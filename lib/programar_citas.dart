@@ -24,7 +24,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   ];
 
   final List<String> personalDisponible = [
-    'Jocelyn Castillo',
+    'Jocelyn Angeles',
     'Dr. Hernández',
     'Martha López',
     'Carlos Ruiz',
