@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:login/perfil_mascota.dart';
 import 'package:login/programar_citas.dart';
 
 void main() {
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: /*const MyHomePage(title: 'HOME PAGE'),*/ const ProgramarCita(),
+      home: /*const MyHomePage(title: 'HOME PAGE'),*/ const PerfilMascota(),
     );
   }
 }
