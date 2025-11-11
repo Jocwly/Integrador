@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login/Pantallas/Mascota_vet.dart';
+import 'package:login/Mascota_vet.dart';
 
 class Clientes extends StatelessWidget {
   const Clientes({super.key});

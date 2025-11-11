@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:login/Pantallas/consulta.dart';
-import 'package:login/Pantallas/programar_citas.dart';
+import 'package:login/consulta.dart';
+import 'package:login/programar_citas.dart';
 
 class PerfilMascota extends StatelessWidget {
   const PerfilMascota({super.key});
