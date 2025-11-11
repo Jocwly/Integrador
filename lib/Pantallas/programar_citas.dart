@@ -67,7 +67,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
         elevation: 1,
         leading: IconButton(
           icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
+            Icons.arrow_circle_left_rounded,
             color: Color(0xFF2A74D9),
           ),
           onPressed: () => Navigator.pop(context),
@@ -99,7 +99,6 @@ class _ProgramarCitaState extends State<ProgramarCita> {
               }),
               const SizedBox(height: 16),
 
-              // Fecha y hora
               Row(
                 children: [
                   Expanded(child: _buildLabel('Fecha:')),
