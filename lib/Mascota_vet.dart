@@ -50,8 +50,8 @@ class PerfilMascota extends StatelessWidget {
                     vertical: 6,
                   ),
                   child: const Text(
-                    "Firulai",
-                    style: TextStyle(
+                    "Mascota X",
+                    style:TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,

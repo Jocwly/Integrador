@@ -15,10 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'PETCARE',
-      theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Roboto',
-      ),
+      theme: ThemeData(useMaterial3: true, fontFamily: 'Roboto'),
       initialRoute: Login.routeName,
       routes: {
         Login.routeName: (_) => const Login(),

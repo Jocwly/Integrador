@@ -38,10 +38,10 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
         elevation: 1,
         leading: IconButton(
           icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF2A74D9),
+            Icons.arrow_circle_left,
+            color: Color.fromARGB(255, 0, 0, 0),
           ),
-          onPressed: () {},
+          onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(

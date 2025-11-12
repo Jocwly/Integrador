@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:login/Mascota_vet.dart';
 import 'package:login/registrar_mascota.dart';
+
 class Cliente extends StatelessWidget {
   const Cliente({super.key});
 
@@ -70,7 +71,7 @@ class _CardContenido extends StatelessWidget {
           // Nombre
           Center(
             child: Text(
-              'Adriana X',
+              'Usuario X',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -88,7 +89,7 @@ class _CardContenido extends StatelessWidget {
           const SizedBox(height: 8),
           _PillInfo(
             icon: Icons.home_filled,
-            text: 'Panales, Ixmiquilpan, Hgo.',
+            text: 'Direccion X.',
           ),
           const SizedBox(height: 16),
 
@@ -100,10 +101,7 @@ class _CardContenido extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _PillInfo(
-            icon: Icons.phone,
-            text: '7721345678',
-          ),
+          _PillInfo(icon: Icons.phone, text: 'XXXXXXXXXX'),
 
           const SizedBox(height: 22),
 
@@ -140,10 +138,7 @@ class _CardContenido extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      'Firulai',
-                      textAlign: TextAlign.center,
-                    ),
+                    const Text('Mascota X', textAlign: TextAlign.center),
                   ],
                 ),
               ),
@@ -183,14 +178,15 @@ class _CardContenido extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.add, color: Colors.white, size: 36),
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 36,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      'Añadir\nMascota',
-                      textAlign: TextAlign.center,
-                    ),
+                    const Text('Añadir\nMascota', textAlign: TextAlign.center),
                   ],
                 ),
               ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login/Mascota_vet.dart';
+import 'package:login/perfil_cliente.dart';
 
 class Clientes extends StatelessWidget {
   const Clientes({super.key});
@@ -9,9 +9,9 @@ class Clientes extends StatelessWidget {
     final clientes = List.generate(
       1,
       (i) => {
-        'nombre': 'Adriana',
-        'correo': 'adriana@gmail.com',
-        'mascotas': '1 mascota(s)', 
+        'nombre': 'UsuarioX',
+        'correo': 'Usuariox@gmail.com',
+        'mascotas': '1 mascota(s)',
       },
     );
 
@@ -44,7 +44,7 @@ class Clientes extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute( builder: (context) => PerfilMascota()),
+                  MaterialPageRoute(builder: (context) => Cliente()),
                 );
               },
               child: Container(
@@ -94,7 +94,9 @@ class Clientes extends StatelessWidget {
                           Text(
                             c['mascotas']!,
                             style: const TextStyle(
-                                fontSize: 13, color: Colors.black54),
+                              fontSize: 13,
+                              color: Colors.black54,
+                            ),
                           ),
                         ],
                       ),

@@ -24,7 +24,7 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    final pillBlue = const Color(0xFFD8E1FF); 
+    final pillBlue = const Color(0xFFD8E1FF);
     final darkBlue = const Color(0xFF0B1446);
 
     return Scaffold(
@@ -40,10 +40,19 @@ class _LoginState extends State<Login> {
               CircleAvatar(
                 radius: 60,
                 backgroundColor: pillBlue,
-                backgroundImage: const AssetImage('assets/images/petcare_logo.png'), // reemplaza si no tienes logo
+                backgroundImage: const AssetImage(
+                  'assets/images/petcare_logo.png',
+                ), // reemplaza si no tienes logo
               ),
               const SizedBox(height: 16),
-              const Text('PETCARE', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+              const Text(
+                'PETCARE',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
+                ),
+              ),
               const SizedBox(height: 28),
 
               _FilledField(
@@ -62,7 +71,11 @@ class _LoginState extends State<Login> {
                 background: pillBlue,
                 obscure: _obscure,
                 suffix: IconButton(
-                  icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                  icon: Icon(
+                    _obscure
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
                   onPressed: () => setState(() => _obscure = !_obscure),
                 ),
               ),
@@ -75,10 +88,22 @@ class _LoginState extends State<Login> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: darkBlue,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  onPressed: () => Navigator.pushReplacementNamed(context, Veterinario.routeName),
-                  child: const Text('INICIAR SESIÓN', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: .5)),
+                  onPressed:
+                      () => Navigator.pushReplacementNamed(
+                        context,
+                        Veterinario.routeName,
+                      ),
+                  child: const Text(
+                    'INICIAR SESIÓN',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: .5,
+                    ),
+                  ),
                 ),
               ),
 
@@ -88,8 +113,15 @@ class _LoginState extends State<Login> {
                 children: [
                   const Text('¿No tienes una cuenta? '),
                   GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, Registro.routeName),
-                    child: const Text('Regístrate aquí', style: TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.w600)),
+                    onTap:
+                        () => Navigator.pushNamed(context, Registro.routeName),
+                    child: const Text(
+                      'Regístrate aquí',
+                      style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -133,7 +165,10 @@ class _FilledField extends StatelessWidget {
         hintText: hint,
         filled: true,
         fillColor: background,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: background, width: 0),

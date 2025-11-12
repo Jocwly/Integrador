@@ -7,14 +7,17 @@ class FirebaseService {
 
   // Credenciales fijas del veterinario
   static const String _vetEmail = 'vet@petcare.com';
-  static const String _vetPass  = 'Vet12345!';
+  static const String _vetPass = 'Vet12345!';
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     if (email.trim().toLowerCase() == _vetEmail && password == _vetPass) {
       return {'ok': true, 'role': 'veterinario', 'uid': 'vet-fixed'};
     }
 
-    final cred = await _auth.signInWithEmailAndPassword(email: email, password: password);
+    final cred = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
     final uid = cred.user!.uid;
 
     final doc = await _db.collection('usuarios').doc(uid).get();
@@ -31,7 +34,10 @@ class FirebaseService {
     required String direccion,
     required String password,
   }) async {
-    final cred = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    final cred = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
     final uid = cred.user!.uid;
 
     await _db.collection('usuarios').doc(uid).set({

@@ -32,7 +32,6 @@ class Veterinario extends StatelessWidget {
             icon: const Icon(Icons.notifications_none, color: Colors.black),
             tooltip: 'Notificaciones',
           ),
-          // Menú del usuario
           PopupMenuButton<int>(
             icon: const CircleAvatar(
               radius: 18,
@@ -45,37 +44,39 @@ class Veterinario extends StatelessWidget {
             ),
             onSelected: (value) {
               if (value == 1) {
-                // Opción de cerrar sesión
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => MyApp()),
                 );
               }
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem<int>(
-                enabled: false,
-                child: Row(
-                  children: [
-                    Icon(Icons.person, color: Colors.black),
-                    SizedBox(width: 8),
-                    Text('Dr. José'),
-                  ],
-                ),
-              ),
-              const PopupMenuDivider(),
-              const PopupMenuItem<int>(
-                value: 1,
-                child: Row(
-                  children: [
-                    Icon(Icons.exit_to_app, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Cerrar Sesión',
-                        style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
-            ],
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem<int>(
+                    enabled: false,
+                    child: Row(
+                      children: [
+                        Icon(Icons.person, color: Colors.black),
+                        SizedBox(width: 8),
+                        Text('Dr. José'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem<int>(
+                    value: 1,
+                    child: Row(
+                      children: [
+                        Icon(Icons.exit_to_app, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text(
+                          'Cerrar Sesión',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
           ),
           const SizedBox(width: 6),
         ],
@@ -97,7 +98,6 @@ class Veterinario extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              // Imagen de encabezado
               Container(
                 height: 110,
                 decoration: BoxDecoration(
@@ -106,58 +106,51 @@ class Veterinario extends StatelessWidget {
                   boxShadow: const [sombra],
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  'assets/images/Vet.jpg',
-                  fit: BoxFit.cover,
-                ),
+                child: Image.network('https://www.ladridosybigotes.com/content/images/2024/10/2024-08-13-animal-hoarding-disorder.webp'),
               ),
               const SizedBox(height: 16),
 
-              // Tarjetas principales
-              Row(
-                children: [
-                  Expanded(
-                    // CLIENTES → redirige a pantalla Clientes
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Clientes()),
-                        );
-                      },
-                      child: _InfoCard(
-                        color: azulCard,
-                        titulo: 'Clientes',
-                        valor: '4',
-                        subtitulo: 'Registrados',
-                        icono: Icons.groups_rounded,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _InfoCard(
-                      color: azulCard,
-                      titulo: 'Citas hoy',
-                      valor: '2',
-                      subtitulo: '0 completadas',
-                      icono: Icons.calendar_today_outlined,
-                    ),
-                  ),
-                ],
-              ),
               const SizedBox(height: 12),
 
-              // Mascotas
-              SizedBox(
-                width: 165,
-                child: _InfoCard(
-                  color: azulCard,
-                  titulo: 'Mascotas',
-                  valor: '5',
-                  subtitulo: 'Registradas',
-                  icono: Icons.favorite_border,
-                ),
+              Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Clientes()),
+                      );
+                    },
+                    child: _InfoCard(
+                      color: azulCard,
+                      titulo: 'Clientes',
+                      valor: '0',
+                      subtitulo: 'Registrados',
+                      icono: Icons.groups_rounded,
+                      height: 110, 
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  _InfoCard(
+                    color: azulCard,
+                    titulo: 'Citas hoy',
+                    valor: '0',
+                    subtitulo: '0 completadas',
+                    icono: Icons.calendar_today_outlined,
+                    height: 110,
+                  ),
+                  const SizedBox(height: 12),
+
+                  _InfoCard(
+                    color: azulCard,
+                    titulo: 'Mascotas',
+                    valor: '0',
+                    subtitulo: 'Registradas',
+                    icono: Icons.favorite_border,
+                    height: 110,
+                  ),
+                ],
               ),
             ],
           ),
@@ -179,7 +172,7 @@ class _InfoCard extends StatelessWidget {
     required this.titulo,
     required this.valor,
     required this.subtitulo,
-    required this.icono,
+    required this.icono, required int height,
   });
 
   @override
@@ -200,7 +193,6 @@ class _InfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título e icono a la derecha
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -216,7 +208,7 @@ class _InfoCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          // Número grande
+
           Text(
             valor,
             style: const TextStyle(
@@ -227,13 +219,10 @@ class _InfoCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 2),
-          // Subtítulo pequeño
+
           Text(
             subtitulo,
-            style: const TextStyle(
-              color: Colors.black87,
-              fontSize: 13,
-            ),
+            style: const TextStyle(color: Colors.black87, fontSize: 13),
           ),
         ],
       ),
