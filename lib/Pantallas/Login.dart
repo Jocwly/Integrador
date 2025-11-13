@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:login/veterinario.dart';
-import 'package:login/registro.dart';
+import 'package:login/Pantallas/veterinario.dart';
+import 'package:login/Pantallas/registro.dart';
 
 class Login extends StatefulWidget {
   static const routeName = '/login';

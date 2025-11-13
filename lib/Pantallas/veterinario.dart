@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:login/Clientes.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';        // 👈 NUEVO
+import 'package:login/Pantallas/Clientes.dart';
 import 'package:login/main.dart';
 
 class Veterinario extends StatelessWidget {
@@ -17,6 +18,9 @@ class Veterinario extends StatelessWidget {
       blurRadius: 6,
       offset: Offset(0, 3),
     );
+
+    final clientesRef = FirebaseFirestore.instance.collection('clientes');
+    // Para después podrías hacer algo similar con citas y mascotas
 
     return Scaffold(
       backgroundColor: fondo,
@@ -50,33 +54,32 @@ class Veterinario extends StatelessWidget {
                 );
               }
             },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem<int>(
-                    enabled: false,
-                    child: Row(
-                      children: [
-                        Icon(Icons.person, color: Colors.black),
-                        SizedBox(width: 8),
-                        Text('Dr. José'),
-                      ],
+            itemBuilder: (context) => const [
+              PopupMenuItem<int>(
+                enabled: false,
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.black),
+                    SizedBox(width: 8),
+                    Text('Dr. José'),
+                  ],
+                ),
+              ),
+              PopupMenuDivider(),
+              PopupMenuItem<int>(
+                value: 1,
+                child: Row(
+                  children: [
+                    Icon(Icons.exit_to_app, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text(
+                      'Cerrar Sesión',
+                      style: TextStyle(color: Colors.red),
                     ),
-                  ),
-                  const PopupMenuDivider(),
-                  const PopupMenuItem<int>(
-                    value: 1,
-                    child: Row(
-                      children: [
-                        Icon(Icons.exit_to_app, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text(
-                          'Cerrar Sesión',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(width: 6),
         ],
@@ -106,32 +109,47 @@ class Veterinario extends StatelessWidget {
                   boxShadow: const [sombra],
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: Image.network('https://www.ladridosybigotes.com/content/images/2024/10/2024-08-13-animal-hoarding-disorder.webp'),
+                child: Image.network(
+                  'https://www.ladridosybigotes.com/content/images/2024/10/2024-08-13-animal-hoarding-disorder.webp',
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(height: 16),
 
-              const SizedBox(height: 12),
-
               Column(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Clientes()),
+                  // 👉 Card de CLIENTES con contador real
+                  StreamBuilder<QuerySnapshot>(
+                    stream: clientesRef.snapshots(),
+                    builder: (context, snapshot) {
+                      String totalClientes = '0';
+                      if (snapshot.hasData) {
+                        totalClientes =
+                            snapshot.data!.docs.length.toString();
+                      }
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const Clientes()),
+                          );
+                        },
+                        child: _InfoCard(
+                          color: azulCard,
+                          titulo: 'Clientes',
+                          valor: totalClientes,
+                          subtitulo: 'Registrados',
+                          icono: Icons.groups_rounded,
+                          height: 110,
+                        ),
                       );
                     },
-                    child: _InfoCard(
-                      color: azulCard,
-                      titulo: 'Clientes',
-                      valor: '0',
-                      subtitulo: 'Registrados',
-                      icono: Icons.groups_rounded,
-                      height: 110, 
-                    ),
                   ),
                   const SizedBox(height: 12),
 
+                  // Por ahora las otras cards siguen estáticas
                   _InfoCard(
                     color: azulCard,
                     titulo: 'Citas hoy',
@@ -166,13 +184,15 @@ class _InfoCard extends StatelessWidget {
   final String valor;
   final String subtitulo;
   final IconData icono;
+  final double height;           // 👈 NUEVO
 
   const _InfoCard({
     required this.color,
     required this.titulo,
     required this.valor,
     required this.subtitulo,
-    required this.icono, required int height,
+    required this.icono,
+    required this.height,
   });
 
   @override
@@ -184,6 +204,7 @@ class _InfoCard extends StatelessWidget {
     );
 
     return Container(
+      height: height,                 // 👈 respeta el mockup
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: color,

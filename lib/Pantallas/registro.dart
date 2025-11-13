@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:login/Login.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';          // 👈 NUEVO
+import 'package:login/Pantallas/Login.dart';
 
 class Registro extends StatefulWidget {
   static const routeName = '/registro';
@@ -32,7 +33,54 @@ class _RegistroState extends State<Registro> {
         borderSide: BorderSide(color: const Color(0xFF5F79FF), width: w),
       );
 
-  // Solo confirmación al registrar
+  // 👉 Guarda el cliente en la colección "clientes"
+  Future<void> _registrarCliente() async {
+    final nombre = _nameCtrl.text.trim();
+    final telefono = _phoneCtrl.text.trim();
+    final correo = _emailCtrl.text.trim();
+    final direccion = _addressCtrl.text.trim();
+    final password = _passCtrl.text.trim();
+
+    if (nombre.isEmpty ||
+        telefono.isEmpty ||
+        correo.isEmpty ||
+        direccion.isEmpty ||
+        password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor llena todos los campos')),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance.collection('clientes').add({
+        'nombre': nombre,
+        'telefono': telefono,
+        'correo': correo,
+        'direccion': direccion,
+        // ⚠️ Para escuela está bien, pero en la vida real no se guarda así
+        'password': password,
+        'mascotas': 0,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Registro exitoso')),
+      );
+
+      // Después de registrar, lo mandamos al login
+      Navigator.pushReplacementNamed(context, Login.routeName);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al registrar: $e')),
+      );
+    }
+  }
+
+  // Diálogo de confirmación que AHORA sí registra en la BD
   Future<void> _confirmarRegistro() async {
     final confirmar = await showDialog<bool>(
       context: context,
@@ -56,11 +104,7 @@ class _RegistroState extends State<Registro> {
     );
 
     if (confirmar == true) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Datos guardados correctamente')),
-      );
-      // Aquí puedes agregar lógica real de guardado si la necesitas.
+      await _registrarCliente();
     }
   }
 
@@ -72,7 +116,7 @@ class _RegistroState extends State<Registro> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context), // ← sin confirmación
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       backgroundColor: Colors.white,
@@ -165,7 +209,7 @@ class _RegistroState extends State<Registro> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: _confirmarRegistro, // solo confirmación aquí
+                  onPressed: _confirmarRegistro,
                   child: const Text(
                     'Registrarse',
                     style: TextStyle(fontWeight: FontWeight.w800),
