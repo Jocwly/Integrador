@@ -37,7 +37,8 @@ class PerfilMascota extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(
-                child: Text('Error al cargar datos de la mascota'));
+              child: Text('Error al cargar datos de la mascota'),
+            );
           }
           if (!snapshot.hasData || !snapshot.data!.exists) {
             return const Center(child: CircularProgressIndicator());
@@ -52,7 +53,9 @@ class PerfilMascota extends StatelessWidget {
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0, vertical: 16),
+                  horizontal: 24.0,
+                  vertical: 16,
+                ),
                 child: Column(
                   children: [
                     // Imagen circular de la mascota (placeholder)
@@ -67,8 +70,7 @@ class PerfilMascota extends StatelessWidget {
                       padding: const EdgeInsets.all(4),
                       child: const CircleAvatar(
                         radius: 50,
-                        backgroundImage:
-                            AssetImage('assets/images/perro.jpg'),
+                        backgroundImage: AssetImage('assets/images/perro.jpg'),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -95,9 +97,7 @@ class PerfilMascota extends StatelessWidget {
                     const SizedBox(height: 4),
                     if (raza.isNotEmpty || color.isNotEmpty)
                       Text(
-                        [raza, color]
-                            .where((e) => e.isNotEmpty)
-                            .join(' • '),
+                        [raza, color].where((e) => e.isNotEmpty).join(' • '),
                         style: const TextStyle(
                           fontSize: 13,
                           color: Colors.black54,
@@ -125,8 +125,7 @@ class PerfilMascota extends StatelessWidget {
                       child: Column(
                         children: [
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceAround,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               _buildMenuItem(
                                 icon: Icons.pets,
@@ -140,8 +139,11 @@ class PerfilMascota extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ProgramarCita(),
+                                      builder:
+                                          (context) => ProgramarCita(
+                                            clienteId: clienteId,
+                                            mascotaId: mascotaId,
+                                          ),
                                     ),
                                   );
                                 },
@@ -150,14 +152,19 @@ class PerfilMascota extends StatelessWidget {
                           ),
                           const SizedBox(height: 20),
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceAround,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               _buildMenuItem(
                                 icon: Icons.vaccines,
                                 label: "Vacunas",
                                 onTap: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context)=> const RegistrarVacuna()));
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => const RegistrarVacuna(),
+                                    ),
+                                  );
                                 },
                               ),
                               _buildMenuItem(
@@ -167,8 +174,8 @@ class PerfilMascota extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ConsultaMedica(),
+                                      builder:
+                                          (context) => const ConsultaMedica(),
                                     ),
                                   );
                                 },
@@ -214,8 +221,7 @@ class PerfilMascota extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
-              border:
-                  Border.all(color: const Color(0xFF2A74D9), width: 1.8),
+              border: Border.all(color: const Color(0xFF2A74D9), width: 1.8),
             ),
             child: Icon(icon, color: Colors.black, size: 34),
           ),

@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProgramarCita extends StatefulWidget {
-  const ProgramarCita({super.key});
+  final String clienteId;
+  final String mascotaId;
+
+  const ProgramarCita({
+    super.key,
+    required this.clienteId,
+    required this.mascotaId,
+  });
 
   @override
   State<ProgramarCita> createState() => _ProgramarCitaState();
@@ -34,7 +42,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
     final DateTime? seleccion = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2023),
+      firstDate: DateTime.now(),
       lastDate: DateTime(2030),
     );
     if (seleccion != null) {
@@ -56,10 +64,57 @@ class _ProgramarCitaState extends State<ProgramarCita> {
     }
   }
 
+  // 🔹 Guardar cita en Firestore
+  Future<void> guardarCita() async {
+    if (fechaSeleccionada == null || horaSeleccionada == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Selecciona fecha y hora')));
+      return;
+    }
+
+    final mascotaRef =
+        FirebaseFirestore.instance
+            .collection('clientes')
+            .doc(widget.clienteId)
+            .collection('mascotas')
+            .doc(widget.mascotaId)
+            .collection('citas')
+            .doc();
+
+    final fechaCompleta = DateTime(
+      fechaSeleccionada!.year,
+      fechaSeleccionada!.month,
+      fechaSeleccionada!.day,
+      horaSeleccionada!.hour,
+      horaSeleccionada!.minute,
+    );
+
+    await mascotaRef.set({
+      'tipo': tipoCita,
+      'fecha': fechaCompleta,
+      'motivo': motivoController.text,
+      'personal': personal,
+      'creado': Timestamp.now(),
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Cita programada correctamente')),
+    );
+
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final azulSuave = const Color(0xFFD6E1F7);
     final azulFuerte = const Color(0xFF2A74D9);
+
+    final mascotaRef = FirebaseFirestore.instance
+        .collection('clientes')
+        .doc(widget.clienteId)
+        .collection('mascotas')
+        .doc(widget.mascotaId);
 
     return Scaffold(
       appBar: AppBar(
@@ -82,123 +137,173 @@ class _ProgramarCitaState extends State<ProgramarCita> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Container(
-          decoration: BoxDecoration(
-            color: azulSuave,
-            borderRadius: BorderRadius.circular(18),
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildLabel('Tipo de cita:'),
-              _buildDropdown(tipoCita, tiposCita, (value) {
-                setState(() => tipoCita = value!);
-              }),
-              const SizedBox(height: 16),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: mascotaRef.snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-              Row(
-                children: [
-                  Expanded(child: _buildLabel('Fecha:')),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildLabel('Hora:')),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildPickerField(
-                      icon: Icons.calendar_today_rounded,
-                      text:
-                          fechaSeleccionada != null
-                              ? DateFormat(
-                                'dd/MM/yyyy',
-                              ).format(fechaSeleccionada!)
-                              : 'Seleccionar',
-                      onTap: () => _seleccionarFecha(context),
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          final nombre = data['nombre'] ?? 'Mascota';
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // FOTO + NOMBRE ——— EXACTO COMO LO PEDISTE
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: azulFuerte, width: 3),
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: const CircleAvatar(
+                    radius: 50,
+                    backgroundImage: AssetImage('assets/images/perro.jpg'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: azulFuerte,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
+                  child: Text(
+                    nombre,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildPickerField(
-                      icon: Icons.access_time_rounded,
-                      text:
-                          horaSeleccionada != null
-                              ? horaSeleccionada!.format(context)
-                              : 'Seleccionar',
-                      onTap: () => _seleccionarHora(context),
-                    ),
+                ),
+                const SizedBox(height: 20),
+
+                // TARJETA DEL FORMULARIO
+                Container(
+                  decoration: BoxDecoration(
+                    color: azulSuave,
+                    borderRadius: BorderRadius.circular(18),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              _buildLabel('Motivo/Descripción:'),
-              _buildTextArea(motivoController),
-              const SizedBox(height: 16),
-
-              _buildLabel('Personal asignado:'),
-              _buildDropdown(personal, personalDisponible, (value) {
-                setState(() => personal = value!);
-              }),
-              const SizedBox(height: 20),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildLabel('Tipo de cita:'),
+                      _buildDropdown(
+                        tipoCita,
+                        tiposCita,
+                        (value) => setState(() => tipoCita = value!),
                       ),
-                      child: const Text(
-                        'Cancelar',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
+                      const SizedBox(height: 16),
+
+                      Row(
+                        children: [
+                          Expanded(child: _buildLabel('Fecha:')),
+                          const SizedBox(width: 16),
+                          Expanded(child: _buildLabel('Hora:')),
+                        ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Cita programada correctamente'),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildPickerField(
+                              icon: Icons.calendar_today_rounded,
+                              text:
+                                  fechaSeleccionada != null
+                                      ? DateFormat(
+                                        'dd/MM/yyyy',
+                                      ).format(fechaSeleccionada!)
+                                      : 'Seleccionar',
+                              onTap: () => _seleccionarFecha(context),
+                            ),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: azulFuerte,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildPickerField(
+                              icon: Icons.access_time_rounded,
+                              text:
+                                  horaSeleccionada != null
+                                      ? horaSeleccionada!.format(context)
+                                      : 'Seleccionar',
+                              onTap: () => _seleccionarHora(context),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: const Text(
-                        'Programar cita',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
+                      const SizedBox(height: 16),
+
+                      _buildLabel('Motivo/Descripción:'),
+                      _buildTextArea(motivoController),
+                      const SizedBox(height: 16),
+
+                      _buildLabel('Personal asignado:'),
+                      _buildDropdown(
+                        personal,
+                        personalDisponible,
+                        (value) => setState(() => personal = value!),
                       ),
-                    ),
+                      const SizedBox(height: 20),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: const Text(
+                                'Cancelar',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: guardarCita,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: azulFuerte,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: const Text(
+                                'Programar cita',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
-          ),
-        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
