@@ -126,7 +126,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
           ),
         ),
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
@@ -156,85 +155,123 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
 
             const SizedBox(height: 25),
 
-            // 🔵 NOMBRE + SEXO + ESTERILIZADO EN LA MISMA FILA
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 3,
+                  flex: 2,
                   child: _buildCardTextField(nombreController, 'Nombre'),
                 ),
-
                 const SizedBox(width: 10),
 
-                // SEXO
+                // *** Sexo vertical ***
                 Expanded(
                   flex: 1,
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        "Sexo:",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Radio(
-                        value: "Macho",
-                        groupValue: sexo,
-                        activeColor: azul,
-                        visualDensity: const VisualDensity(
-                          horizontal: -4,
-                          vertical: -4,
+                        "Sexo",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
                         ),
-                        onChanged: (v) => setState(() => sexo = v),
                       ),
-                      const Text("Macho", style: TextStyle(fontSize: 12)),
-                      Radio(
-                        value: "Hembra",
-                        groupValue: sexo,
-                        activeColor: azul,
-                        visualDensity: const VisualDensity(
-                          horizontal: -4,
-                          vertical: -4,
-                        ),
-                        onChanged: (v) => setState(() => sexo = v),
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              Radio(
+                                value: "Macho",
+                                groupValue: sexo,
+                                activeColor: azul,
+                                visualDensity: const VisualDensity(
+                                  horizontal: -4,
+                                  vertical: -4,
+                                ),
+                                onChanged: (v) => setState(() => sexo = v),
+                              ),
+                              const Text(
+                                "Macho",
+                                style: TextStyle(fontSize: 11),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Radio(
+                                value: "Hembra",
+                                groupValue: sexo,
+                                activeColor: azul,
+                                visualDensity: const VisualDensity(
+                                  horizontal: -4,
+                                  vertical: -4,
+                                ),
+                                onChanged: (v) => setState(() => sexo = v),
+                              ),
+                              const Text(
+                                "Hembra",
+                                style: TextStyle(fontSize: 11),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      const Text("Hembra", style: TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),
 
                 const SizedBox(width: 10),
 
-                // ESTERILIZADO
+                // *** Esterilizado vertical ***
                 Expanded(
                   flex: 1,
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        "Esterilizado:",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Radio(
-                        value: "Sí",
-                        groupValue: esterilizado,
-                        activeColor: azul,
-                        visualDensity: const VisualDensity(
-                          horizontal: -4,
-                          vertical: -4,
+                        "Esterilizado",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
                         ),
-                        onChanged: (v) => setState(() => esterilizado = v),
                       ),
-                      const Text("Sí", style: TextStyle(fontSize: 12)),
-                      Radio(
-                        value: "No",
-                        groupValue: esterilizado,
-                        activeColor: azul,
-                        visualDensity: const VisualDensity(
-                          horizontal: -4,
-                          vertical: -4,
-                        ),
-                        onChanged: (v) => setState(() => esterilizado = v),
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              Radio(
+                                value: "Sí",
+                                groupValue: esterilizado,
+                                activeColor: azul,
+                                visualDensity: const VisualDensity(
+                                  horizontal: -4,
+                                  vertical: -4,
+                                ),
+                                onChanged:
+                                    (v) => setState(() => esterilizado = v),
+                              ),
+                              const Text("Sí", style: TextStyle(fontSize: 11)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Radio(
+                                value: "No",
+                                groupValue: esterilizado,
+                                activeColor: azul,
+                                visualDensity: const VisualDensity(
+                                  horizontal: -4,
+                                  vertical: -4,
+                                ),
+                                onChanged:
+                                    (v) => setState(() => esterilizado = v),
+                              ),
+                              const Text("No", style: TextStyle(fontSize: 11)),
+                            ],
+                          ),
+                        ],
                       ),
-                      const Text("No", style: TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),
@@ -265,23 +302,21 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
 
             const SizedBox(height: 12),
 
-            // 🔵 COLOR + ESPECIE MISMA FILA
             Row(
               children: [
                 Expanded(child: _buildCardTextField(colorController, 'Color')),
                 const SizedBox(width: 12),
-
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
-                      vertical: 15,
+                      vertical: 7,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: const Color(0xFF2A74D9).withOpacity(0.4),
+                        color: azul.withOpacity(0.4),
                         width: 3.5,
                       ),
                     ),
@@ -306,7 +341,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
             ),
 
             const SizedBox(height: 12),
-
             _buildCardTextField(
               observacionesController,
               'Observaciones',

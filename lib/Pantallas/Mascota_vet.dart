@@ -162,7 +162,10 @@ class PerfilMascota extends StatelessWidget {
                                     context,
                                     MaterialPageRoute(
                                       builder:
-                                          (context) => const RegistrarVacuna(),
+                                          (context) => RegistrarVacuna(
+                                            clienteId: clienteId,
+                                            mascotaId: mascotaId,
+                                          ),
                                     ),
                                   );
                                 },
@@ -175,7 +178,10 @@ class PerfilMascota extends StatelessWidget {
                                     context,
                                     MaterialPageRoute(
                                       builder:
-                                          (context) => const ConsultaMedica(),
+                                          (context) => ConsultaMedica(
+                                            clienteId: clienteId,
+                                            mascotaId: mascotaId,
+                                          ),
                                     ),
                                   );
                                 },
