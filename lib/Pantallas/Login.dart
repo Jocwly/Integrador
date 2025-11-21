@@ -38,11 +38,11 @@ class _LoginState extends State<Login> {
               const SizedBox(height: 12),
               // Logo circular
               CircleAvatar(
-                radius: 60,
+                radius: 85,
                 backgroundColor: pillBlue,
                 backgroundImage: const AssetImage(
-                  'assets/images/petcare_logo.png',
-                ), // reemplaza si no tienes logo
+                  'assets/images/petcare_logo.jpg',
+                ), 
               ),
               const SizedBox(height: 16),
               const Text(
@@ -58,7 +58,7 @@ class _LoginState extends State<Login> {
               _FilledField(
                 controller: _emailCtrl,
                 hint: 'Correo electrónico',
-                icon: Icons.alternate_email,
+                icon: Icons.email_rounded,
                 background: pillBlue,
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -67,7 +67,7 @@ class _LoginState extends State<Login> {
               _FilledField(
                 controller: _passCtrl,
                 hint: 'Contraseña',
-                icon: Icons.lock_outline,
+                icon: Icons.lock,
                 background: pillBlue,
                 obscure: _obscure,
                 suffix: IconButton(

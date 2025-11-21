@@ -31,6 +31,16 @@ class PerfilMascota extends StatelessWidget {
           icon: const Icon(Icons.arrow_circle_left, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
+        centerTitle: true,
+        title: const Text(
+          'Mi Mascota',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            color: Color.fromARGB(255, 0, 0, 0),
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: mascotaRef.snapshots(),
@@ -62,7 +72,7 @@ class PerfilMascota extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: const Color(0xFF2A74D9),
+                          color: const Color.fromARGB(255, 13, 0, 60),
                           width: 3,
                         ),
                         shape: BoxShape.circle,
@@ -78,7 +88,7 @@ class PerfilMascota extends StatelessWidget {
                     // Nombre real
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2A74D9),
+                        color: const Color.fromARGB(255, 13, 0, 60),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.symmetric(

@@ -21,8 +21,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   DateTime? fechaSeleccionada;
   TimeOfDay? horaSeleccionada;
 
-  String tipoCita = 'Cita estética';
-  String personal = 'Jocelyn Angeles';
+  // AHORA PUEDEN SER NULOS PARA MOSTRAR "Seleccionar"
+  String? tipoCita;
+  String? personal;
 
   final List<String> tiposCita = [
     'Cita estética',
@@ -67,20 +68,33 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   // 🔹 Guardar cita en Firestore
   Future<void> guardarCita() async {
     if (fechaSeleccionada == null || horaSeleccionada == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Selecciona fecha y hora')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecciona fecha y hora')),
+      );
       return;
     }
 
-    final mascotaRef =
-        FirebaseFirestore.instance
-            .collection('clientes')
-            .doc(widget.clienteId)
-            .collection('mascotas')
-            .doc(widget.mascotaId)
-            .collection('citas')
-            .doc();
+    if (tipoCita == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecciona el tipo de cita')),
+      );
+      return;
+    }
+
+    if (personal == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecciona el personal asignado')),
+      );
+      return;
+    }
+
+    final mascotaRef = FirebaseFirestore.instance
+        .collection('clientes')
+        .doc(widget.clienteId)
+        .collection('mascotas')
+        .doc(widget.mascotaId)
+        .collection('citas')
+        .doc();
 
     final fechaCompleta = DateTime(
       fechaSeleccionada!.year,
@@ -108,7 +122,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   @override
   Widget build(BuildContext context) {
     final azulSuave = const Color(0xFFD6E1F7);
-    final azulFuerte = const Color(0xFF2A74D9);
+    final azulFuerte = const Color.fromARGB(103, 88, 128, 184);
 
     final mascotaRef = FirebaseFirestore.instance
         .collection('clientes')
@@ -123,7 +137,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_circle_left_rounded,
-            color: Color(0xFF2A74D9),
+            color: Color.fromARGB(255, 0, 0, 0),
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -131,7 +145,8 @@ class _ProgramarCitaState extends State<ProgramarCita> {
         title: const Text(
           'Programar cita',
           style: TextStyle(
-            color: Color(0xFF2A74D9),
+            fontFamily: 'Roboto',
+            color: Color.fromARGB(255, 0, 0, 0),
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -151,10 +166,10 @@ class _ProgramarCitaState extends State<ProgramarCita> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                // FOTO + NOMBRE ——— EXACTO COMO LO PEDISTE
+                // FOTO + NOMBRE
                 Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: azulFuerte, width: 3),
+                    border: Border.all(color: const Color.fromARGB(255, 0, 20, 66), width: 3),
                     shape: BoxShape.circle,
                   ),
                   padding: const EdgeInsets.all(4),
@@ -166,7 +181,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                 const SizedBox(height: 8),
                 Container(
                   decoration: BoxDecoration(
-                    color: azulFuerte,
+                    color: const Color.fromARGB(255, 13, 0, 60),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.symmetric(
@@ -198,7 +213,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                       _buildDropdown(
                         tipoCita,
                         tiposCita,
-                        (value) => setState(() => tipoCita = value!),
+                        (value) => setState(() => tipoCita = value),
                       ),
                       const SizedBox(height: 16),
 
@@ -214,12 +229,10 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                           Expanded(
                             child: _buildPickerField(
                               icon: Icons.calendar_today_rounded,
-                              text:
-                                  fechaSeleccionada != null
-                                      ? DateFormat(
-                                        'dd/MM/yyyy',
-                                      ).format(fechaSeleccionada!)
-                                      : 'Seleccionar',
+                              text: fechaSeleccionada != null
+                                  ? DateFormat('dd/MM/yyyy')
+                                      .format(fechaSeleccionada!)
+                                  : 'Seleccionar',
                               onTap: () => _seleccionarFecha(context),
                             ),
                           ),
@@ -227,10 +240,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                           Expanded(
                             child: _buildPickerField(
                               icon: Icons.access_time_rounded,
-                              text:
-                                  horaSeleccionada != null
-                                      ? horaSeleccionada!.format(context)
-                                      : 'Seleccionar',
+                              text: horaSeleccionada != null
+                                  ? horaSeleccionada!.format(context)
+                                  : 'Seleccionar',
                               onTap: () => _seleccionarHora(context),
                             ),
                           ),
@@ -246,7 +258,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                       _buildDropdown(
                         personal,
                         personalDisponible,
-                        (value) => setState(() => personal = value!),
+                        (value) => setState(() => personal = value),
                       ),
                       const SizedBox(height: 20),
 
@@ -254,31 +266,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                         children: [
                           Expanded(
                             child: ElevatedButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: const Text(
-                                'Cancelar',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
                               onPressed: guardarCita,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: azulFuerte,
+                                backgroundColor: const Color.fromARGB(255, 13, 0, 60),
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,
                                 ),
@@ -289,7 +279,30 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                               child: const Text(
                                 'Programar cita',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Color.fromARGB(255, 255, 255, 255),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Colors.grey,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: const Text(
+                                'Cancelar',
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 0, 0, 0),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -308,8 +321,6 @@ class _ProgramarCitaState extends State<ProgramarCita> {
     );
   }
 
-  // 🔹 Widgets auxiliares limpios
-
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -325,7 +336,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   }
 
   Widget _buildDropdown(
-    String value,
+    String? value,
     List<String> items,
     ValueChanged<String?> onChanged,
   ) {
@@ -338,18 +349,22 @@ class _ProgramarCitaState extends State<ProgramarCita> {
           width: 1.5,
         ),
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: DropdownButtonFormField<String>(
-        value: value,
-        icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black54),
+        value: value, // puede ser null → muestra hint
+        hint: const Text('Seleccionar'),
         decoration: const InputDecoration(
-          prefixIcon: Icon(Icons.close_rounded, color: Colors.black54),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         ),
-        items:
-            items
-                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-                .toList(),
+        icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black87),
+        items: items
+            .map(
+              (item) => DropdownMenuItem(
+                value: item,
+                child: Text(item),
+              ),
+            )
+            .toList(),
         onChanged: onChanged,
       ),
     );

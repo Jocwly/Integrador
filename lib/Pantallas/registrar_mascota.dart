@@ -18,11 +18,9 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
   final TextEditingController tamanoController = TextEditingController();
   final TextEditingController pesoController = TextEditingController();
   final TextEditingController colorController = TextEditingController();
-  final TextEditingController observacionesController = TextEditingController();
 
   File? _imagenSeleccionada;
 
-  // NUEVOS CAMPOS
   String? especie;
   String? sexo;
   String? esterilizado;
@@ -59,7 +57,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     final tamano = tamanoController.text.trim();
     final peso = pesoController.text.trim();
     final color = colorController.text.trim();
-    final obs = observacionesController.text.trim();
 
     if (nombre.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -80,7 +77,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
         'tamano': tamano,
         'peso': peso,
         'color': color,
-        'observaciones': obs,
         'especie': especie,
         'sexo': sexo,
         'esterilizado': esterilizado,
@@ -98,9 +94,8 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -109,19 +104,20 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     const azul = Color(0xFF2A74D9);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFEFEFEF),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_circle_left, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(
           'Registrar Mascota',
           style: TextStyle(
-            color: azul,
-            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            fontWeight: FontWeight.w700,
             fontSize: 20,
           ),
         ),
@@ -131,42 +127,72 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // FOTO (círculo gris con icono negro)
             Center(
               child: GestureDetector(
                 onTap: _seleccionarImagen,
                 child: CircleAvatar(
                   radius: 45,
-                  backgroundColor: const Color(0xFFDDE6F8),
-                  backgroundImage:
-                      _imagenSeleccionada != null
-                          ? FileImage(_imagenSeleccionada!)
-                          : null,
-                  child:
-                      _imagenSeleccionada == null
-                          ? const Icon(
-                            Icons.add_a_photo_rounded,
-                            size: 32,
-                            color: azul,
-                          )
-                          : null,
+                  backgroundColor: const Color(0xFFE0E0E0),
+                  backgroundImage: _imagenSeleccionada != null
+                      ? FileImage(_imagenSeleccionada!)
+                      : null,
+                  child: _imagenSeleccionada == null
+                      ? const Icon(
+                          Icons.add_photo_alternate_outlined,
+                          size: 34,
+                          color: Colors.black87,
+                        )
+                      : null,
                 ),
               ),
             ),
+            const SizedBox(height: 24),
 
-            const SizedBox(height: 25),
+            // NOMBRE
+            _buildOutlinedTextField(nombreController, 'Nombre'),
+            const SizedBox(height: 12),
 
+            // ESPECIE
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                labelText: 'Especie',
+                labelStyle: const TextStyle(fontSize: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: azul.withOpacity(0.7)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: azul.withOpacity(0.7)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: azul, width: 2),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              ),
+              value: especie,
+              items: especies
+                  .map(
+                    (e) =>
+                        DropdownMenuItem<String>(
+                          value: e,
+                          child: Text(e),
+                        ),
+                  )
+                  .toList(),
+              onChanged: (v) => setState(() => especie = v),
+            ),
+
+            const SizedBox(height: 16),
+
+            // SEXO / ESTERILIZADO
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 2,
-                  child: _buildCardTextField(nombreController, 'Nombre'),
-                ),
-                const SizedBox(width: 10),
-
-                // *** Sexo vertical ***
-                Expanded(
-                  flex: 1,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -174,58 +200,44 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                         "Sexo",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 13,
+                          fontSize: 14,
                         ),
                       ),
-                      Column(
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Radio(
-                                value: "Macho",
-                                groupValue: sexo,
-                                activeColor: azul,
-                                visualDensity: const VisualDensity(
-                                  horizontal: -4,
-                                  vertical: -4,
-                                ),
-                                onChanged: (v) => setState(() => sexo = v),
-                              ),
-                              const Text(
-                                "Macho",
-                                style: TextStyle(fontSize: 11),
-                              ),
-                            ],
+                          Radio(
+                            value: "Macho",
+                            groupValue: sexo,
+                            activeColor: azul,
+                            visualDensity: const VisualDensity(
+                              horizontal: -4,
+                              vertical: -4,
+                            ),
+                            onChanged: (v) => setState(() => sexo = v),
                           ),
-                          Row(
-                            children: [
-                              Radio(
-                                value: "Hembra",
-                                groupValue: sexo,
-                                activeColor: azul,
-                                visualDensity: const VisualDensity(
-                                  horizontal: -4,
-                                  vertical: -4,
-                                ),
-                                onChanged: (v) => setState(() => sexo = v),
-                              ),
-                              const Text(
-                                "Hembra",
-                                style: TextStyle(fontSize: 11),
-                              ),
-                            ],
+                          const Text("Macho", style: TextStyle(fontSize: 13)),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Radio(
+                            value: "Hembra",
+                            groupValue: sexo,
+                            activeColor: azul,
+                            visualDensity: const VisualDensity(
+                              horizontal: -4,
+                              vertical: -4,
+                            ),
+                            onChanged: (v) => setState(() => sexo = v),
                           ),
+                          const Text("Hembra", style: TextStyle(fontSize: 13)),
                         ],
                       ),
                     ],
                   ),
                 ),
-
-                const SizedBox(width: 10),
-
-                // *** Esterilizado vertical ***
+                const SizedBox(width: 16),
                 Expanded(
-                  flex: 1,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -233,43 +245,39 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                         "Esterilizado",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 13,
+                          fontSize: 14,
                         ),
                       ),
-                      Column(
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Radio(
-                                value: "Sí",
-                                groupValue: esterilizado,
-                                activeColor: azul,
-                                visualDensity: const VisualDensity(
-                                  horizontal: -4,
-                                  vertical: -4,
-                                ),
-                                onChanged:
-                                    (v) => setState(() => esterilizado = v),
-                              ),
-                              const Text("Sí", style: TextStyle(fontSize: 11)),
-                            ],
+                          Radio(
+                            value: "Sí",
+                            groupValue: esterilizado,
+                            activeColor: azul,
+                            visualDensity: const VisualDensity(
+                              horizontal: -4,
+                              vertical: -4,
+                            ),
+                            onChanged: (v) =>
+                                setState(() => esterilizado = v),
                           ),
-                          Row(
-                            children: [
-                              Radio(
-                                value: "No",
-                                groupValue: esterilizado,
-                                activeColor: azul,
-                                visualDensity: const VisualDensity(
-                                  horizontal: -4,
-                                  vertical: -4,
-                                ),
-                                onChanged:
-                                    (v) => setState(() => esterilizado = v),
-                              ),
-                              const Text("No", style: TextStyle(fontSize: 11)),
-                            ],
+                          const Text("Sí", style: TextStyle(fontSize: 13)),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Radio(
+                            value: "No",
+                            groupValue: esterilizado,
+                            activeColor: azul,
+                            visualDensity: const VisualDensity(
+                              horizontal: -4,
+                              vertical: -4,
+                            ),
+                            onChanged: (v) =>
+                                setState(() => esterilizado = v),
                           ),
+                          const Text("No", style: TextStyle(fontSize: 13)),
                         ],
                       ),
                     ],
@@ -280,98 +288,88 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
 
             const SizedBox(height: 12),
 
-            Row(
-              children: [
-                Expanded(child: _buildCardTextField(edadController, 'Edad')),
-                const SizedBox(width: 12),
-                Expanded(child: _buildCardTextField(razaController, 'Raza')),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
+            // EDAD / RAZA
             Row(
               children: [
                 Expanded(
-                  child: _buildCardTextField(tamanoController, 'Tamaño'),
+                  child: _buildOutlinedTextField(edadController, 'Edad'),
                 ),
                 const SizedBox(width: 12),
-                Expanded(child: _buildCardTextField(pesoController, 'Peso')),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(child: _buildCardTextField(colorController, 'Color')),
-                const SizedBox(width: 12),
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: azul.withOpacity(0.4),
-                        width: 3.5,
-                      ),
-                    ),
-                    child: DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(
-                        labelText: "Especie",
-                        border: InputBorder.none,
-                      ),
-                      value: especie,
-                      items:
-                          especies
-                              .map(
-                                (e) =>
-                                    DropdownMenuItem(value: e, child: Text(e)),
-                              )
-                              .toList(),
-                      onChanged: (v) => setState(() => especie = v),
-                    ),
-                  ),
+                  child: _buildOutlinedTextField(razaController, 'Raza'),
                 ),
               ],
             ),
 
             const SizedBox(height: 12),
-            _buildCardTextField(
-              observacionesController,
-              'Observaciones',
-              maxLines: 3,
+
+            // TAMAÑO / PESO
+            Row(
+              children: [
+                Expanded(
+                  child: _buildOutlinedTextField(tamanoController, 'Tamaño'),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildOutlinedTextField(pesoController, 'Peso'),
+                ),
+              ],
             ),
+
+            const SizedBox(height: 12),
+
+            // COLOR
+            _buildOutlinedTextField(colorController, 'Color'),
+            const SizedBox(height: 12),
 
             const SizedBox(height: 24),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _guardarMascota,
-                icon: const Icon(Icons.save_rounded, color: Colors.white),
-                label: const Text(
-                  'GUARDAR',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                    fontSize: 16,
+            // BOTONES GUARDAR / CANCELAR
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _guardarMascota,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1D2A5F),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Guardar',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: azul,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD3D3D3),
+                      foregroundColor: Colors.black87,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Cancelar',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
-                  elevation: 3,
                 ),
-              ),
+              ],
             ),
           ],
         ),
@@ -379,30 +377,35 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     );
   }
 
-  Widget _buildCardTextField(
+  // ---- TextField con borde azul fino (como el mockup) ----
+  Widget _buildOutlinedTextField(
     TextEditingController controller,
     String label, {
     int maxLines = 1,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFF2A74D9).withOpacity(0.4),
-          width: 3.5,
+    const azul = Color(0xFF2A74D9);
+
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(fontSize: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: azul.withOpacity(0.7)),
         ),
-      ),
-      child: TextField(
-        controller: controller,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          labelText: label,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: azul.withOpacity(0.7)),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderSide: BorderSide(color: azul, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
         ),
       ),
     );

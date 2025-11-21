@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';        // 👈 NUEVO
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login/Pantallas/Clientes.dart';
 import 'package:login/main.dart';
 
@@ -19,8 +19,11 @@ class Veterinario extends StatelessWidget {
       offset: Offset(0, 3),
     );
 
+    final size = MediaQuery.of(context).size;
+    final cardMinHeight = size.height * 0.16; // altura mínima responsiva
+    final imageHeight = size.width * 0.35; // imagen responsiva según ancho
+
     final clientesRef = FirebaseFirestore.instance.collection('clientes');
-    // Para después podrías hacer algo similar con citas y mascotas
 
     return Scaffold(
       backgroundColor: fondo,
@@ -84,7 +87,6 @@ class Veterinario extends StatelessWidget {
           const SizedBox(width: 6),
         ],
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(14, 10, 14, 20),
@@ -101,14 +103,16 @@ class Veterinario extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
+              // IMAGEN RESPONSIVA
               Container(
-                height: 110,
+                height: imageHeight,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: const [sombra],
                 ),
                 clipBehavior: Clip.antiAlias,
+                width: double.infinity,
                 child: Image.network(
                   'https://www.ladridosybigotes.com/content/images/2024/10/2024-08-13-animal-hoarding-disorder.webp',
                   fit: BoxFit.cover,
@@ -118,7 +122,7 @@ class Veterinario extends StatelessWidget {
 
               Column(
                 children: [
-                  // 👉 Card de CLIENTES con contador real
+                  // Card CLIENTES
                   StreamBuilder<QuerySnapshot>(
                     stream: clientesRef.snapshots(),
                     builder: (context, snapshot) {
@@ -133,7 +137,8 @@ class Veterinario extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const Clientes()),
+                              builder: (context) => const Clientes(),
+                            ),
                           );
                         },
                         child: _InfoCard(
@@ -142,31 +147,32 @@ class Veterinario extends StatelessWidget {
                           valor: totalClientes,
                           subtitulo: 'Registrados',
                           icono: Icons.groups_rounded,
-                          height: 110,
+                          height: cardMinHeight,
                         ),
                       );
                     },
                   ),
                   const SizedBox(height: 12),
 
-                  // Por ahora las otras cards siguen estáticas
+                  // Citas hoy
                   _InfoCard(
                     color: azulCard,
                     titulo: 'Citas hoy',
                     valor: '0',
                     subtitulo: '0 completadas',
                     icono: Icons.calendar_today_outlined,
-                    height: 110,
+                    height: cardMinHeight,
                   ),
                   const SizedBox(height: 12),
 
+                  // Mascotas
                   _InfoCard(
                     color: azulCard,
                     titulo: 'Mascotas',
                     valor: '0',
                     subtitulo: 'Registradas',
                     icono: Icons.favorite_border,
-                    height: 110,
+                    height: cardMinHeight,
                   ),
                 ],
               ),
@@ -184,7 +190,7 @@ class _InfoCard extends StatelessWidget {
   final String valor;
   final String subtitulo;
   final IconData icono;
-  final double height;           // 👈 NUEVO
+  final double height; // altura mínima
 
   const _InfoCard({
     required this.color,
@@ -204,48 +210,62 @@ class _InfoCard extends StatelessWidget {
     );
 
     return Container(
-      height: height,                 // 👈 respeta el mockup
-      padding: const EdgeInsets.all(14),
+      constraints: BoxConstraints(
+        minHeight: height, // ya no es altura fija, puede crecer
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      width: double.infinity,
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(14),
         boxShadow: const [sombra],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Ajuste sutil del tamaño de fuente según la altura disponible
+          final isSmall = constraints.maxHeight < 120;
+          final valueFontSize = isSmall ? 30.0 : 36.0;
+          final titleFontSize = isSmall ? 15.0 : 16.0;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    titulo,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w800,
+                      fontSize: titleFontSize,
+                    ),
+                  ),
+                  Icon(icono, color: Colors.black, size: 22),
+                ],
+              ),
+              const SizedBox(height: 6),
               Text(
-                titulo,
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
+                valor,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w900,
+                  fontSize: valueFontSize,
+                  height: 1.0,
                 ),
               ),
-              Icon(icono, color: Colors.black, size: 22),
+              const SizedBox(height: 2),
+              Text(
+                subtitulo,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 13,
+                ),
+              ),
             ],
-          ),
-          const SizedBox(height: 6),
-
-          Text(
-            valor,
-            style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w900,
-              fontSize: 36,
-              height: 1.0,
-            ),
-          ),
-          const SizedBox(height: 2),
-
-          Text(
-            subtitulo,
-            style: const TextStyle(color: Colors.black87, fontSize: 13),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

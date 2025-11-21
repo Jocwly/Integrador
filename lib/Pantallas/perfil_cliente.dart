@@ -95,7 +95,7 @@ class _CardContenido extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(26), // más redondeado, estilo mockup
         boxShadow: const [
           BoxShadow(
             color: Color(0x1A000000),
@@ -111,9 +111,9 @@ class _CardContenido extends StatelessWidget {
           // Avatar
           Center(
             child: CircleAvatar(
-              radius: 34,
+              radius: 40,
               backgroundColor: const Color(0xFFEDEFF3),
-              child: Icon(Icons.person, size: 44, color: Colors.grey.shade700),
+              child: Icon(Icons.person, size: 48, color: Colors.grey.shade700),
             ),
           ),
           const SizedBox(height: 12),
@@ -123,20 +123,22 @@ class _CardContenido extends StatelessWidget {
             child: Text(
               nombre,
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
+                fontSize: 22,
               ),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 22),
 
           // Dirección
-          Text(
+          const Text(
             'Dirección:',
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
+              fontSize: 15,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           _PillInfo(
             icon: Icons.home_filled,
             text: direccion,
@@ -144,26 +146,28 @@ class _CardContenido extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Teléfono
-          Text(
-            'Teléfono:',
-            style: theme.textTheme.bodyMedium?.copyWith(
+          const Text(
+            'Teléfono',
+            style: TextStyle(
               fontWeight: FontWeight.w700,
+              fontSize: 15,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           _PillInfo(icon: Icons.phone, text: telefono),
           const SizedBox(height: 22),
 
           // Mascotas
-          Text(
+          const Text(
             'Mascotas',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: TextStyle(
               fontWeight: FontWeight.w800,
+              fontSize: 18,
             ),
           ),
           const SizedBox(height: 12),
 
-          // Lista de mascotas + botón añadir
+          // Lista de mascotas + botón añadir (DISEÑO MOCKUP)
           StreamBuilder<QuerySnapshot>(
             stream: mascotasRef.snapshots(),
             builder: (context, snapshot) {
@@ -177,30 +181,35 @@ class _CardContenido extends StatelessWidget {
 
               final docs = snapshot.data!.docs;
 
-              return Column(
-                children: [
-                  if (docs.isEmpty)
+              // Si no hay mascotas: solo mostrar mensaje + botón añadir
+              if (docs.isEmpty) {
+                return Column(
+                  children: [
                     const Text(
                       'Este cliente aún no tiene mascotas registradas.',
                       style: TextStyle(fontSize: 13, color: Colors.black54),
-                    )
-                  else
+                    ),
+                    const SizedBox(height: 16),
+                    _BotonAgregarMascota(clienteId: clienteId),
+                  ],
+                );
+              }
+
+              // Con mascotas: círculos horizontales + añadir al final
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
                     ...docs.map((doc) {
                       final data =
                           doc.data() as Map<String, dynamic>;
                       final nombreMascota =
                           data['nombre'] ?? 'Mascota';
+                      final foto = data['foto'];
 
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const CircleAvatar(
-                          radius: 24,
-                          backgroundImage: NetworkImage(
-                            'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300',
-                          ),
-                        ),
-                        title: Text(nombreMascota),
+                      return GestureDetector(
                         onTap: () {
+                          // MISMA FUNCIONALIDAD: ir al perfil de la mascota
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -211,60 +220,51 @@ class _CardContenido extends StatelessWidget {
                             ),
                           );
                         },
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 18.0),
+                          child: Column(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: const Color(0xFF7FA3FF),
+                                    width: 3,
+                                  ),
+                                ),
+                                child: CircleAvatar(
+                                  radius: 34,
+                                  backgroundImage: foto != null
+                                      ? NetworkImage(foto)
+                                      : const NetworkImage(
+                                          'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300',
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              SizedBox(
+                                width: 80,
+                                child: Text(
+                                  nombreMascota,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     }).toList(),
 
-                  const SizedBox(height: 12),
-
-                  // Botón añadir mascota
-                  Center(
-                    child: Column(
-                      children: [
-                        InkWell(
-                          borderRadius: BorderRadius.circular(44),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    RegistrarMascota(clienteId: clienteId),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            width: 72,
-                            height: 72,
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFF7FA3FF),
-                                width: 4,
-                              ),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x33000000),
-                                  blurRadius: 8,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 36,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Añadir\nMascota',
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  )
-                ],
+                    // Botón añadir mascota en la misma fila
+                    _BotonAgregarMascota(clienteId: clienteId),
+                  ],
+                ),
               );
             },
           ),
@@ -296,6 +296,70 @@ class _PillInfo extends StatelessWidget {
               text,
               style: const TextStyle(fontSize: 14),
               overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BotonAgregarMascota extends StatelessWidget {
+  const _BotonAgregarMascota({required this.clienteId});
+  final String clienteId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0, left: 4.0),
+      child: Column(
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(44),
+            onTap: () {
+              // MISMA FUNCIONALIDAD DE ANTES: registrar mascota
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RegistrarMascota(clienteId: clienteId),
+                ),
+              );
+            },
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: Colors.black,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFF7FA3FF),
+                  width: 4,
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x33000000),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+                size: 36,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          const SizedBox(
+            width: 80,
+            child: Text(
+              'Añadir\nMascota',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

@@ -1,0 +1,25 @@
+import 'package:flutter/material.dart';
+
+class Mascotadueno extends StatelessWidget {
+  static const routeName = '/mascotadueno';
+
+  const Mascotadueno({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Panel del dueño'),
+      ),
+      body: const Center(
+        child: Text(
+          'Soy dueño',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+}

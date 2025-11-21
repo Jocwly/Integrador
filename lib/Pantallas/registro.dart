@@ -39,9 +39,50 @@ class _RegistroState extends State<Registro> {
   }
 
   OutlineInputBorder _outlineBlue(double w) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
-    borderSide: BorderSide(color: const Color(0xFF5F79FF), width: w),
-  );
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: const Color(0xFF5F79FF), width: w),
+      );
+
+  OutlineInputBorder _outlineRed(double w) => OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.red, width: w),
+      );
+
+  // ---------- Validadores reutilizables ----------
+
+  String? _validateTelefono(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'Este campo es requerido';
+    if (!RegExp(r'^[0-9]+$').hasMatch(v)) return 'Solo se permiten números';
+    return null;
+  }
+
+  String? _validateEmail(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'Este campo es requerido';
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(v)) {
+      return 'Formato de correo inválido';
+    }
+    return null;
+  }
+
+  String? _validatePass(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'Este campo es requerido';
+    if (v.length < 8) {
+      return 'La contraseña debe tener mínimo 8 caracteres';
+    }
+    return null;
+  }
+
+  String? _validateConfirmPass(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'Este campo es requerido';
+    if (v != _passCtrl.text.trim()) {
+      return 'Las contraseñas no coinciden';
+    }
+    return null;
+  }
 
   // Guarda el cliente en Firestore
   Future<void> _registrarCliente() async {
@@ -64,44 +105,27 @@ class _RegistroState extends State<Registro> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Registro exitoso')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Registro exitoso')));
 
       Navigator.pushReplacementNamed(context, Login.routeName);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al registrar: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error al registrar: $e')));
     }
   }
 
   // Validaciones + Confirmación
   Future<void> _confirmarRegistro() async {
+    // Validamos TODO al presionar el botón
     setState(() {
-      _phoneError =
-          RegExp(r'^[0-9]+$').hasMatch(_phoneCtrl.text.trim())
-              ? null
-              : 'Solo se permiten números';
-
-      _emailError =
-          RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(_emailCtrl.text.trim())
-              ? null
-              : 'Formato de correo inválido';
-
-      _passError =
-          _passCtrl.text.trim().length >= 6
-              ? null
-              : 'La contraseña debe tener mínimo 6 caracteres';
-
-      _confirmPassError =
-          _confirmPassCtrl.text.trim() == _passCtrl.text.trim()
-              ? null
-              : 'Las contraseñas no coinciden';
+      _phoneError = _validateTelefono(_phoneCtrl.text);
+      _emailError = _validateEmail(_emailCtrl.text);
+      _passError = _validatePass(_passCtrl.text);
+      _confirmPassError = _validateConfirmPass(_confirmPassCtrl.text);
     });
 
-    // Si hay errores, no continúa
     if (_phoneError != null ||
         _emailError != null ||
         _passError != null ||
@@ -109,27 +133,25 @@ class _RegistroState extends State<Registro> {
       return;
     }
 
-    // Abrir diálogo
     final confirmar = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Confirmar registro"),
-            content: const Text("¿Deseas guardar tus datos y registrarte?"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text("Cancelar"),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0B1446),
-                ),
-                child: const Text("Sí, registrarme"),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text("Confirmar registro"),
+        content: const Text("¿Deseas guardar tus datos y registrarte?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancelar"),
           ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+            ),
+            child: const Text("Sí, registrarme"),
+          ),
+        ],
+      ),
     );
 
     if (confirmar == true) {
@@ -139,14 +161,11 @@ class _RegistroState extends State<Registro> {
 
   @override
   Widget build(BuildContext context) {
+    const pillBlue = Color(0xFFD8E1FF);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -155,10 +174,12 @@ class _RegistroState extends State<Registro> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const CircleAvatar(
-                radius: 44,
-                backgroundImage: AssetImage('assets/images/petcare_logo.png'),
-                backgroundColor: Colors.white,
+              CircleAvatar(
+                radius: 70,
+                backgroundColor: pillBlue,
+                backgroundImage: const AssetImage(
+                  'assets/images/petcare_logo.jpg',
+                ),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -169,8 +190,10 @@ class _RegistroState extends State<Registro> {
 
               _LabeledField(
                 label: 'Nombre:',
-                icon: Icons.person_outline,
+                icon: Icons.person_2_rounded,
                 controller: _nameCtrl,
+                outlineBlue: _outlineBlue,
+                outlineRed: _outlineRed,
               ),
               const SizedBox(height: 12),
 
@@ -184,25 +207,48 @@ class _RegistroState extends State<Registro> {
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(10),
                 ],
+                outlineBlue: _outlineBlue,
+                outlineRed: _outlineRed,
+                onChanged: (value) {
+                  setState(() {
+                    _phoneError = _validateTelefono(value) == null &&
+                            value.trim().isNotEmpty
+                        ? null
+                        : _validateTelefono(value);
+                  });
+                },
               ),
               const SizedBox(height: 12),
 
               _LabeledField(
                 label: 'Correo electrónico:',
-                icon: Icons.mail_outline,
+                icon: Icons.mail_rounded,
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
                 errorText: _emailError,
+                outlineBlue: _outlineBlue,
+                outlineRed: _outlineRed,
+                onChanged: (value) {
+                  setState(() {
+                    _emailError = _validateEmail(value) == null &&
+                            value.trim().isNotEmpty
+                        ? null
+                        : _validateEmail(value);
+                  });
+                },
               ),
               const SizedBox(height: 12),
 
               _LabeledField(
                 label: 'Dirección:',
-                icon: Icons.home_outlined,
+                icon: Icons.home_filled,
                 controller: _addressCtrl,
+                outlineBlue: _outlineBlue,
+                outlineRed: _outlineRed,
               ),
               const SizedBox(height: 12),
 
+              // Contraseña
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -214,15 +260,24 @@ class _RegistroState extends State<Registro> {
                   TextField(
                     controller: _passCtrl,
                     obscureText: _obscure,
+                    onChanged: (value) {
+                      setState(() {
+                        _passError = _validatePass(value) == null &&
+                                value.trim().isNotEmpty
+                            ? null
+                            : _validatePass(value);
+                      });
+                    },
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock_outline),
+                      prefixIcon: const Icon(Icons.lock_rounded),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscure
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
                         ),
-                        onPressed: () => setState(() => _obscure = !_obscure),
+                        onPressed: () =>
+                            setState(() => _obscure = !_obscure),
                       ),
                       errorText: _passError,
                       contentPadding: const EdgeInsets.symmetric(
@@ -231,12 +286,15 @@ class _RegistroState extends State<Registro> {
                       ),
                       enabledBorder: _outlineBlue(1.2),
                       focusedBorder: _outlineBlue(1.6),
+                      errorBorder: _outlineRed(1.3),
+                      focusedErrorBorder: _outlineRed(1.6),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
 
+              // Confirmar contraseña
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -248,8 +306,17 @@ class _RegistroState extends State<Registro> {
                   TextField(
                     controller: _confirmPassCtrl,
                     obscureText: _obscure,
+                    onChanged: (value) {
+                      setState(() {
+                        _confirmPassError =
+                            _validateConfirmPass(value) == null &&
+                                    value.trim().isNotEmpty
+                                ? null
+                                : _validateConfirmPass(value);
+                      });
+                    },
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock_outline),
+                      prefixIcon: const Icon(Icons.lock_rounded),
                       errorText: _confirmPassError,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 14,
@@ -257,6 +324,8 @@ class _RegistroState extends State<Registro> {
                       ),
                       enabledBorder: _outlineBlue(1.2),
                       focusedBorder: _outlineBlue(1.6),
+                      errorBorder: _outlineRed(1.3),
+                      focusedErrorBorder: _outlineRed(1.6),
                     ),
                   ),
                 ],
@@ -288,11 +357,10 @@ class _RegistroState extends State<Registro> {
                 children: [
                   const Text('¿Ya tienes una cuenta? '),
                   GestureDetector(
-                    onTap:
-                        () => Navigator.pushReplacementNamed(
-                          context,
-                          Login.routeName,
-                        ),
+                    onTap: () => Navigator.pushReplacementNamed(
+                      context,
+                      Login.routeName,
+                    ),
                     child: const Text(
                       'Inicia sesión aquí',
                       style: TextStyle(
@@ -328,6 +396,9 @@ class _LabeledField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? errorText;
   final List<TextInputFormatter>? inputFormatters;
+  final OutlineInputBorder Function(double)? outlineBlue;
+  final OutlineInputBorder Function(double)? outlineRed;
+  final ValueChanged<String>? onChanged;
 
   const _LabeledField({
     required this.label,
@@ -336,15 +407,25 @@ class _LabeledField extends StatelessWidget {
     this.keyboardType,
     this.errorText,
     this.inputFormatters,
+    this.outlineBlue,
+    this.outlineRed,
+    this.onChanged,
   });
-
-  OutlineInputBorder _outlineBlue(double w) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
-    borderSide: BorderSide(color: const Color(0xFF5F79FF), width: w),
-  );
 
   @override
   Widget build(BuildContext context) {
+    final ob = outlineBlue ??
+        (double w) => OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide:
+                  BorderSide(color: const Color(0xFF5F79FF), width: w),
+            );
+    final or = outlineRed ??
+        (double w) => OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.red, width: w),
+            );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -354,6 +435,7 @@ class _LabeledField extends StatelessWidget {
           controller: controller,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
+          onChanged: onChanged,
           decoration: InputDecoration(
             prefixIcon: Icon(icon),
             errorText: errorText,
@@ -361,8 +443,10 @@ class _LabeledField extends StatelessWidget {
               horizontal: 14,
               vertical: 14,
             ),
-            enabledBorder: _outlineBlue(1.2),
-            focusedBorder: _outlineBlue(1.6),
+            enabledBorder: ob(1.2),
+            focusedBorder: ob(1.6),
+            errorBorder: or(1.3),
+            focusedErrorBorder: or(1.6),
           ),
         ),
       ],
