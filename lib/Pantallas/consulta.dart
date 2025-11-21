@@ -327,7 +327,6 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                // FOTO Y NOMBRE (NO tocado)
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
@@ -339,10 +338,9 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                   padding: const EdgeInsets.all(4),
                   child: CircleAvatar(
                     radius: 48,
-                    backgroundImage: fotoUrl != null
-                        ? NetworkImage(fotoUrl)
-                        : const AssetImage('assets/images/perro.jpg')
-                            as ImageProvider,
+                    backgroundImage: (fotoUrl != null && fotoUrl!.isNotEmpty)
+                        ? NetworkImage(fotoUrl!)
+                        : const AssetImage('')
                   ),
                 ),
                 const SizedBox(height: 10),

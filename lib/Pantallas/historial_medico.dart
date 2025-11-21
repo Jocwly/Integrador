@@ -47,7 +47,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
         title: const Text(
           'Historial Médico',
           style: TextStyle(
-            color: Color(0xFF2A74D9),
+            color: Color.fromARGB(255, 0, 0, 0),
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),

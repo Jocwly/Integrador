@@ -83,202 +83,182 @@ class _CitasMascotaState extends State<CitasMascota> {
               final docs = citasSnap.data!.docs;
 
               // separar completadas y pendientes
-              final completadas =
-                  docs.where((d) {
-                    final data = d.data() as Map<String, dynamic>;
-                    return (data['completada'] ?? false) == true;
-                  }).toList();
+              final completadas = docs.where((d) {
+                final data = d.data() as Map<String, dynamic>;
+                return (data['completada'] ?? false) == true;
+              }).toList();
 
-              final pendientes =
-                  docs.where((d) {
-                    final data = d.data() as Map<String, dynamic>;
-                    return (data['completada'] ?? false) == false;
-                  }).toList();
+              final pendientes = docs.where((d) {
+                final data = d.data() as Map<String, dynamic>;
+                return (data['completada'] ?? false) == false;
+              }).toList();
 
               final listaActual = _tabIndex == 0 ? completadas : pendientes;
 
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  return Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 430),
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 430),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        // FOTO + NOMBRE (FIJOS ARRIBA)
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color.fromARGB(255, 0, 20, 66),
+                              width: 3,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundImage: foto != null
+                                ? NetworkImage(foto)
+                                : const AssetImage('assets/images/perro.jpg')
+                                    as ImageProvider,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: moradoOscuro,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 6,
+                          ),
+                          child: Text(
+                            nombre,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // tarjetas de resumen (FIJAS)
+                        Row(
                           children: [
-                            // FOTO + NOMBRE (como en otras pantallas)
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: const Color.fromARGB(255, 0, 20, 66),
-                                  width: 3,
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                              padding: const EdgeInsets.all(4),
-                              child: CircleAvatar(
-                                radius: 50,
-                                backgroundImage:
-                                    foto != null
-                                        ? NetworkImage(foto)
-                                        : const AssetImage(
-                                              'assets/images/perro.jpg',
-                                            )
-                                            as ImageProvider,
+                            Expanded(
+                              child: _resumenCard(
+                                titulo: 'Completadas',
+                                valor: completadas.length,
+                                azulSuave: azulSuave,
+                                icono: Icons.check_circle_outline,
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: moradoOscuro,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 6,
-                              ),
-                              child: Text(
-                                nombre,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _resumenCard(
+                                titulo: 'Pendientes',
+                                valor: pendientes.length,
+                                azulSuave: azulSuave,
+                                icono: Icons.schedule,
                               ),
                             ),
-                            const SizedBox(height: 16),
-
-                            // tarjetas de resumen
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _resumenCard(
-                                    titulo: 'Completadas',
-                                    valor: completadas.length,
-                                    azulSuave: azulSuave,
-                                    icono: Icons.check_circle_outline,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _resumenCard(
-                                    titulo: 'Pendientes',
-                                    valor: pendientes.length,
-                                    azulSuave: azulSuave,
-                                    icono: Icons.schedule,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 14),
-
-                            // Tabs tipo segemented control
-                            Container(
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: moradoOscuro,
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap:
-                                          () => setState(() => _tabIndex = 0),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color:
-                                              _tabIndex == 0
-                                                  ? Colors.white
-                                                  : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(
-                                            18,
-                                          ),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          'Completadas',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            color:
-                                                _tabIndex == 0
-                                                    ? Colors.black
-                                                    : Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap:
-                                          () => setState(() => _tabIndex = 1),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color:
-                                              _tabIndex == 1
-                                                  ? Colors.white
-                                                  : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(
-                                            18,
-                                          ),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          'Pendientes',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            color:
-                                                _tabIndex == 1
-                                                    ? Colors.black
-                                                    : Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // LISTA DE CITAS
-                            if (listaActual.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.only(top: 20),
-                                child: Text(
-                                  'No hay citas en esta categoría.',
-                                  style: TextStyle(color: Colors.black54),
-                                ),
-                              )
-                            else
-                              ListView.separated(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: listaActual.length,
-                                separatorBuilder:
-                                    (_, __) => const SizedBox(height: 12),
-                                itemBuilder: (context, index) {
-                                  final doc = listaActual[index];
-                                  final data =
-                                      doc.data() as Map<String, dynamic>;
-                                  return _citaCard(
-                                    data: data,
-                                    citaId: doc.id,
-                                    citasRef: citasRef,
-                                    azulSuave: azulSuave,
-                                    azulFuerte: azulFuerte,
-                                    completada:
-                                        (data['completada'] ?? false) == true,
-                                  );
-                                },
-                              ),
                           ],
                         ),
-                      ),
+                        const SizedBox(height: 14),
+
+                        // Tabs (FIJAS)
+                        Container(
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: moradoOscuro,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => setState(() => _tabIndex = 0),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: _tabIndex == 0
+                                          ? Colors.white
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      'Completadas',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: _tabIndex == 0
+                                            ? Colors.black
+                                            : Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => setState(() => _tabIndex = 1),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: _tabIndex == 1
+                                          ? Colors.white
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      'Pendientes',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: _tabIndex == 1
+                                            ? Colors.black
+                                            : Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // SOLO LA LISTA DESPLAZABLE
+                        Expanded(
+                          child: listaActual.isEmpty
+                              ? const Center(
+                                  child: Text(
+                                    'No hay citas en esta categoría.',
+                                    style: TextStyle(color: Colors.black54),
+                                  ),
+                                )
+                              : ListView.separated(
+                                  itemCount: listaActual.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 12),
+                                  itemBuilder: (context, index) {
+                                    final doc = listaActual[index];
+                                    final data =
+                                        doc.data() as Map<String, dynamic>;
+                                    return _citaCard(
+                                      data: data,
+                                      citaId: doc.id,
+                                      citasRef: citasRef,
+                                      azulSuave: azulSuave,
+                                      azulFuerte: azulFuerte,
+                                      completada:
+                                          (data['completada'] ?? false) ==
+                                              true,
+                                    );
+                                  },
+                                ),
+                        ),
+                      ],
                     ),
-                  );
-                },
+                  ),
+                ),
               );
             },
           );
@@ -343,9 +323,7 @@ class _CitasMascotaState extends State<CitasMascota> {
     final horaStr =
         fecha != null ? DateFormat('hh:mm a').format(fecha) : '--:--';
 
-    final bool esPendiente = !completada;
-
-    // iconito según tipo
+    // icono según tipo
     IconData tipoIcon;
     if (tipo.toString().toLowerCase().contains('estética')) {
       tipoIcon = Icons.cut;
@@ -377,7 +355,10 @@ class _CitasMascotaState extends State<CitasMascota> {
               ),
               const SizedBox(width: 8),
               _chip(
-                tipo.replaceAll('Cita ', '').replaceAll('Consulta ', '').trim(),
+                tipo
+                    .replaceAll('Cita ', '')
+                    .replaceAll('Consulta ', '')
+                    .trim(),
               ),
               const SizedBox(width: 6),
               _chip(
@@ -408,7 +389,8 @@ class _CitasMascotaState extends State<CitasMascota> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
@@ -443,52 +425,52 @@ class _CitasMascotaState extends State<CitasMascota> {
           ),
           const SizedBox(height: 10),
 
-          // botones Editar / Cancelar
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed:
-                    () => _editarFechaHora(
-                      context: context,
-                      citasRef: citasRef,
-                      citaId: citaId,
-                      fechaActual: fecha,
+          // botones Editar / Cancelar SOLO SI NO ESTÁ COMPLETADA
+          if (!completada)
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () => _editarFechaHora(
+                    context: context,
+                    citasRef: citasRef,
+                    citaId: citaId,
+                    fechaActual: fecha,
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: azulFuerte,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 8,
                     ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: azulFuerte,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                child: const Text(
-                  'Editar',
-                  style: TextStyle(color: Colors.white, fontSize: 13),
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () => _cancelarCita(context, citasRef, citaId),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                  child: const Text(
+                    'Editar',
+                    style: TextStyle(color: Colors.white, fontSize: 13),
                   ),
                 ),
-                child: const Text(
-                  'Cancelar',
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () => _cancelarCita(context, citasRef, citaId),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Text(
+                    'Cancelar',
+                    style: TextStyle(color: Colors.white, fontSize: 13),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );
@@ -525,7 +507,6 @@ class _CitasMascotaState extends State<CitasMascota> {
     required DateTime? fechaActual,
   }) async {
     DateTime fechaTemp = fechaActual ?? DateTime.now();
-
     TimeOfDay horaTemp = TimeOfDay.fromDateTime(fechaActual ?? DateTime.now());
 
     await showDialog(
@@ -543,9 +524,8 @@ class _CitasMascotaState extends State<CitasMascota> {
                   final picked = await showDatePicker(
                     context: context,
                     initialDate: fechaTemp,
-                    firstDate: DateTime.now().subtract(
-                      const Duration(days: 365),
-                    ),
+                    firstDate:
+                        DateTime.now().subtract(const Duration(days: 365)),
                     lastDate: DateTime(2100),
                   );
                   if (picked != null) {
@@ -606,23 +586,22 @@ class _CitasMascotaState extends State<CitasMascota> {
   ) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder:
-          (_) => AlertDialog(
-            title: const Text('Cancelar cita'),
-            content: const Text(
-              '¿Seguro que deseas cancelar esta cita? Se eliminará de la lista.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('No'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Sí, cancelar'),
-              ),
-            ],
+      builder: (_) => AlertDialog(
+        title: const Text('Cancelar cita'),
+        content: const Text(
+          '¿Seguro que deseas cancelar esta cita? Se eliminará de la lista.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('No'),
           ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sí, cancelar'),
+          ),
+        ],
+      ),
     );
 
     if (confirm == true) {
