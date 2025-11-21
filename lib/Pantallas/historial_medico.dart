@@ -78,7 +78,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // 📌 Tarjeta de información de la mascota
+
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(

@@ -577,8 +577,6 @@ class _CitasMascotaState extends State<CitasMascota> {
     );
   }
 
-  // ---------- Cancelar (eliminar) cita ----------
-
   Future<void> _cancelarCita(
     BuildContext context,
     CollectionReference citasRef,
