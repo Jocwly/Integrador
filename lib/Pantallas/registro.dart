@@ -39,14 +39,14 @@ class _RegistroState extends State<Registro> {
   }
 
   OutlineInputBorder _outlineBlue(double w) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: const Color(0xFF5F79FF), width: w),
-      );
+    borderRadius: BorderRadius.circular(12),
+    borderSide: BorderSide(color: const Color(0xFF5F79FF), width: w),
+  );
 
   OutlineInputBorder _outlineRed(double w) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.red, width: w),
-      );
+    borderRadius: BorderRadius.circular(12),
+    borderSide: BorderSide(color: Colors.red, width: w),
+  );
 
   // ---------- Validadores reutilizables ----------
 
@@ -105,14 +105,16 @@ class _RegistroState extends State<Registro> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Registro exitoso')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Registro exitoso')));
 
       Navigator.pushReplacementNamed(context, Login.routeName);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error al registrar: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al registrar: $e')));
     }
   }
 
@@ -135,23 +137,24 @@ class _RegistroState extends State<Registro> {
 
     final confirmar = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Confirmar registro"),
-        content: const Text("¿Deseas guardar tus datos y registrarte?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancelar"),
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Confirmar registro"),
+            content: const Text("¿Deseas guardar tus datos y registrarte?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text("Cancelar"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                ),
+                child: const Text("Sí, registrarme"),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-            ),
-            child: const Text("Sí, registrarme"),
-          ),
-        ],
-      ),
     );
 
     if (confirmar == true) {
@@ -163,10 +166,7 @@ class _RegistroState extends State<Registro> {
   Widget build(BuildContext context) {
     const pillBlue = Color(0xFFD8E1FF);
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
+      appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -211,10 +211,11 @@ class _RegistroState extends State<Registro> {
                 outlineRed: _outlineRed,
                 onChanged: (value) {
                   setState(() {
-                    _phoneError = _validateTelefono(value) == null &&
-                            value.trim().isNotEmpty
-                        ? null
-                        : _validateTelefono(value);
+                    _phoneError =
+                        _validateTelefono(value) == null &&
+                                value.trim().isNotEmpty
+                            ? null
+                            : _validateTelefono(value);
                   });
                 },
               ),
@@ -230,10 +231,10 @@ class _RegistroState extends State<Registro> {
                 outlineRed: _outlineRed,
                 onChanged: (value) {
                   setState(() {
-                    _emailError = _validateEmail(value) == null &&
-                            value.trim().isNotEmpty
-                        ? null
-                        : _validateEmail(value);
+                    _emailError =
+                        _validateEmail(value) == null && value.trim().isNotEmpty
+                            ? null
+                            : _validateEmail(value);
                   });
                 },
               ),
@@ -262,10 +263,11 @@ class _RegistroState extends State<Registro> {
                     obscureText: _obscure,
                     onChanged: (value) {
                       setState(() {
-                        _passError = _validatePass(value) == null &&
-                                value.trim().isNotEmpty
-                            ? null
-                            : _validatePass(value);
+                        _passError =
+                            _validatePass(value) == null &&
+                                    value.trim().isNotEmpty
+                                ? null
+                                : _validatePass(value);
                       });
                     },
                     decoration: InputDecoration(
@@ -276,8 +278,7 @@ class _RegistroState extends State<Registro> {
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscure = !_obscure),
+                        onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                       errorText: _passError,
                       contentPadding: const EdgeInsets.symmetric(
@@ -357,10 +358,11 @@ class _RegistroState extends State<Registro> {
                 children: [
                   const Text('¿Ya tienes una cuenta? '),
                   GestureDetector(
-                    onTap: () => Navigator.pushReplacementNamed(
-                      context,
-                      Login.routeName,
-                    ),
+                    onTap:
+                        () => Navigator.pushReplacementNamed(
+                          context,
+                          Login.routeName,
+                        ),
                     child: const Text(
                       'Inicia sesión aquí',
                       style: TextStyle(
@@ -414,17 +416,18 @@ class _LabeledField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ob = outlineBlue ??
+    final ob =
+        outlineBlue ??
         (double w) => OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  BorderSide(color: const Color(0xFF5F79FF), width: w),
-            );
-    final or = outlineRed ??
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: const Color(0xFF5F79FF), width: w),
+        );
+    final or =
+        outlineRed ??
         (double w) => OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.red, width: w),
-            );
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.red, width: w),
+        );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

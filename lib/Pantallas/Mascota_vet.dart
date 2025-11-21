@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:login/Pantallas/citas.dart';
 import 'package:login/Pantallas/consulta.dart';
+import 'package:login/Pantallas/historial_medico.dart';
 import 'package:login/Pantallas/programar_citas.dart';
 import 'package:login/Pantallas/registro_vacuna.dart';
 
@@ -140,7 +142,18 @@ class PerfilMascota extends StatelessWidget {
                               _buildMenuItem(
                                 icon: Icons.pets,
                                 label: "Citas",
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => CitasMascota(
+                                            clienteId: clienteId,
+                                            mascotaId: mascotaId,
+                                          ),
+                                    ),
+                                  );
+                                },
                               ),
                               _buildMenuItem(
                                 icon: Icons.calendar_month,
@@ -205,7 +218,9 @@ class PerfilMascota extends StatelessWidget {
                               _buildMenuItem(
                                 icon: Icons.assignment_outlined,
                                 label: "Historial\nMédico",
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context)=> HistorialMedico(clienteId: clienteId, mascotaId: mascotaId)));
+                                },
                               ),
                             ],
                           ),

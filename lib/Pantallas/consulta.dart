@@ -16,7 +16,7 @@ class ConsultaMedica extends StatefulWidget {
   State<ConsultaMedica> createState() => _ConsultaMedicaState();
 }
 
-// 👉 Controladores para cada bloque de medicación
+/// Controladores para cada bloque de medicación
 class _MedicationFields {
   final TextEditingController nombre = TextEditingController();
   final TextEditingController dosis = TextEditingController();
@@ -37,10 +37,37 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
   final azulSuave = const Color(0xFFD6E1F7);
   final azulFuerte = const Color(0xFF2A74D9);
 
+  // flags de error
+  bool _errMotivo = false;
+  bool _errPeso = false;
+  bool _errTemp = false;
+  bool _errDiag = false;
+  bool _errMedNombre = false;
+  bool _errMedDosis = false;
+  bool _errMedFrecuencia = false;
+  bool _errMedDuracion = false;
+
   @override
   void initState() {
     super.initState();
+    // Fecha por default: hoy, formato dd/MM/yyyy
     _dateCtrl.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
+  }
+
+  @override
+  void dispose() {
+    _dateCtrl.dispose();
+    _reasonCtrl.dispose();
+    _weightCtrl.dispose();
+    _tempCtrl.dispose();
+    _diagnosisCtrl.dispose();
+    for (final m in _medicaciones) {
+      m.nombre.dispose();
+      m.dosis.dispose();
+      m.frecuencia.dispose();
+      m.duracion.dispose();
+    }
+    super.dispose();
   }
 
   OutlineInputBorder _softBorder() => OutlineInputBorder(
@@ -67,33 +94,188 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     }
   }
 
+  // ---------- GUARDAR (misma lógica que antes + validaciones visuales) ----------
   Future<void> _onGuardar() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Consulta guardada')),
-    );
-    Navigator.pop(context, true);
+    // Validaciones de campos requeridos
+    final firstMed = _medicaciones.first;
+
+    setState(() {
+      _errMotivo = _reasonCtrl.text.trim().isEmpty;
+      _errPeso = _weightCtrl.text.trim().isEmpty;
+      _errTemp = _tempCtrl.text.trim().isEmpty;
+      _errDiag = _diagnosisCtrl.text.trim().isEmpty;
+
+      _errMedNombre = firstMed.nombre.text.trim().isEmpty;
+      _errMedDosis = firstMed.dosis.text.trim().isEmpty;
+      _errMedFrecuencia = firstMed.frecuencia.text.trim().isEmpty;
+      _errMedDuracion = firstMed.duracion.text.trim().isEmpty;
+    });
+
+    final hayErrores = _errMotivo ||
+        _errPeso ||
+        _errTemp ||
+        _errDiag ||
+        _errMedNombre ||
+        _errMedDosis ||
+        _errMedFrecuencia ||
+        _errMedDuracion;
+
+    if (hayErrores) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Completa los campos requeridos')),
+      );
+      return;
+    }
+
+    try {
+      final mascotaRef = FirebaseFirestore.instance
+          .collection('clientes')
+          .doc(widget.clienteId)
+          .collection('mascotas')
+          .doc(widget.mascotaId);
+
+      // Construir lista de medicaciones (solo las que tengan algo escrito)
+      final List<Map<String, String>> meds = [];
+      for (final m in _medicaciones) {
+        final nombre = m.nombre.text.trim();
+        final dosis = m.dosis.text.trim();
+        final frecuencia = m.frecuencia.text.trim();
+        final duracion = m.duracion.text.trim();
+
+        final tieneAlgo =
+            nombre.isNotEmpty || dosis.isNotEmpty || frecuencia.isNotEmpty || duracion.isNotEmpty;
+
+        if (tieneAlgo) {
+          meds.add({
+            'nombre': nombre,
+            'dosis': dosis,
+            'frecuencia': frecuencia,
+            'duracion': duracion,
+          });
+        }
+      }
+
+      // Para compatibilidad con tu lógica anterior: tomamos el primer medicamento
+      String medicamentoPrincipal = '';
+      String dosisPrincipal = '';
+      String frecuenciaPrincipal = '';
+      String duracionPrincipal = '';
+
+      if (meds.isNotEmpty) {
+        medicamentoPrincipal = meds.first['nombre'] ?? '';
+        dosisPrincipal = meds.first['dosis'] ?? '';
+        frecuenciaPrincipal = meds.first['frecuencia'] ?? '';
+        duracionPrincipal = meds.first['duracion'] ?? '';
+      }
+
+      await mascotaRef.collection('consultas').add({
+        'fechaStr': _dateCtrl.text,
+        'fecha': DateFormat('dd/MM/yyyy').parse(_dateCtrl.text),
+        'motivo': _reasonCtrl.text,
+        'peso': _weightCtrl.text,
+        'temperatura': _tempCtrl.text,
+        'diagnostico': _diagnosisCtrl.text,
+        'medicamento': medicamentoPrincipal,
+        'dosis': dosisPrincipal,
+        'frecuencia': frecuenciaPrincipal,
+        'duracion': duracionPrincipal,
+        'medicaciones': meds,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Consulta guardada correctamente'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context, true);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al guardar: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _onCancelar() async {
     Navigator.pop(context);
   }
 
+  // Recuadro base (gris o blanco), icono negro
   InputDecoration _inputDecoration({
     String? hint,
     IconData? icon,
     bool gray = false,
+    bool error = false,
   }) {
     final fillColor = gray ? const Color(0xFFE6E6E6) : Colors.white;
-    final border = gray ? _grayBorder() : _softBorder();
+
+    final border = error
+        ? OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.red, width: 1.6),
+          )
+        : (gray ? _grayBorder() : _softBorder());
 
     return InputDecoration(
-      prefixIcon: icon != null ? Icon(icon, color: Colors.black54) : null,
+      prefixIcon: icon != null ? Icon(icon, color: Colors.black) : null,
       hintText: hint,
       filled: true,
       fillColor: fillColor,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // más alto
       enabledBorder: border,
       focusedBorder: border,
+    );
+  }
+
+  // TextField con overlay de "Este campo es requerido"
+  Widget _buildTextFieldWithError({
+    required TextEditingController controller,
+    required String hint,
+    IconData? icon,
+    bool gray = false,
+    bool showError = false,
+    int maxLines = 1,
+    ValueChanged<String>? onChanged,
+  }) {
+    final decoration = _inputDecoration(
+      hint: showError ? '' : hint,
+      icon: icon,
+      gray: gray,
+      error: showError,
+    );
+
+    final field = TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: decoration,
+      style: TextStyle(
+        color: showError ? Colors.transparent : Colors.black,
+      ),
+      onChanged: onChanged,
+    );
+
+    final double? height = maxLines == 1 ? 56 : null; // recuadros un poco más grandes
+
+    if (!showError) {
+      return SizedBox(height: height, child: field);
+    }
+
+    return SizedBox(
+      height: height,
+      child: Stack(
+        alignment: Alignment.center,
+        children: const [
+          // field se dibuja abajo, pero como el texto es transparente
+          // solo se ve el borde y el mensaje centrado.
+          // ignore: prefer_const_constructors
+          Positioned.fill(child: IgnorePointer(child: SizedBox())), // placeholder
+        ],
+      ),
     );
   }
 
@@ -111,8 +293,10 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
-          icon:
-              const Icon(Icons.arrow_circle_left_rounded, color: Colors.black),
+          icon: const Icon(
+            Icons.arrow_circle_left_rounded,
+            color: Colors.black,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -143,7 +327,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                // 👇 FOTO Y NOMBRE – NO LOS TOCO, SOLO COLORES
+                // FOTO Y NOMBRE (NO tocado)
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
@@ -167,8 +351,10 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                     color: const Color.fromARGB(255, 13, 0, 60),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
                   child: Text(
                     nombre,
                     style: const TextStyle(
@@ -180,19 +366,29 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                 ),
                 const SizedBox(height: 20),
 
-                // 👉 Fecha (pill gris)
+                // Fecha (pill gris, no requerida)
                 _campo(
                   'Fecha:',
                   _dateCtrl,
                   icon: Icons.event_outlined,
                   onTap: _pickDate,
                   grayField: true,
+                  showError: false,
                 ),
 
-                // 👉 Motivo, borde azul
-                _campo('Motivo de la consulta', _reasonCtrl),
+                // Motivo (requerido)
+                _campo(
+                  'Motivo de la consulta',
+                  _reasonCtrl,
+                  showError: _errMotivo,
+                  onChanged: (v) {
+                    if (_errMotivo && v.trim().isNotEmpty) {
+                      setState(() => _errMotivo = false);
+                    }
+                  },
+                ),
 
-                // Peso / Temperatura con pill gris
+                // Peso / Temperatura (requeridos)
                 Row(
                   children: [
                     Expanded(
@@ -201,6 +397,12 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                         _weightCtrl,
                         icon: Icons.monitor_weight,
                         grayField: true,
+                        showError: _errPeso,
+                        onChanged: (v) {
+                          if (_errPeso && v.trim().isNotEmpty) {
+                            setState(() => _errPeso = false);
+                          }
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -210,16 +412,31 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                         _tempCtrl,
                         icon: Icons.thermostat_sharp,
                         grayField: true,
+                        showError: _errTemp,
+                        onChanged: (v) {
+                          if (_errTemp && v.trim().isNotEmpty) {
+                            setState(() => _errTemp = false);
+                          }
+                        },
                       ),
                     ),
                   ],
                 ),
 
-                // Diagnóstico borde azul
-                _campo('Diagnóstico', _diagnosisCtrl, maxLines: 3),
+                // Diagnóstico (requerido)
+                _campo(
+                  'Diagnóstico',
+                  _diagnosisCtrl,
+                  maxLines: 3,
+                  showError: _errDiag,
+                  onChanged: (v) {
+                    if (_errDiag && v.trim().isNotEmpty) {
+                      setState(() => _errDiag = false);
+                    }
+                  },
+                ),
 
                 const SizedBox(height: 6),
-                // Título "Medicación prescrita"
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -233,7 +450,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                 ),
                 const SizedBox(height: 10),
 
-                // 👉 Sección dinámica de medicación
+                // Sección dinámica de medicación
                 _buildMedicacionesSection(),
 
                 const SizedBox(height: 24),
@@ -245,7 +462,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               const Color.fromARGB(255, 13, 0, 60),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -266,7 +483,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               const Color.fromARGB(255, 148, 148, 148),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -299,6 +516,8 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     int maxLines = 1,
     VoidCallback? onTap,
     bool grayField = false,
+    bool showError = false,
+    ValueChanged<String>? onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
@@ -317,14 +536,14 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
             onTap: onTap,
             child: AbsorbPointer(
               absorbing: onTap != null,
-              child: TextField(
+              child: _buildTextFieldWithError(
                 controller: ctrl,
+                hint: label,
+                icon: icon,
+                gray: grayField,
+                showError: showError,
                 maxLines: maxLines,
-                decoration: _inputDecoration(
-                  hint: label,
-                  icon: icon,
-                  gray: grayField,
-                ),
+                onChanged: onChanged,
               ),
             ),
           ),
@@ -339,7 +558,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     return Column(
       children: [
         for (int i = 0; i < _medicaciones.length; i++) ...[
-          _buildMedicacionForm(_medicaciones[i]),
+          _buildMedicacionForm(_medicaciones[i], i),
           const SizedBox(height: 12),
         ],
         Align(
@@ -353,74 +572,87 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               foregroundColor: Colors.black,
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
+              textStyle: const TextStyle(fontWeight: FontWeight.w600),
             ),
-            icon: const Icon(Icons.add, size: 18),
+            icon: const Icon(Icons.add, size: 18, color: Colors.black),
             label: const Text('Agregar medicación'),
           ),
         ),
       ],
     );
   }
+
   Widget _separator() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 10),
-    child: Container(
-      height: 1.2,
-      color: Colors.grey.shade300,
-    ),
-  );
-}
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Container(height: 1.2, color: Colors.grey.shade300),
+    );
+  }
 
+  Widget _buildMedicacionForm(_MedicationFields med, int index) {
+    final bool isFirst = index == 0;
 
-  Widget _buildMedicacionForm(_MedicationFields med) {
     return Column(
       children: [
-        // Nombre del medicamento (pill gris grande)
-        TextField(
+        // Nombre del medicamento
+        _buildTextFieldWithError(
           controller: med.nombre,
-          decoration: _inputDecoration(
-            hint: 'Nombre del medicamento',
-            gray: true,
-          ),
+          hint: 'Nombre del medicamento',
+          gray: true,
+          showError: isFirst && _errMedNombre,
+          onChanged: (v) {
+            if (isFirst && _errMedNombre && v.trim().isNotEmpty) {
+              setState(() => _errMedNombre = false);
+            }
+          },
         ),
         const SizedBox(height: 10),
         // Dosis / Frecuencia
         Row(
           children: [
             Expanded(
-              child: TextField(
+              child: _buildTextFieldWithError(
                 controller: med.dosis,
-                decoration: _inputDecoration(
-                  hint: 'Dosis',
-                  gray: true,
-                ),
+                hint: 'Dosis',
+                gray: true,
+                showError: isFirst && _errMedDosis,
+                onChanged: (v) {
+                  if (isFirst && _errMedDosis && v.trim().isNotEmpty) {
+                    setState(() => _errMedDosis = false);
+                  }
+                },
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: TextField(
+              child: _buildTextFieldWithError(
                 controller: med.frecuencia,
-                decoration: _inputDecoration(
-                  hint: 'Frecuencia',
-                  gray: true,
-                ),
+                hint: 'Frecuencia',
+                gray: true,
+                showError: isFirst && _errMedFrecuencia,
+                onChanged: (v) {
+                  if (isFirst && _errMedFrecuencia && v.trim().isNotEmpty) {
+                    setState(() => _errMedFrecuencia = false);
+                  }
+                },
               ),
             ),
           ],
         ),
         const SizedBox(height: 10),
         // Duración
-        TextField(
+        _buildTextFieldWithError(
           controller: med.duracion,
-          decoration: _inputDecoration(
-            hint: 'Duración',
-            gray: true,
-          ),
+          hint: 'Duración',
+          gray: true,
+          showError: isFirst && _errMedDuracion,
+          onChanged: (v) {
+            if (isFirst && _errMedDuracion && v.trim().isNotEmpty) {
+              setState(() => _errMedDuracion = false);
+            }
+          },
         ),
-        _separator()
+        _separator(),
       ],
     );
   }

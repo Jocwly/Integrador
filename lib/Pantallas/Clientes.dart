@@ -31,7 +31,8 @@ class Clientes extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: StreamBuilder<QuerySnapshot>(
-          stream: clientesRef.orderBy('createdAt', descending: false).snapshots(),
+          stream:
+              clientesRef.orderBy('createdAt', descending: false).snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return const Center(child: Text('Error al cargar clientes'));
@@ -59,7 +60,9 @@ class Clientes extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => Cliente(clienteId: doc.id), // 👈 pasamos el id
+                        builder:
+                            (_) =>
+                                Cliente(clienteId: doc.id), // 👈 pasamos el id
                       ),
                     );
                   },

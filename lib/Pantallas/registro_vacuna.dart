@@ -93,8 +93,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
       _errPersonal = _personalCtrl.text.trim().isEmpty;
     });
 
-    final hayErrores =
-        _errNombre || _errLote || _errDosis || _errPersonal;
+    final hayErrores = _errNombre || _errLote || _errDosis || _errPersonal;
 
     if (hayErrores) return;
 
@@ -107,45 +106,47 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
 
     await showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("¡Vacuna registrada! 🎉"),
-        content: Text(
-          "Vacuna: ${_nombreVacunaCtrl.text}\n"
-          "Lote: ${_loteCtrl.text}\n"
-          "Dosis: ${_dosisCtrl.text}\n"
-          "Aplicador: ${_personalCtrl.text}\n\n"
-          "Aplicación: ${_format(_fechaAplicacion)}\n"
-          "Próxima dosis: ${_fechaProxima == null ? 'No aplica' : _format(_fechaProxima)}",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cerrar"),
+      builder:
+          (_) => AlertDialog(
+            title: const Text("¡Vacuna registrada! 🎉"),
+            content: Text(
+              "Vacuna: ${_nombreVacunaCtrl.text}\n"
+              "Lote: ${_loteCtrl.text}\n"
+              "Dosis: ${_dosisCtrl.text}\n"
+              "Aplicador: ${_personalCtrl.text}\n\n"
+              "Aplicación: ${_format(_fechaAplicacion)}\n"
+              "Próxima dosis: ${_fechaProxima == null ? 'No aplica' : _format(_fechaProxima)}",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cerrar"),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   Future<void> _cancelar() async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("¿Cancelar registro?"),
-        content: const Text(
-          "Se perderá la información. ¿Seguro que quieres cancelar?",
-        ),
-        actions: [
-          TextButton(
-            child: const Text("Seguir editando"),
-            onPressed: () => Navigator.pop(context, false),
+      builder:
+          (_) => AlertDialog(
+            title: const Text("¿Cancelar registro?"),
+            content: const Text(
+              "Se perderá la información. ¿Seguro que quieres cancelar?",
+            ),
+            actions: [
+              TextButton(
+                child: const Text("Seguir editando"),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              ElevatedButton(
+                child: const Text("Sí, cancelar"),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
           ),
-          ElevatedButton(
-            child: const Text("Sí, cancelar"),
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true && mounted) Navigator.pop(context);
@@ -153,7 +154,6 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
 
   @override
   Widget build(BuildContext context) {
-    final azulFuerte = const Color(0xFF2A74D9);
     final botonAzulOscuro = const Color(0xFF0B1446);
     final botonGris = const Color(0xFF9FA2B4);
 
@@ -207,23 +207,31 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 430),
                   child: SingleChildScrollView(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     child: Column(
                       children: [
                         // Foto
                         Container(
                           decoration: BoxDecoration(
-                            border: Border.all(color: const Color.fromARGB(255, 0, 20, 66), width: 3),
+                            border: Border.all(
+                              color: const Color.fromARGB(255, 0, 20, 66),
+                              width: 3,
+                            ),
                             shape: BoxShape.circle,
                           ),
                           padding: const EdgeInsets.all(4),
                           child: CircleAvatar(
                             radius: 50,
-                            backgroundImage: foto != null
-                                ? NetworkImage(foto)
-                                : const AssetImage('assets/images/perro.jpg')
-                                    as ImageProvider,
+                            backgroundImage:
+                                foto != null
+                                    ? NetworkImage(foto)
+                                    : const AssetImage(
+                                          'assets/images/perro.jpg',
+                                        )
+                                        as ImageProvider,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -274,7 +282,10 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
 
                               _label("Fecha de aplicación"),
                               const SizedBox(height: 4),
-                              _dateField(_fechaAplicacion, _pickFechaAplicacion),
+                              _dateField(
+                                _fechaAplicacion,
+                                _pickFechaAplicacion,
+                              ),
                               const SizedBox(height: 18),
 
                               Row(
@@ -286,9 +297,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                       _errLote,
                                       onChanged: () {
                                         if (_errLote &&
-                                            _loteCtrl.text
-                                                .trim()
-                                                .isNotEmpty) {
+                                            _loteCtrl.text.trim().isNotEmpty) {
                                           setState(() => _errLote = false);
                                         }
                                       },
@@ -302,9 +311,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                       _errDosis,
                                       onChanged: () {
                                         if (_errDosis &&
-                                            _dosisCtrl.text
-                                                .trim()
-                                                .isNotEmpty) {
+                                            _dosisCtrl.text.trim().isNotEmpty) {
                                           setState(() => _errDosis = false);
                                         }
                                       },
@@ -321,9 +328,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                 showError: _errPersonal,
                                 onChanged: () {
                                   if (_errPersonal &&
-                                      _personalCtrl.text
-                                          .trim()
-                                          .isNotEmpty) {
+                                      _personalCtrl.text.trim().isNotEmpty) {
                                     setState(() => _errPersonal = false);
                                   }
                                 },
@@ -343,11 +348,11 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                       onPressed: _guardar,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: botonAzulOscuro,
-                                        minimumSize:
-                                            const Size.fromHeight(52),
+                                        minimumSize: const Size.fromHeight(52),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                       ),
                                       child: const Text(
@@ -365,11 +370,11 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                       onPressed: _cancelar,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: botonGris,
-                                        minimumSize:
-                                            const Size.fromHeight(52),
+                                        minimumSize: const Size.fromHeight(52),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                       ),
                                       child: const Text(
@@ -401,13 +406,13 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
   // --------- Widgets de apoyo ---------
 
   Widget _label(String text) => Text(
-        text,
-        style: const TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 14,
-          color: Colors.black87,
-        ),
-      );
+    text,
+    style: const TextStyle(
+      fontWeight: FontWeight.w700,
+      fontSize: 14,
+      color: Colors.black87,
+    ),
+  );
 
   /// Campo con borde azul + mensaje rojo CENTRADO verticalmente
   Widget _inputText(
@@ -424,10 +429,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: borderColor,
-          width: 1.6,
-        ),
+        border: Border.all(color: borderColor, width: 1.6),
       ),
       child: Stack(
         children: [
@@ -438,9 +440,10 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
               onChanged: (_) => onChanged(),
               decoration: InputDecoration(
                 border: InputBorder.none,
-                prefixIcon: icon != null
-                    ? Icon(icon, size: 20, color: Colors.black87)
-                    : null,
+                prefixIcon:
+                    icon != null
+                        ? Icon(icon, size: 20, color: Colors.black87)
+                        : null,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 12,
@@ -457,10 +460,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                   padding: EdgeInsets.only(left: leftPadding),
                   child: const Text(
                     "Este campo es requerido",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.red,
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.red),
                   ),
                 ),
               ),
@@ -475,42 +475,37 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
     TextEditingController controller,
     bool showError, {
     required VoidCallback onChanged,
-  }) =>
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _label(label),
-          const SizedBox(height: 4),
-          _inputText(
-            controller,
-            showError: showError,
-            onChanged: onChanged,
-          ),
-        ],
-      );
+  }) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _label(label),
+      const SizedBox(height: 4),
+      _inputText(controller, showError: showError, onChanged: onChanged),
+    ],
+  );
 
   Widget _dateField(DateTime? value, VoidCallback onTap) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(12),
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.calendar_today_rounded,
+            color: Colors.black87,
+            size: 18,
           ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.calendar_today_rounded,
-                color: Colors.black87,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                value == null ? "Seleccionar" : _format(value),
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
-              ),
-            ],
+          const SizedBox(width: 8),
+          Text(
+            value == null ? "Seleccionar" : _format(value),
+            style: const TextStyle(fontSize: 14, color: Colors.black87),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }

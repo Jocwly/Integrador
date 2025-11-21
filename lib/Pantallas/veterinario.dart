@@ -57,32 +57,33 @@ class Veterinario extends StatelessWidget {
                 );
               }
             },
-            itemBuilder: (context) => const [
-              PopupMenuItem<int>(
-                enabled: false,
-                child: Row(
-                  children: [
-                    Icon(Icons.person, color: Colors.black),
-                    SizedBox(width: 8),
-                    Text('Dr. José'),
-                  ],
-                ),
-              ),
-              PopupMenuDivider(),
-              PopupMenuItem<int>(
-                value: 1,
-                child: Row(
-                  children: [
-                    Icon(Icons.exit_to_app, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text(
-                      'Cerrar Sesión',
-                      style: TextStyle(color: Colors.red),
+            itemBuilder:
+                (context) => const [
+                  PopupMenuItem<int>(
+                    enabled: false,
+                    child: Row(
+                      children: [
+                        Icon(Icons.person, color: Colors.black),
+                        SizedBox(width: 8),
+                        Text('Dr. José'),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ],
+                  ),
+                  PopupMenuDivider(),
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Row(
+                      children: [
+                        Icon(Icons.exit_to_app, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text(
+                          'Cerrar Sesión',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
           ),
           const SizedBox(width: 6),
         ],
@@ -128,8 +129,7 @@ class Veterinario extends StatelessWidget {
                     builder: (context, snapshot) {
                       String totalClientes = '0';
                       if (snapshot.hasData) {
-                        totalClientes =
-                            snapshot.data!.docs.length.toString();
+                        totalClientes = snapshot.data!.docs.length.toString();
                       }
 
                       return GestureDetector(
@@ -258,10 +258,7 @@ class _InfoCard extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 subtitulo,
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 13,
-                ),
+                style: const TextStyle(color: Colors.black87, fontSize: 13),
               ),
             ],
           );

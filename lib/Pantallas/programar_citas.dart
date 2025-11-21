@@ -68,9 +68,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   // 🔹 Guardar cita en Firestore
   Future<void> guardarCita() async {
     if (fechaSeleccionada == null || horaSeleccionada == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecciona fecha y hora')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Selecciona fecha y hora')));
       return;
     }
 
@@ -88,13 +88,14 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       return;
     }
 
-    final mascotaRef = FirebaseFirestore.instance
-        .collection('clientes')
-        .doc(widget.clienteId)
-        .collection('mascotas')
-        .doc(widget.mascotaId)
-        .collection('citas')
-        .doc();
+    final mascotaRef =
+        FirebaseFirestore.instance
+            .collection('clientes')
+            .doc(widget.clienteId)
+            .collection('mascotas')
+            .doc(widget.mascotaId)
+            .collection('citas')
+            .doc();
 
     final fechaCompleta = DateTime(
       fechaSeleccionada!.year,
@@ -110,6 +111,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       'motivo': motivoController.text,
       'personal': personal,
       'creado': Timestamp.now(),
+
+      'completada': false,
+      'estado': 'Programada',
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -122,7 +126,6 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   @override
   Widget build(BuildContext context) {
     final azulSuave = const Color(0xFFD6E1F7);
-    final azulFuerte = const Color.fromARGB(103, 88, 128, 184);
 
     final mascotaRef = FirebaseFirestore.instance
         .collection('clientes')
@@ -169,7 +172,10 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                 // FOTO + NOMBRE
                 Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: const Color.fromARGB(255, 0, 20, 66), width: 3),
+                    border: Border.all(
+                      color: const Color.fromARGB(255, 0, 20, 66),
+                      width: 3,
+                    ),
                     shape: BoxShape.circle,
                   ),
                   padding: const EdgeInsets.all(4),
@@ -229,10 +235,12 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                           Expanded(
                             child: _buildPickerField(
                               icon: Icons.calendar_today_rounded,
-                              text: fechaSeleccionada != null
-                                  ? DateFormat('dd/MM/yyyy')
-                                      .format(fechaSeleccionada!)
-                                  : 'Seleccionar',
+                              text:
+                                  fechaSeleccionada != null
+                                      ? DateFormat(
+                                        'dd/MM/yyyy',
+                                      ).format(fechaSeleccionada!)
+                                      : 'Seleccionar',
                               onTap: () => _seleccionarFecha(context),
                             ),
                           ),
@@ -240,9 +248,10 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                           Expanded(
                             child: _buildPickerField(
                               icon: Icons.access_time_rounded,
-                              text: horaSeleccionada != null
-                                  ? horaSeleccionada!.format(context)
-                                  : 'Seleccionar',
+                              text:
+                                  horaSeleccionada != null
+                                      ? horaSeleccionada!.format(context)
+                                      : 'Seleccionar',
                               onTap: () => _seleccionarHora(context),
                             ),
                           ),
@@ -268,10 +277,13 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                             child: ElevatedButton(
                               onPressed: guardarCita,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color.fromARGB(255, 13, 0, 60),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  13,
+                                  0,
+                                  60,
                                 ),
+                                minimumSize: const Size.fromHeight(52),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -290,11 +302,8 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                             child: ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Colors.grey,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
+                                backgroundColor: Colors.grey,
+                                minimumSize: const Size.fromHeight(52),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -353,18 +362,12 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       child: DropdownButtonFormField<String>(
         value: value, // puede ser null → muestra hint
         hint: const Text('Seleccionar'),
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-        ),
+        decoration: const InputDecoration(border: InputBorder.none),
         icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black87),
-        items: items
-            .map(
-              (item) => DropdownMenuItem(
-                value: item,
-                child: Text(item),
-              ),
-            )
-            .toList(),
+        items:
+            items
+                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+                .toList(),
         onChanged: onChanged,
       ),
     );

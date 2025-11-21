@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:login/Pantallas/Mascota_vet.dart';                   // PerfilMascota
-import 'package:login/Pantallas/registrar_mascota.dart';  // RegistrarMascota
+import 'package:login/Pantallas/Mascota_vet.dart'; // PerfilMascota
+import 'package:login/Pantallas/registrar_mascota.dart'; // RegistrarMascota
 
 class Cliente extends StatelessWidget {
   final String clienteId;
@@ -10,8 +10,9 @@ class Cliente extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final clienteRef =
-        FirebaseFirestore.instance.collection('clientes').doc(clienteId);
+    final clienteRef = FirebaseFirestore.instance
+        .collection('clientes')
+        .doc(clienteId);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
@@ -41,13 +42,10 @@ class Cliente extends StatelessWidget {
                       );
                     }
                     if (!snapshot.hasData || !snapshot.data!.exists) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
+                      return const Center(child: CircularProgressIndicator());
                     }
 
-                    final data =
-                        snapshot.data!.data() as Map<String, dynamic>;
+                    final data = snapshot.data!.data() as Map<String, dynamic>;
                     final nombre = data['nombre'] ?? 'Cliente';
                     final direccion = data['direccion'] ?? 'Sin dirección';
                     final telefono = data['telefono'] ?? 'Sin teléfono';
@@ -95,7 +93,9 @@ class _CardContenido extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(26), // más redondeado, estilo mockup
+        borderRadius: BorderRadius.circular(
+          26,
+        ), // más redondeado, estilo mockup
         boxShadow: const [
           BoxShadow(
             color: Color(0x1A000000),
@@ -133,25 +133,16 @@ class _CardContenido extends StatelessWidget {
           // Dirección
           const Text(
             'Dirección:',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 15,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
           ),
           const SizedBox(height: 6),
-          _PillInfo(
-            icon: Icons.home_filled,
-            text: direccion,
-          ),
+          _PillInfo(icon: Icons.home_filled, text: direccion),
           const SizedBox(height: 16),
 
           // Teléfono
           const Text(
             'Teléfono',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 15,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
           ),
           const SizedBox(height: 6),
           _PillInfo(icon: Icons.phone, text: telefono),
@@ -160,10 +151,7 @@ class _CardContenido extends StatelessWidget {
           // Mascotas
           const Text(
             'Mascotas',
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
           ),
           const SizedBox(height: 12),
 
@@ -201,10 +189,8 @@ class _CardContenido extends StatelessWidget {
                 child: Row(
                   children: [
                     ...docs.map((doc) {
-                      final data =
-                          doc.data() as Map<String, dynamic>;
-                      final nombreMascota =
-                          data['nombre'] ?? 'Mascota';
+                      final data = doc.data() as Map<String, dynamic>;
+                      final nombreMascota = data['nombre'] ?? 'Mascota';
                       final foto = data['foto'];
 
                       return GestureDetector(
@@ -213,10 +199,11 @@ class _CardContenido extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => PerfilMascota(
-                                clienteId: clienteId,
-                                mascotaId: doc.id,
-                              ),
+                              builder:
+                                  (_) => PerfilMascota(
+                                    clienteId: clienteId,
+                                    mascotaId: doc.id,
+                                  ),
                             ),
                           );
                         },
@@ -234,11 +221,12 @@ class _CardContenido extends StatelessWidget {
                                 ),
                                 child: CircleAvatar(
                                   radius: 34,
-                                  backgroundImage: foto != null
-                                      ? NetworkImage(foto)
-                                      : const NetworkImage(
-                                          'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300',
-                                        ),
+                                  backgroundImage:
+                                      foto != null
+                                          ? NetworkImage(foto)
+                                          : const NetworkImage(
+                                            'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300',
+                                          ),
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -331,10 +319,7 @@ class _BotonAgregarMascota extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.black,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFF7FA3FF),
-                  width: 4,
-                ),
+                border: Border.all(color: const Color(0xFF7FA3FF), width: 4),
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x33000000),
@@ -343,11 +328,7 @@ class _BotonAgregarMascota extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 36,
-              ),
+              child: const Icon(Icons.add, color: Colors.white, size: 36),
             ),
           ),
           const SizedBox(height: 6),
@@ -356,10 +337,7 @@ class _BotonAgregarMascota extends StatelessWidget {
             child: Text(
               'Añadir\nMascota',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
         ],

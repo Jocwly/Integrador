@@ -42,7 +42,7 @@ class _LoginState extends State<Login> {
                 backgroundColor: pillBlue,
                 backgroundImage: const AssetImage(
                   'assets/images/petcare_logo.jpg',
-                ), 
+                ),
               ),
               const SizedBox(height: 16),
               const Text(

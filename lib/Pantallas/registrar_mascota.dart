@@ -94,8 +94,9 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -134,16 +135,18 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                 child: CircleAvatar(
                   radius: 45,
                   backgroundColor: const Color(0xFFE0E0E0),
-                  backgroundImage: _imagenSeleccionada != null
-                      ? FileImage(_imagenSeleccionada!)
-                      : null,
-                  child: _imagenSeleccionada == null
-                      ? const Icon(
-                          Icons.add_photo_alternate_outlined,
-                          size: 34,
-                          color: Colors.black87,
-                        )
-                      : null,
+                  backgroundImage:
+                      _imagenSeleccionada != null
+                          ? FileImage(_imagenSeleccionada!)
+                          : null,
+                  child:
+                      _imagenSeleccionada == null
+                          ? const Icon(
+                            Icons.add_photo_alternate_outlined,
+                            size: 34,
+                            color: Colors.black87,
+                          )
+                          : null,
                 ),
               ),
             ),
@@ -170,19 +173,19 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: azul, width: 2),
                 ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
               ),
               value: especie,
-              items: especies
-                  .map(
-                    (e) =>
-                        DropdownMenuItem<String>(
-                          value: e,
-                          child: Text(e),
-                        ),
-                  )
-                  .toList(),
+              items:
+                  especies
+                      .map(
+                        (e) =>
+                            DropdownMenuItem<String>(value: e, child: Text(e)),
+                      )
+                      .toList(),
               onChanged: (v) => setState(() => especie = v),
             ),
 
@@ -258,8 +261,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                               horizontal: -4,
                               vertical: -4,
                             ),
-                            onChanged: (v) =>
-                                setState(() => esterilizado = v),
+                            onChanged: (v) => setState(() => esterilizado = v),
                           ),
                           const Text("Sí", style: TextStyle(fontSize: 13)),
                         ],
@@ -274,8 +276,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                               horizontal: -4,
                               vertical: -4,
                             ),
-                            onChanged: (v) =>
-                                setState(() => esterilizado = v),
+                            onChanged: (v) => setState(() => esterilizado = v),
                           ),
                           const Text("No", style: TextStyle(fontSize: 13)),
                         ],
