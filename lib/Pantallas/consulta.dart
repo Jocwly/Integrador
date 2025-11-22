@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 class ConsultaMedica extends StatefulWidget {
   final String clienteId;
@@ -16,7 +17,6 @@ class ConsultaMedica extends StatefulWidget {
   State<ConsultaMedica> createState() => _ConsultaMedicaState();
 }
 
-/// Controladores para cada bloque de medicación
 class _MedicationFields {
   final TextEditingController nombre = TextEditingController();
   final TextEditingController dosis = TextEditingController();
@@ -31,13 +31,11 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
   final _tempCtrl = TextEditingController();
   final _diagnosisCtrl = TextEditingController();
 
-  // Lista dinámica de medicamentos
   final List<_MedicationFields> _medicaciones = [_MedicationFields()];
 
-  final azulSuave = const Color(0xFFD6E1F7);
-  final azulFuerte = const Color(0xFF2A74D9);
+  final Color azulSuave = const Color(0xFFD6E1F7);
+  final Color azulFuerte = const Color(0xFF2A74D9);
 
-  // flags de error
   bool _errMotivo = false;
   bool _errPeso = false;
   bool _errTemp = false;
@@ -50,7 +48,6 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
   @override
   void initState() {
     super.initState();
-    // Fecha por default: hoy, formato dd/MM/yyyy
     _dateCtrl.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
   }
 
@@ -71,14 +68,13 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
   }
 
   OutlineInputBorder _softBorder() => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: azulFuerte.withOpacity(0.4), width: 1.2),
-      );
-
+    borderRadius: BorderRadius.circular(10),
+    borderSide: BorderSide(color: azulFuerte.withOpacity(0.5), width: 1.5),
+  );
   OutlineInputBorder _grayBorder() => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Colors.transparent, width: 0),
-      );
+    borderRadius: BorderRadius.circular(10),
+    borderSide: BorderSide(color: azulFuerte.withOpacity(0.5), width: 1.5),
+  );
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -94,9 +90,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     }
   }
 
-  // ---------- GUARDAR (misma lógica que antes + validaciones visuales) ----------
   Future<void> _onGuardar() async {
-    // Validaciones de campos requeridos
     final firstMed = _medicaciones.first;
 
     setState(() {
@@ -111,7 +105,8 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
       _errMedDuracion = firstMed.duracion.text.trim().isEmpty;
     });
 
-    final hayErrores = _errMotivo ||
+    final hayErrores =
+        _errMotivo ||
         _errPeso ||
         _errTemp ||
         _errDiag ||
@@ -133,8 +128,6 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
           .doc(widget.clienteId)
           .collection('mascotas')
           .doc(widget.mascotaId);
-
-      // Construir lista de medicaciones (solo las que tengan algo escrito)
       final List<Map<String, String>> meds = [];
       for (final m in _medicaciones) {
         final nombre = m.nombre.text.trim();
@@ -143,7 +136,10 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
         final duracion = m.duracion.text.trim();
 
         final tieneAlgo =
-            nombre.isNotEmpty || dosis.isNotEmpty || frecuencia.isNotEmpty || duracion.isNotEmpty;
+            nombre.isNotEmpty ||
+            dosis.isNotEmpty ||
+            frecuencia.isNotEmpty ||
+            duracion.isNotEmpty;
 
         if (tieneAlgo) {
           meds.add({
@@ -154,8 +150,6 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
           });
         }
       }
-
-      // Para compatibilidad con tu lógica anterior: tomamos el primer medicamento
       String medicamentoPrincipal = '';
       String dosisPrincipal = '';
       String frecuenciaPrincipal = '';
@@ -204,35 +198,44 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     Navigator.pop(context);
   }
 
-  // Recuadro base (gris o blanco), icono negro
   InputDecoration _inputDecoration({
     String? hint,
     IconData? icon,
     bool gray = false,
     bool error = false,
+    String? suffixText,
   }) {
-    final fillColor = gray ? const Color(0xFFE6E6E6) : Colors.white;
+    final fillColor = Colors.white;
 
-    final border = error
-        ? OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Colors.red, width: 1.6),
-          )
-        : (gray ? _grayBorder() : _softBorder());
+    final baseBorder = gray ? _grayBorder() : _softBorder();
+
+    final border =
+        error
+            ? OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Colors.red, width: 1.6),
+            )
+            : baseBorder;
 
     return InputDecoration(
-      prefixIcon: icon != null ? Icon(icon, color: Colors.black) : null,
+      prefixIcon:
+          icon != null ? Icon(icon, color: Colors.black54, size: 20) : null,
       hintText: hint,
       filled: true,
       fillColor: fillColor,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // más alto
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       enabledBorder: border,
       focusedBorder: border,
+      border: InputBorder.none,
+      suffixText: suffixText, // APARECE KG AUTOMATICAMENT
+      suffixStyle: const TextStyle(
+        fontSize: 14,
+        color: Colors.black87,
+        fontWeight: FontWeight.w500,
+      ),
     );
   }
 
-  // TextField con overlay de "Este campo es requerido"
   Widget _buildTextFieldWithError({
     required TextEditingController controller,
     required String hint,
@@ -241,12 +244,16 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     bool showError = false,
     int maxLines = 1,
     ValueChanged<String>? onChanged,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    String? suffixText,
   }) {
     final decoration = _inputDecoration(
       hint: showError ? '' : hint,
       icon: icon,
       gray: gray,
       error: showError,
+      suffixText: suffixText,
     );
 
     final field = TextField(
@@ -255,25 +262,33 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
       decoration: decoration,
       style: TextStyle(
         color: showError ? Colors.transparent : Colors.black,
+        fontSize: 14,
       ),
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       onChanged: onChanged,
     );
 
-    final double? height = maxLines == 1 ? 56 : null; // recuadros un poco más grandes
+    final double? height = maxLines == 1 ? 52 : null;
 
     if (!showError) {
       return SizedBox(height: height, child: field);
     }
-
     return SizedBox(
       height: height,
       child: Stack(
-        alignment: Alignment.center,
-        children: const [
-          // field se dibuja abajo, pero como el texto es transparente
-          // solo se ve el borde y el mensaje centrado.
-          // ignore: prefer_const_constructors
-          Positioned.fill(child: IgnorePointer(child: SizedBox())), // placeholder
+        children: [
+          field,
+          const Center(
+            child: Text(
+              'Este campo es requerido',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -299,15 +314,16 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
+        centerTitle: true,
         title: const Text(
           'Nueva consulta médica',
           style: TextStyle(
+            fontFamily: 'Roboto',
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Color.fromARGB(255, 0, 0, 0),
           ),
         ),
-        centerTitle: true,
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: mascotaRef.snapshots(),
@@ -337,13 +353,15 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                   ),
                   padding: const EdgeInsets.all(4),
                   child: CircleAvatar(
-                    radius: 48,
-                    backgroundImage: (fotoUrl != null && fotoUrl!.isNotEmpty)
-                        ? NetworkImage(fotoUrl!)
-                        : const AssetImage('')
+                    radius: 50,
+                    backgroundImage:
+                        (fotoUrl != null && (fotoUrl as String).isNotEmpty)
+                            ? NetworkImage(fotoUrl)
+                            : const AssetImage('assets/images/perro.jpg')
+                                as ImageProvider,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Container(
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 13, 0, 60),
@@ -363,139 +381,172 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Fecha (pill gris, no requerida)
-                _campo(
-                  'Fecha:',
-                  _dateCtrl,
-                  icon: Icons.event_outlined,
-                  onTap: _pickDate,
-                  grayField: true,
-                  showError: false,
-                ),
-
-                // Motivo (requerido)
-                _campo(
-                  'Motivo de la consulta',
-                  _reasonCtrl,
-                  showError: _errMotivo,
-                  onChanged: (v) {
-                    if (_errMotivo && v.trim().isNotEmpty) {
-                      setState(() => _errMotivo = false);
-                    }
-                  },
-                ),
-
-                // Peso / Temperatura (requeridos)
-                Row(
-                  children: [
-                    Expanded(
-                      child: _campo(
-                        'Peso',
-                        _weightCtrl,
-                        icon: Icons.monitor_weight,
-                        grayField: true,
-                        showError: _errPeso,
-                        onChanged: (v) {
-                          if (_errPeso && v.trim().isNotEmpty) {
-                            setState(() => _errPeso = false);
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _campo(
-                        'Temperatura',
-                        _tempCtrl,
-                        icon: Icons.thermostat_sharp,
-                        grayField: true,
-                        showError: _errTemp,
-                        onChanged: (v) {
-                          if (_errTemp && v.trim().isNotEmpty) {
-                            setState(() => _errTemp = false);
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Diagnóstico (requerido)
-                _campo(
-                  'Diagnóstico',
-                  _diagnosisCtrl,
-                  maxLines: 3,
-                  showError: _errDiag,
-                  onChanged: (v) {
-                    if (_errDiag && v.trim().isNotEmpty) {
-                      setState(() => _errDiag = false);
-                    }
-                  },
-                ),
-
-                const SizedBox(height: 6),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Medicación prescrita',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      color: Colors.black87,
-                    ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: azulSuave,
+                    borderRadius: BorderRadius.circular(18),
                   ),
-                ),
-                const SizedBox(height: 10),
-
-                // Sección dinámica de medicación
-                _buildMedicacionesSection(),
-
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _onGuardar,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 13, 0, 60),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _campo(
+                        'Fecha:',
+                        _dateCtrl,
+                        icon: Icons.event_outlined,
+                        onTap: _pickDate,
+                        grayField: true,
+                        showError: false,
+                      ),
+                      _campo(
+                        'Motivo de la consulta',
+                        _reasonCtrl,
+                        showError: _errMotivo,
+                        onChanged: (v) {
+                          if (_errMotivo && v.trim().isNotEmpty) {
+                            setState(() => _errMotivo = false);
+                          }
+                        },
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _campo(
+                              'Peso',
+                              _weightCtrl,
+                              icon: Icons.monitor_weight,
+                              grayField: true,
+                              showError: _errPeso,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'[0-9.]'),
+                                ),
+                              ],
+                              suffixText:
+                                  'kg', //  AQUÍ APARECEN LOS KILOS EN EL CAMPO
+                              onChanged: (v) {
+                                if (_errPeso && v.trim().isNotEmpty) {
+                                  setState(() => _errPeso = false);
+                                }
+                              },
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          'Guardar',
+
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _campo(
+                              'Temperatura',
+                              _tempCtrl,
+                              icon: Icons.thermostat_sharp,
+                              grayField: true,
+                              showError: _errTemp,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'[0-9.]'),
+                                ),
+                              ],
+                              suffixText: '°C',
+                              onChanged: (v) {
+                                if (_errTemp && v.trim().isNotEmpty) {
+                                  setState(() => _errTemp = false);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      _campo(
+                        'Diagnóstico',
+                        _diagnosisCtrl,
+                        maxLines: 3,
+                        showError: _errDiag,
+                        onChanged: (v) {
+                          if (_errDiag && v.trim().isNotEmpty) {
+                            setState(() => _errDiag = false);
+                          }
+                        },
+                      ),
+
+                      const SizedBox(height: 6),
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Medicación prescrita',
                           style: TextStyle(
-                            color: Color.fromARGB(255, 255, 255, 255),
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            color: Colors.black87,
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _onCancelar,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 148, 148, 148),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                      const SizedBox(height: 10),
+
+                      _buildMedicacionesSection(),
+
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: _onGuardar,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  13,
+                                  0,
+                                  60,
+                                ),
+                                minimumSize: const Size.fromHeight(52),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: const Text(
+                                'Guardar',
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 255, 255, 255),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          'Cancelar',
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 0, 0, 0),
-                            fontWeight: FontWeight.bold,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: _onCancelar,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  148,
+                                  148,
+                                  148,
+                                ),
+                                minimumSize: const Size.fromHeight(52),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: const Text(
+                                'Cancelar',
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 0, 0, 0),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -504,8 +555,6 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
       ),
     );
   }
-
-  // --------- CAMPOS GENERALES (motivo, peso, etc.) ---------
 
   Widget _campo(
     String label,
@@ -516,9 +565,12 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     bool grayField = false,
     bool showError = false,
     ValueChanged<String>? onChanged,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    String? suffixText,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -530,6 +582,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
               color: Colors.black87,
             ),
           ),
+          const SizedBox(height: 6),
           GestureDetector(
             onTap: onTap,
             child: AbsorbPointer(
@@ -542,6 +595,9 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                 showError: showError,
                 maxLines: maxLines,
                 onChanged: onChanged,
+                keyboardType: keyboardType,
+                inputFormatters: inputFormatters,
+                suffixText: suffixText,
               ),
             ),
           ),
@@ -549,8 +605,6 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
       ),
     );
   }
-
-  // --------- SECCIÓN DE MEDICACIÓN DINÁMICA ---------
 
   Widget _buildMedicacionesSection() {
     return Column(
@@ -570,7 +624,10 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               foregroundColor: Colors.black,
-              textStyle: const TextStyle(fontWeight: FontWeight.w600),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
             ),
             icon: const Icon(Icons.add, size: 18, color: Colors.black),
             label: const Text('Agregar medicación'),
@@ -591,12 +648,13 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     final bool isFirst = index == 0;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Nombre del medicamento
         _buildTextFieldWithError(
           controller: med.nombre,
           hint: 'Nombre del medicamento',
           gray: true,
+          icon: Icons.medication,
           showError: isFirst && _errMedNombre,
           onChanged: (v) {
             if (isFirst && _errMedNombre && v.trim().isNotEmpty) {
@@ -605,7 +663,6 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
           },
         ),
         const SizedBox(height: 10),
-        // Dosis / Frecuencia
         Row(
           children: [
             Expanded(
@@ -613,6 +670,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                 controller: med.dosis,
                 hint: 'Dosis',
                 gray: true,
+                icon: Icons.medication_liquid,
                 showError: isFirst && _errMedDosis,
                 onChanged: (v) {
                   if (isFirst && _errMedDosis && v.trim().isNotEmpty) {
@@ -626,6 +684,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
               child: _buildTextFieldWithError(
                 controller: med.frecuencia,
                 hint: 'Frecuencia',
+                icon: Icons.timer,
                 gray: true,
                 showError: isFirst && _errMedFrecuencia,
                 onChanged: (v) {
@@ -638,11 +697,11 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
           ],
         ),
         const SizedBox(height: 10),
-        // Duración
         _buildTextFieldWithError(
           controller: med.duracion,
           hint: 'Duración',
           gray: true,
+          icon: Icons.calendar_today,
           showError: isFirst && _errMedDuracion,
           onChanged: (v) {
             if (isFirst && _errMedDuracion && v.trim().isNotEmpty) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:login/Pantallas/detalles_hm.dart';
 
 class HistorialMedico extends StatefulWidget {
   final String clienteId;
@@ -28,7 +29,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
         .collection('mascotas')
         .doc(widget.mascotaId);
 
-    final consultasRef = mascotaRef.collection('consultas'); // ✔ Corrección
+    final consultasRef = mascotaRef.collection('consultas');
 
     final azulClaro = const Color(0xffe6e8ff);
 
@@ -47,7 +48,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
         title: const Text(
           'Historial Médico',
           style: TextStyle(
-            color: Color.fromARGB(255, 0, 0, 0),
+            color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -78,7 +79,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-
+                //  Información de la mascota
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
@@ -135,7 +136,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
 
                 const SizedBox(height: 20),
 
-                // 🔍 Filtro por fecha
+                //  Filtro por fecha
                 Row(
                   children: [
                     Expanded(
@@ -191,7 +192,6 @@ class _HistorialMedicoState extends State<HistorialMedico> {
 
                 const SizedBox(height: 20),
 
-                // 📋 Resultados
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream:
@@ -213,7 +213,6 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                         return const Center(
                           child: Text(
                             "No hay resultados para la fecha seleccionada.",
-                            style: TextStyle(fontSize: 16),
                           ),
                         );
                       }
@@ -223,6 +222,8 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                         itemBuilder: (context, index) {
                           final consulta =
                               docs[index].data() as Map<String, dynamic>;
+                          final consultaId = docs[index].id;
+
                           DateTime fecha =
                               (consulta['fecha'] as Timestamp).toDate();
                           String fechaFormateada = DateFormat(
@@ -255,18 +256,45 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                 const SizedBox(height: 5),
                                 Text(
                                   "🩺 Motivo: ${consulta['motivo'] ?? '---'}",
+                                  style: TextStyle(fontSize: 17),
                                 ),
                                 Text(
                                   "🔎 Diagnóstico: ${consulta['diagnostico'] ?? '---'}",
+                                  style: TextStyle(fontSize: 17),
                                 ),
                                 Text(
                                   "💊 Medicamento: ${consulta['medicamento'] ?? '---'}",
+                                  style: TextStyle(fontSize: 17),
                                 ),
-                                Text(
-                                  "📍 Dosis: ${consulta['dosis'] ?? '---'} | Frec: ${consulta['frecuencia'] ?? '---'}",
-                                ),
-                                Text(
-                                  "🕒 Duración: ${consulta['duracion'] ?? '---'}",
+
+                                const SizedBox(height: 10),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (_) => ConsultaMedicaDetalles(
+                                                clienteId: widget.clienteId,
+                                                mascotaId: widget.mascotaId,
+                                                consultaId: consultaId,
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF2A74D9),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      "DETALLES",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),

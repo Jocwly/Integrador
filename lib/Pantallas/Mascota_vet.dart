@@ -219,7 +219,16 @@ class PerfilMascota extends StatelessWidget {
                                 icon: Icons.assignment_outlined,
                                 label: "Historial\nMédico",
                                 onTap: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context)=> HistorialMedico(clienteId: clienteId, mascotaId: mascotaId)));
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => HistorialMedico(
+                                            clienteId: clienteId,
+                                            mascotaId: mascotaId,
+                                          ),
+                                    ),
+                                  );
                                 },
                               ),
                             ],

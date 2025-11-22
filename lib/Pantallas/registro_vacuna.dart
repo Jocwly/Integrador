@@ -33,6 +33,12 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
   bool _errDosis = false;
   bool _errPersonal = false;
 
+  // Colores de estilo
+  final Color azulSuave = const Color(0xFFD6E1F7);
+  final Color azulBorde = const Color(0xFF2A74D9);
+  final Color botonAzulOscuro = const Color(0xFF0B1446);
+  final Color botonGris = const Color(0xFF9FA2B4);
+
   @override
   void initState() {
     super.initState();
@@ -154,9 +160,6 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
 
   @override
   Widget build(BuildContext context) {
-    final botonAzulOscuro = const Color(0xFF0B1446);
-    final botonGris = const Color(0xFF9FA2B4);
-
     final mascotaRef = FirebaseFirestore.instance
         .collection('clientes')
         .doc(widget.clienteId)
@@ -260,135 +263,149 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                         // -------- FORMULARIO --------
                         Form(
                           key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _label("Nombre de la vacuna"),
-                              const SizedBox(height: 4),
-                              _inputText(
-                                _nombreVacunaCtrl,
-                                showError: _errNombre,
-                                icon: Icons.vaccines_outlined,
-                                onChanged: () {
-                                  if (_errNombre &&
-                                      _nombreVacunaCtrl.text
-                                          .trim()
-                                          .isNotEmpty) {
-                                    setState(() => _errNombre = false);
-                                  }
-                                },
-                              ),
-                              const SizedBox(height: 18),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: azulSuave,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _label("Nombre de la vacuna"),
+                                const SizedBox(height: 6),
+                                _inputText(
+                                  _nombreVacunaCtrl,
+                                  showError: _errNombre,
+                                  icon: Icons.vaccines_outlined,
+                                  onChanged: () {
+                                    if (_errNombre &&
+                                        _nombreVacunaCtrl.text
+                                            .trim()
+                                            .isNotEmpty) {
+                                      setState(() => _errNombre = false);
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 16),
 
-                              _label("Fecha de aplicación"),
-                              const SizedBox(height: 4),
-                              _dateField(
-                                _fechaAplicacion,
-                                _pickFechaAplicacion,
-                              ),
-                              const SizedBox(height: 18),
+                                _label("Fecha de aplicación"),
+                                const SizedBox(height: 6),
+                                _dateField(
+                                  _fechaAplicacion,
+                                  _pickFechaAplicacion,
+                                ),
+                                const SizedBox(height: 16),
 
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _fieldSmall(
-                                      "Lote",
-                                      _loteCtrl,
-                                      _errLote,
-                                      onChanged: () {
-                                        if (_errLote &&
-                                            _loteCtrl.text.trim().isNotEmpty) {
-                                          setState(() => _errLote = false);
-                                        }
-                                      },
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _fieldSmall(
+                                        "Lote",
+                                        _loteCtrl,
+                                        _errLote,
+                                        onChanged: () {
+                                          if (_errLote &&
+                                              _loteCtrl.text
+                                                  .trim()
+                                                  .isNotEmpty) {
+                                            setState(() => _errLote = false);
+                                          }
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: _fieldSmall(
-                                      "Dosis",
-                                      _dosisCtrl,
-                                      _errDosis,
-                                      onChanged: () {
-                                        if (_errDosis &&
-                                            _dosisCtrl.text.trim().isNotEmpty) {
-                                          setState(() => _errDosis = false);
-                                        }
-                                      },
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: _fieldSmall(
+                                        "Dosis",
+                                        _dosisCtrl,
+                                        _errDosis,
+                                        onChanged: () {
+                                          if (_errDosis &&
+                                              _dosisCtrl.text
+                                                  .trim()
+                                                  .isNotEmpty) {
+                                            setState(() => _errDosis = false);
+                                          }
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 18),
+                                  ],
+                                ),
 
-                              _label("Personal Aplicador"),
-                              const SizedBox(height: 4),
-                              _inputText(
-                                _personalCtrl,
-                                showError: _errPersonal,
-                                onChanged: () {
-                                  if (_errPersonal &&
-                                      _personalCtrl.text.trim().isNotEmpty) {
-                                    setState(() => _errPersonal = false);
-                                  }
-                                },
-                              ),
-                              const SizedBox(height: 18),
+                                const SizedBox(height: 16),
+                                _label("Personal Aplicador"),
+                                const SizedBox(height: 6),
+                                _inputText(
+                                  _personalCtrl,
+                                  showError: _errPersonal,
+                                  onChanged: () {
+                                    if (_errPersonal &&
+                                        _personalCtrl.text.trim().isNotEmpty) {
+                                      setState(() => _errPersonal = false);
+                                    }
+                                  },
+                                ),
 
-                              _label("Fecha de próxima dosis (si aplica)"),
-                              const SizedBox(height: 4),
-                              _dateField(_fechaProxima, _pickFechaProxima),
-                              const SizedBox(height: 28),
+                                const SizedBox(height: 16),
+                                _label("Fecha de próxima dosis (si aplica)"),
+                                const SizedBox(height: 6),
+                                _dateField(_fechaProxima, _pickFechaProxima),
 
-                              // Botones un poco más "anchos" (más altos)
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: _guardar,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: botonAzulOscuro,
-                                        minimumSize: const Size.fromHeight(52),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
+                                const SizedBox(height: 26),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: _guardar,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: botonAzulOscuro,
+                                          minimumSize: const Size.fromHeight(
+                                            52,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          "Guardar",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ),
-                                      child: const Text(
-                                        "Guardar",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: _cancelar,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: botonGris,
-                                        minimumSize: const Size.fromHeight(52),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: _cancelar,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: botonGris,
+                                          minimumSize: const Size.fromHeight(
+                                            52,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          "Cancelar",
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ),
-                                      child: const Text(
-                                        "Cancelar",
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -414,14 +431,14 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
     ),
   );
 
-  /// Campo con borde azul + mensaje rojo CENTRADO verticalmente
+  /// Campo con borde azul + mensaje rojo centrado verticalmente
   Widget _inputText(
     TextEditingController controller, {
     required bool showError,
     IconData? icon,
     required VoidCallback onChanged,
   }) {
-    final borderColor = showError ? Colors.red : const Color(0xFF2A74D9);
+    final borderColor = showError ? Colors.red : azulBorde.withOpacity(0.5);
     final leftPadding = icon != null ? 40.0 : 12.0;
 
     return Container(
@@ -451,7 +468,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
               ),
             ),
           ),
-          // Mensaje de error CENTRADO vertical (y alineado a la izquierda)
+          // Mensaje de error
           if (showError)
             Positioned.fill(
               child: Align(
@@ -475,22 +492,25 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
     TextEditingController controller,
     bool showError, {
     required VoidCallback onChanged,
-  }) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _label(label),
-      const SizedBox(height: 4),
-      _inputText(controller, showError: showError, onChanged: onChanged),
-    ],
-  );
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _label(label),
+        const SizedBox(height: 6),
+        _inputText(controller, showError: showError, onChanged: onChanged),
+      ],
+    );
+  }
 
   Widget _dateField(DateTime? value, VoidCallback onTap) => GestureDetector(
     onTap: onTap,
     child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.grey.shade300,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: azulBorde.withOpacity(0.5), width: 1.6),
       ),
       child: Row(
         children: [
