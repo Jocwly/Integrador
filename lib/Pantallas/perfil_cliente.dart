@@ -15,7 +15,7 @@ class Cliente extends StatelessWidget {
         .doc(clienteId);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
+      backgroundColor: const Color.fromARGB(255, 211, 209, 255),
       body: SafeArea(
         child: Stack(
           children: [

@@ -31,7 +31,8 @@ class Clientes extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: StreamBuilder<QuerySnapshot>(
-          stream: clientesRef.orderBy('createdAt', descending: false).snapshots(),
+          stream:
+              clientesRef.orderBy('createdAt', descending: false).snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return const Center(child: Text('Error al cargar clientes'));
@@ -56,7 +57,9 @@ class Clientes extends StatelessWidget {
 
                 return Dismissible(
                   key: Key(doc.id),
-                  direction: DismissDirection.endToStart, // deslizar de derecha a izquierda
+                  direction:
+                      DismissDirection
+                          .endToStart, // deslizar de derecha a izquierda
                   background: Container(
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(right: 20),
@@ -100,9 +103,7 @@ class Clientes extends StatelessWidget {
                       await clientesRef.doc(doc.id).delete();
                       // Opcional: mostrar mensaje
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Cliente "$nombre" eliminado'),
-                        ),
+                        SnackBar(content: Text('Cliente "$nombre" eliminado')),
                       );
                     } catch (e, stack) {
                       // Si algo falla, mostramos error
@@ -114,9 +115,10 @@ class Clientes extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => Cliente(
-                            clienteId: doc.id, // pasamos el id
-                          ),
+                          builder:
+                              (_) => Cliente(
+                                clienteId: doc.id, // pasamos el id
+                              ),
                         ),
                       );
                     },
@@ -144,7 +146,10 @@ class Clientes extends StatelessWidget {
                               color: Colors.black12,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.person, color: Colors.black),
+                            child: const Icon(
+                              Icons.person,
+                              color: Colors.black,
+                            ),
                           ),
                           const SizedBox(width: 14),
                           Expanded(

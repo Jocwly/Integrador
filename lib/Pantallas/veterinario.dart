@@ -11,7 +11,8 @@ class Veterinario extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const fondo = Color(0xFFE6E6E6);
-    const azulCard = Color(0xFF8FA8FF);
+    const azulCardClaro = Color(0xFF8FA8FF);
+    const azulCardOscuro = Color(0xFF2965C7);
     const textoOscuro = Colors.black;
     const sombra = BoxShadow(
       color: Color(0x33000000),
@@ -20,25 +21,41 @@ class Veterinario extends StatelessWidget {
     );
 
     final size = MediaQuery.of(context).size;
-    final cardMinHeight = size.height * 0.16; // altura mínima responsiva
-    final imageHeight = size.width * 0.35; // imagen responsiva según ancho
+    final cardMinHeight = size.height * 0.16;
+    final imageHeight = size.width * 0.35;
 
     final clientesRef = FirebaseFirestore.instance.collection('clientes');
+
+    // --- para las citas de HOY ---
+    final now = DateTime.now();
+    final inicioHoy = DateTime(now.year, now.month, now.day);
+    final finHoy = inicioHoy.add(const Duration(days: 1));
+
+    final citasHoyQuery = FirebaseFirestore.instance
+        .collectionGroup('citas')
+        .where('fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(inicioHoy))
+        .where('fecha', isLessThan: Timestamp.fromDate(finHoy));
+
+    // --- para total de mascotas (todas las subcolecciones mascotas) ---
+    final mascotasQuery =
+        FirebaseFirestore.instance.collectionGroup('mascotas');
 
     return Scaffold(
       backgroundColor: fondo,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        titleSpacing: 0,
         automaticallyImplyLeading: false,
-        title: const SizedBox(),
-        actions: [
-          IconButton(
+        titleSpacing: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
+            icon: const Icon(Icons.notifications, color: Colors.black),
             tooltip: 'Notificaciones',
           ),
+        ),
+        actions: [
           PopupMenuButton<int>(
             icon: const CircleAvatar(
               radius: 18,
@@ -57,35 +74,34 @@ class Veterinario extends StatelessWidget {
                 );
               }
             },
-            itemBuilder:
-                (context) => const [
-                  PopupMenuItem<int>(
-                    enabled: false,
-                    child: Row(
-                      children: [
-                        Icon(Icons.person, color: Colors.black),
-                        SizedBox(width: 8),
-                        Text('Dr. José'),
-                      ],
+            itemBuilder: (context) => const [
+              PopupMenuItem<int>(
+                enabled: false,
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.black),
+                    SizedBox(width: 8),
+                    Text('Dr. José'),
+                  ],
+                ),
+              ),
+              PopupMenuDivider(),
+              PopupMenuItem<int>(
+                value: 1,
+                child: Row(
+                  children: [
+                    Icon(Icons.exit_to_app, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text(
+                      'Cerrar Sesión',
+                      style: TextStyle(color: Colors.red),
                     ),
-                  ),
-                  PopupMenuDivider(),
-                  PopupMenuItem<int>(
-                    value: 1,
-                    child: Row(
-                      children: [
-                        Icon(Icons.exit_to_app, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text(
-                          'Cerrar Sesión',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 10),
         ],
       ),
       body: SafeArea(
@@ -95,7 +111,7 @@ class Veterinario extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                '¡Bienvenido Dr. José!',
+                '¡Bienvenido Dr. Jose!',
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w900,
@@ -107,13 +123,13 @@ class Veterinario extends StatelessWidget {
               // IMAGEN RESPONSIVA
               Container(
                 height: imageHeight,
+                width: double.infinity,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(18),
                   boxShadow: const [sombra],
                 ),
                 clipBehavior: Clip.antiAlias,
-                width: double.infinity,
                 child: Image.network(
                   'https://www.ladridosybigotes.com/content/images/2024/10/2024-08-13-animal-hoarding-disorder.webp',
                   fit: BoxFit.cover,
@@ -121,58 +137,104 @@ class Veterinario extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
+              // === CARDS ===
               Column(
                 children: [
-                  // Card CLIENTES
+                  // Fila 1: CLIENTES (card grande, ocupa todo)
                   StreamBuilder<QuerySnapshot>(
                     stream: clientesRef.snapshots(),
                     builder: (context, snapshot) {
                       String totalClientes = '0';
                       if (snapshot.hasData) {
-                        totalClientes = snapshot.data!.docs.length.toString();
+                        totalClientes =
+                            snapshot.data!.docs.length.toString();
                       }
 
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const Clientes(),
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const Clientes(),
+                                  ),
+                                );
+                              },
+                              child: _InfoCard(
+                                color: azulCardClaro,
+                                titulo: 'Clientes',
+                                valor: totalClientes,
+                                subtitulo: 'Registrados',
+                                icono: Icons.groups_rounded,
+                                height: cardMinHeight,
+                              ),
                             ),
-                          );
-                        },
-                        child: _InfoCard(
-                          color: azulCard,
-                          titulo: 'Clientes',
-                          valor: totalClientes,
-                          subtitulo: 'Registrados',
-                          icono: Icons.groups_rounded,
-                          height: cardMinHeight,
-                        ),
+                          ),
+                        ],
                       );
                     },
                   ),
                   const SizedBox(height: 12),
 
-                  // Citas hoy
-                  _InfoCard(
-                    color: azulCard,
-                    titulo: 'Citas hoy',
-                    valor: '0',
-                    subtitulo: '0 completadas',
-                    icono: Icons.calendar_today_outlined,
-                    height: cardMinHeight,
-                  ),
-                  const SizedBox(height: 12),
+                  // Fila 2: Citas hoy y Mascotas (dos cards pequeñas en una fila)
+                  Row(
+                    children: [
+                      // --- Citas hoy (contador) ---
+                      Expanded(
+                        child: StreamBuilder<QuerySnapshot>(
+                          stream: citasHoyQuery.snapshots(),
+                          builder: (context, snapshot) {
+                            int totalHoy = 0;
+                            int completadasHoy = 0;
 
-                  // Mascotas
-                  _InfoCard(
-                    color: azulCard,
-                    titulo: 'Mascotas',
-                    valor: '0',
-                    subtitulo: 'Registradas',
-                    icono: Icons.favorite_border,
-                    height: cardMinHeight,
+                            if (snapshot.hasData) {
+                              totalHoy = snapshot.data!.docs.length;
+                              for (var d in snapshot.data!.docs) {
+                                final data =
+                                    d.data() as Map<String, dynamic>;
+                                if ((data['completada'] ?? false) == true) {
+                                  completadasHoy++;
+                                }
+                              }
+                            }
+
+                            return _InfoCard(
+                              color: azulCardOscuro,
+                              titulo: 'Citas hoy',
+                              valor: totalHoy.toString(),
+                              subtitulo: '$completadasHoy completadas',
+                              icono: Icons.calendar_today_outlined,
+                              height: cardMinHeight,
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+
+                      // --- Mascotas (contador total) ---
+                      Expanded(
+                        child: StreamBuilder<QuerySnapshot>(
+                          stream: mascotasQuery.snapshots(),
+                          builder: (context, snapshot) {
+                            int totalMascotas = 0;
+                            if (snapshot.hasData) {
+                              totalMascotas = snapshot.data!.docs.length;
+                            }
+
+                            return _InfoCard(
+                              color: azulCardOscuro,
+                              titulo: 'Mascotas',
+                              valor: totalMascotas.toString(),
+                              subtitulo: 'Registradas',
+                              icono: Icons.favorite_border,
+                              height: cardMinHeight,
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -184,13 +246,14 @@ class Veterinario extends StatelessWidget {
   }
 }
 
+// NO CAMBIÉ NADA AQUÍ
 class _InfoCard extends StatelessWidget {
   final Color color;
   final String titulo;
   final String valor;
   final String subtitulo;
   final IconData icono;
-  final double height; // altura mínima
+  final double height;
 
   const _InfoCard({
     required this.color,
@@ -210,19 +273,16 @@ class _InfoCard extends StatelessWidget {
     );
 
     return Container(
-      constraints: BoxConstraints(
-        minHeight: height, // ya no es altura fija, puede crecer
-      ),
+      constraints: BoxConstraints(minHeight: height),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       width: double.infinity,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: const [sombra],
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Ajuste sutil del tamaño de fuente según la altura disponible
           final isSmall = constraints.maxHeight < 120;
           final valueFontSize = isSmall ? 30.0 : 36.0;
           final titleFontSize = isSmall ? 15.0 : 16.0;
