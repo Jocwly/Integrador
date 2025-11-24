@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 class RegistrarMascota extends StatefulWidget {
   final String clienteId;
@@ -25,6 +26,8 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
   String? sexo;
   String? esterilizado;
 
+  bool _mostrarErrores = false;
+
   final List<String> especies = [
     "Canino",
     "Felino",
@@ -38,6 +41,34 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     "Roedor",
     "Mustélido",
     "Pez",
+  ];
+
+  final List<String> razasCaninos = [
+    "Labrador Retriever",
+    "Pastor Alemán",
+    "Bulldog",
+    "Poodle",
+    "Chihuahua",
+    "Golden Retriever",
+    "Beagle",
+    "Rottweiler",
+    "Doberman",
+    "Pug",
+    "Husky Siberiano",
+    "Pitbull",
+  ];
+
+  final List<String> razasFelinos = [
+    "Siamés",
+    "Persa",
+    "Maine Coon",
+    "Bengalí",
+    "Angora",
+    "Sphynx",
+    "British Shorthair",
+    "Ragdoll",
+    "Bombay",
+    "Azul Ruso",
   ];
 
   Future<void> _seleccionarImagen() async {
@@ -58,9 +89,21 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     final peso = pesoController.text.trim();
     final color = colorController.text.trim();
 
-    if (nombre.isEmpty) {
+    if (nombre.isEmpty ||
+        especie == null ||
+        sexo == null ||
+        esterilizado == null ||
+        edad.isEmpty ||
+        raza.isEmpty ||
+        tamano.isEmpty ||
+        peso.isEmpty ||
+        color.isEmpty) {
+      setState(() {
+        _mostrarErrores = true;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Escribe al menos el nombre')),
+        const SnackBar(content: Text('Por favor llena todos los campos')),
       );
       return;
     }
@@ -102,39 +145,48 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
 
   @override
   Widget build(BuildContext context) {
-    const azul = Color(0xFF2A74D9);
+    final azulSuave = const Color(0xFFD6E1F7);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFEFEFEF),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(
+            Icons.arrow_circle_left_rounded,
+            color: Colors.black,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(
-          'Registrar Mascota',
+          'Registrar mascota',
           style: TextStyle(
+            fontFamily: 'Roboto',
             color: Colors.black,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // FOTO (círculo gris con icono negro)
-            Center(
+            // FOTO + "Nueva mascota"
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: const Color.fromARGB(255, 0, 20, 66),
+                  width: 3,
+                ),
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(4),
               child: GestureDetector(
                 onTap: _seleccionarImagen,
                 child: CircleAvatar(
-                  radius: 45,
-                  backgroundColor: const Color(0xFFE0E0E0),
+                  radius: 50,
                   backgroundImage:
                       _imagenSeleccionada != null
                           ? FileImage(_imagenSeleccionada!)
@@ -142,235 +194,366 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                   child:
                       _imagenSeleccionada == null
                           ? const Icon(
-                            Icons.add_photo_alternate_outlined,
-                            size: 34,
-                            color: Colors.black87,
+                            Icons.add_a_photo_rounded,
+                            color: Colors.white,
+                            size: 28,
                           )
                           : null,
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-
-            // NOMBRE
-            _buildOutlinedTextField(nombreController, 'Nombre'),
-            const SizedBox(height: 12),
-
-            // ESPECIE
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Especie',
-                labelStyle: const TextStyle(fontSize: 14),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: azul.withOpacity(0.7)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: azul.withOpacity(0.7)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: azul, width: 2),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 13, 0, 60),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: const Text(
+                'Nueva mascota',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              value: especie,
-              items:
-                  especies
-                      .map(
-                        (e) =>
-                            DropdownMenuItem<String>(value: e, child: Text(e)),
-                      )
-                      .toList(),
-              onChanged: (v) => setState(() => especie = v),
             ),
-
-            const SizedBox(height: 16),
-
-            // SEXO / ESTERILIZADO
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
+            const SizedBox(height: 20),
+            Container(
+              decoration: BoxDecoration(
+                color: azulSuave,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel(
+                    'Nombre de la mascota:',
+                    isError:
+                        _mostrarErrores && nombreController.text.trim().isEmpty,
+                  ),
+                  _buildTextFieldBox(
+                    controller: nombreController,
+                    isError:
+                        _mostrarErrores && nombreController.text.trim().isEmpty,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildLabel(
+                    'Especie:',
+                    isError: _mostrarErrores && especie == null,
+                  ),
+                  _buildDropdownBox<String>(
+                    value: especie,
+                    hint: 'Seleccionar',
+                    items: especies,
+                    isError: _mostrarErrores && especie == null,
+                    onChanged: (value) {
+                      setState(() {
+                        especie = value;
+                        razaController.clear();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Sexo",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel(
+                              'Sexo:',
+                              isError: _mostrarErrores && sexo == null,
+                            ),
+                            Row(
+                              children: [
+                                Radio(
+                                  value: "Macho",
+                                  groupValue: sexo,
+                                  activeColor: const Color.fromARGB(
+                                    255,
+                                    13,
+                                    0,
+                                    60,
+                                  ),
+                                  visualDensity: const VisualDensity(
+                                    horizontal: -4,
+                                    vertical: -4,
+                                  ),
+                                  onChanged: (v) => setState(() => sexo = v),
+                                ),
+                                const Text(
+                                  "Macho",
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Radio(
+                                  value: "Hembra",
+                                  groupValue: sexo,
+                                  activeColor: const Color.fromARGB(
+                                    255,
+                                    13,
+                                    0,
+                                    60,
+                                  ),
+                                  visualDensity: const VisualDensity(
+                                    horizontal: -4,
+                                    vertical: -4,
+                                  ),
+                                  onChanged: (v) => setState(() => sexo = v),
+                                ),
+                                const Text(
+                                  "Hembra",
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      Row(
-                        children: [
-                          Radio(
-                            value: "Macho",
-                            groupValue: sexo,
-                            activeColor: azul,
-                            visualDensity: const VisualDensity(
-                              horizontal: -4,
-                              vertical: -4,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel(
+                              'Esterilizado:',
+                              isError: _mostrarErrores && esterilizado == null,
                             ),
-                            onChanged: (v) => setState(() => sexo = v),
-                          ),
-                          const Text("Macho", style: TextStyle(fontSize: 13)),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Radio(
-                            value: "Hembra",
-                            groupValue: sexo,
-                            activeColor: azul,
-                            visualDensity: const VisualDensity(
-                              horizontal: -4,
-                              vertical: -4,
+                            Row(
+                              children: [
+                                Radio(
+                                  value: "Sí",
+                                  groupValue: esterilizado,
+                                  activeColor: const Color.fromARGB(
+                                    255,
+                                    13,
+                                    0,
+                                    60,
+                                  ),
+                                  visualDensity: const VisualDensity(
+                                    horizontal: -4,
+                                    vertical: -4,
+                                  ),
+                                  onChanged:
+                                      (v) => setState(() => esterilizado = v),
+                                ),
+                                const Text(
+                                  "Sí",
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                              ],
                             ),
-                            onChanged: (v) => setState(() => sexo = v),
-                          ),
-                          const Text("Hembra", style: TextStyle(fontSize: 13)),
-                        ],
+                            Row(
+                              children: [
+                                Radio(
+                                  value: "No",
+                                  groupValue: esterilizado,
+                                  activeColor: const Color.fromARGB(
+                                    255,
+                                    13,
+                                    0,
+                                    60,
+                                  ),
+                                  visualDensity: const VisualDensity(
+                                    horizontal: -4,
+                                    vertical: -4,
+                                  ),
+                                  onChanged:
+                                      (v) => setState(() => esterilizado = v),
+                                ),
+                                const Text(
+                                  "No",
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                  const SizedBox(height: 16),
+                  Row(
                     children: [
-                      const Text(
-                        "Esterilizado",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel(
+                              'Edad:',
+                              isError:
+                                  _mostrarErrores &&
+                                  edadController.text.trim().isEmpty,
+                            ),
+                            _buildTextFieldBox(
+                              controller: edadController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d{0,2}(\.\d{0,2})?$'),
+                                ),
+                              ],
+                              suffixText: 'años',
+                              isError:
+                                  _mostrarErrores &&
+                                  edadController.text.trim().isEmpty,
+                            ),
+                          ],
                         ),
                       ),
-                      Row(
-                        children: [
-                          Radio(
-                            value: "Sí",
-                            groupValue: esterilizado,
-                            activeColor: azul,
-                            visualDensity: const VisualDensity(
-                              horizontal: -4,
-                              vertical: -4,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel(
+                              'Raza:',
+                              isError:
+                                  _mostrarErrores &&
+                                  razaController.text.trim().isEmpty,
                             ),
-                            onChanged: (v) => setState(() => esterilizado = v),
-                          ),
-                          const Text("Sí", style: TextStyle(fontSize: 13)),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Radio(
-                            value: "No",
-                            groupValue: esterilizado,
-                            activeColor: azul,
-                            visualDensity: const VisualDensity(
-                              horizontal: -4,
-                              vertical: -4,
-                            ),
-                            onChanged: (v) => setState(() => esterilizado = v),
-                          ),
-                          const Text("No", style: TextStyle(fontSize: 13)),
-                        ],
+                            _buildRazaField(),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
 
-            const SizedBox(height: 12),
-
-            // EDAD / RAZA
-            Row(
-              children: [
-                Expanded(
-                  child: _buildOutlinedTextField(edadController, 'Edad'),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildOutlinedTextField(razaController, 'Raza'),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // TAMAÑO / PESO
-            Row(
-              children: [
-                Expanded(
-                  child: _buildOutlinedTextField(tamanoController, 'Tamaño'),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildOutlinedTextField(pesoController, 'Peso'),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // COLOR
-            _buildOutlinedTextField(colorController, 'Color'),
-            const SizedBox(height: 12),
-
-            const SizedBox(height: 24),
-
-            // BOTONES GUARDAR / CANCELAR
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _guardarMascota,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1D2A5F),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel(
+                              'Tamaño:',
+                              isError:
+                                  _mostrarErrores &&
+                                  tamanoController.text.trim().isEmpty,
+                            ),
+                            _buildTextFieldBox(
+                              controller: tamanoController,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.deny(
+                                  RegExp(r'[0-9]'),
+                                ),
+                              ],
+                              isError:
+                                  _mostrarErrores &&
+                                  tamanoController.text.trim().isEmpty,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      'Guardar',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel(
+                              'Peso:',
+                              isError:
+                                  _mostrarErrores &&
+                                  pesoController.text.trim().isEmpty,
+                            ),
+                            _buildTextFieldBox(
+                              controller: pesoController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d{0,3}(\.\d{0,2})?$'),
+                                ),
+                              ],
+                              suffixText: 'kg',
+                              isError:
+                                  _mostrarErrores &&
+                                  pesoController.text.trim().isEmpty,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD3D3D3),
-                      foregroundColor: Colors.black87,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Cancelar',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
-                    ),
+
+                  const SizedBox(height: 16),
+                  _buildLabel(
+                    'Color:',
+                    isError:
+                        _mostrarErrores && colorController.text.trim().isEmpty,
                   ),
-                ),
-              ],
+                  _buildTextFieldBox(
+                    controller: colorController,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp(r'[0-9]')),
+                    ],
+                    isError:
+                        _mostrarErrores && colorController.text.trim().isEmpty,
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _guardarMascota,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(
+                              255,
+                              13,
+                              0,
+                              60,
+                            ),
+                            minimumSize: const Size.fromHeight(52),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            'Guardar',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey,
+                            minimumSize: const Size.fromHeight(52),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            'Cancelar',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -378,37 +561,108 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     );
   }
 
-  // ---- TextField con borde azul fino (como el mockup) ----
-  Widget _buildOutlinedTextField(
-    TextEditingController controller,
-    String label, {
-    int maxLines = 1,
-  }) {
-    const azul = Color(0xFF2A74D9);
-
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(fontSize: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: azul.withOpacity(0.7)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: azul.withOpacity(0.7)),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-          borderSide: BorderSide(color: azul, width: 2),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
+  Widget _buildLabel(String text, {bool isError = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+          color: isError ? Colors.red : Colors.black87,
         ),
       ),
     );
+  }
+
+  Widget _buildTextFieldBox({
+    required TextEditingController controller,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    String? suffixText,
+    bool isError = false,
+  }) {
+    final borderColor =
+        isError ? Colors.red : const Color(0xFF2A74D9).withOpacity(0.5);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          suffixText: suffixText,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 4,
+            vertical: 10,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownBox<T>({
+    required T? value,
+    required List<T> items,
+    required ValueChanged<T?> onChanged,
+    String? hint,
+    bool isError = false,
+  }) {
+    final borderColor =
+        isError ? Colors.red : const Color(0xFF2A74D9).withOpacity(0.5);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: DropdownButtonFormField<T>(
+        value: value,
+        hint: hint != null ? Text(hint) : null,
+        decoration: const InputDecoration(border: InputBorder.none),
+        icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black87),
+        items:
+            items
+                .map(
+                  (item) => DropdownMenuItem<T>(
+                    value: item,
+                    child: Text(item.toString()),
+                  ),
+                )
+                .toList(),
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildRazaField() {
+    final bool isError = _mostrarErrores && razaController.text.trim().isEmpty;
+
+    if (especie == "Canino" || especie == "Felino") {
+      final opciones = especie == "Canino" ? razasCaninos : razasFelinos;
+
+      return _buildDropdownBox<String>(
+        value: razaController.text.isEmpty ? null : razaController.text,
+        items: opciones,
+        hint: 'Seleccionar',
+        isError: isError,
+        onChanged: (value) {
+          setState(() {
+            razaController.text = value ?? '';
+          });
+        },
+      );
+    }
+
+    return _buildTextFieldBox(controller: razaController, isError: isError);
   }
 }

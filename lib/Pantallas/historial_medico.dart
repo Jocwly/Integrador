@@ -79,7 +79,6 @@ class _HistorialMedicoState extends State<HistorialMedico> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                //  Información de la mascota
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
@@ -135,8 +134,6 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                 ),
 
                 const SizedBox(height: 20),
-
-                //  Filtro por fecha
                 Row(
                   children: [
                     Expanded(
@@ -254,18 +251,66 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                   ),
                                 ),
                                 const SizedBox(height: 5),
-                                Text(
-                                  "🩺 Motivo: ${consulta['motivo'] ?? '---'}",
-                                  style: TextStyle(fontSize: 17),
+                                RichText(
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 34, 34, 34),
+                                      fontSize: 16,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: '📌 Motivo: ',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: consulta['motivo'] ?? '---',
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                Text(
-                                  "🔎 Diagnóstico: ${consulta['diagnostico'] ?? '---'}",
-                                  style: TextStyle(fontSize: 17),
+                                RichText(
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 34, 34, 34),
+                                      fontSize: 16,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: '🩺 Diagnóstico: ',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: consulta['diagnostico'] ?? '---',
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                Text(
-                                  "💊 Medicamento: ${consulta['medicamento'] ?? '---'}",
-                                  style: TextStyle(fontSize: 17),
-                                ),
+
+                                if (consulta['medicaciones'] != null &&
+                                    consulta['medicaciones'] is List) ...[
+                                  const Text(
+                                    "💊 Medicaciones:",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  ...List<Widget>.from(
+                                    (consulta['medicaciones'] as List).map((
+                                      med,
+                                    ) {
+                                      return Text(
+                                        "• ${med['nombre']} — ${med['dosis']} — ${med['frecuencia']} — ${med['duracion']}",
+                                        style: const TextStyle(fontSize: 16),
+                                      );
+                                    }),
+                                  ),
+                                ] else
+                                  const Text("💊 Medicaciones: ---"),
 
                                 const SizedBox(height: 10),
                                 Align(

@@ -27,13 +27,11 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
   DateTime? _fechaAplicacion;
   DateTime? _fechaProxima;
 
-  // flags de error
   bool _errNombre = false;
   bool _errLote = false;
   bool _errDosis = false;
   bool _errPersonal = false;
 
-  // Colores de estilo
   final Color azulSuave = const Color(0xFFD6E1F7);
   final Color azulBorde = const Color(0xFF2A74D9);
   final Color botonAzulOscuro = const Color(0xFF0B1446);
@@ -42,7 +40,6 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
   @override
   void initState() {
     super.initState();
-    // Fecha de aplicación por defecto: HOY
     final today = DateTime.now();
     _fechaAplicacion = DateTime(today.year, today.month, today.day);
   }
@@ -55,8 +52,10 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
       initialDate: _fechaAplicacion ?? DateTime.now(),
     );
     if (picked != null) {
-      final d = DateTime(picked.year, picked.month, picked.day);
-      setState(() => _fechaAplicacion = d);
+      setState(
+        () =>
+            _fechaAplicacion = DateTime(picked.year, picked.month, picked.day),
+      );
     }
   }
 
@@ -66,7 +65,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
 
     final picked = await showDatePicker(
       context: context,
-      firstDate: baseToday, // no fechas anteriores
+      firstDate: baseToday,
       lastDate: DateTime(2100),
       initialDate: baseToday,
       selectableDayPredicate: (day) {
@@ -74,15 +73,16 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
         if (onlyDate.isBefore(baseToday)) return false;
         if (day.weekday == DateTime.saturday ||
             day.weekday == DateTime.sunday) {
-          return false; // no sábados ni domingos
+          return false;
         }
         return true;
       },
     );
 
     if (picked != null) {
-      final d = DateTime(picked.year, picked.month, picked.day);
-      setState(() => _fechaProxima = d);
+      setState(
+        () => _fechaProxima = DateTime(picked.year, picked.month, picked.day),
+      );
     }
   }
 
@@ -99,9 +99,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
       _errPersonal = _personalCtrl.text.trim().isEmpty;
     });
 
-    final hayErrores = _errNombre || _errLote || _errDosis || _errPersonal;
-
-    if (hayErrores) return;
+    if (_errNombre || _errLote || _errDosis || _errPersonal) return;
 
     if (_fechaAplicacion == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -110,27 +108,51 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
       return;
     }
 
-    await showDialog(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-            title: const Text("¡Vacuna registrada! 🎉"),
-            content: Text(
-              "Vacuna: ${_nombreVacunaCtrl.text}\n"
-              "Lote: ${_loteCtrl.text}\n"
-              "Dosis: ${_dosisCtrl.text}\n"
-              "Aplicador: ${_personalCtrl.text}\n\n"
-              "Aplicación: ${_format(_fechaAplicacion)}\n"
-              "Próxima dosis: ${_fechaProxima == null ? 'No aplica' : _format(_fechaProxima)}",
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cerrar"),
+    try {
+      final mascotaRef = FirebaseFirestore.instance
+          .collection('clientes')
+          .doc(widget.clienteId)
+          .collection('mascotas')
+          .doc(widget.mascotaId);
+
+      await mascotaRef.collection('vacunas').add({
+        'nombreVacuna': _nombreVacunaCtrl.text.trim(),
+        'lote': _loteCtrl.text.trim(),
+        'dosis': _dosisCtrl.text.trim(),
+        'personalAplicador': _personalCtrl.text.trim(),
+        'fechaAplicacion': _fechaAplicacion,
+        'fechaProxima': _fechaProxima,
+        'fechaRegistro': DateTime.now(),
+      });
+
+      await showDialog(
+        context: context,
+        builder:
+            (_) => AlertDialog(
+              title: const Text("¡Vacuna registrada! 🎉"),
+              content: Text(
+                "Vacuna: ${_nombreVacunaCtrl.text}\n"
+                "Lote: ${_loteCtrl.text}\n"
+                "Dosis: ${_dosisCtrl.text}\n"
+                "Aplicador: ${_personalCtrl.text}\n\n"
+                "Aplicación: ${_format(_fechaAplicacion)}\n"
+                "Próxima dosis: ${_fechaProxima == null ? 'No aplica' : _format(_fechaProxima)}",
               ),
-            ],
-          ),
-    );
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cerrar"),
+                ),
+              ],
+            ),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error al guardar: $e")));
+    }
   }
 
   Future<void> _cancelar() async {
@@ -191,236 +213,193 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
       body: StreamBuilder<DocumentSnapshot>(
         stream: mascotaRef.snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text("Error al cargar los datos de la mascota"),
-            );
-          }
-          if (!snapshot.hasData || !snapshot.data!.exists) {
+          if (snapshot.hasError)
+            return const Center(child: Text("Error al cargar los datos"));
+          if (!snapshot.hasData || !snapshot.data!.exists)
             return const Center(child: CircularProgressIndicator());
-          }
 
           final data = snapshot.data!.data() as Map<String, dynamic>;
           final nombre = data['nombre'] ?? 'Mascota';
           final foto = data['foto'];
 
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              return Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 430),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                    child: Column(
-                      children: [
-                        // Foto
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color.fromARGB(255, 0, 20, 66),
-                              width: 3,
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                          padding: const EdgeInsets.all(4),
-                          child: CircleAvatar(
-                            radius: 50,
-                            backgroundImage:
-                                foto != null
-                                    ? NetworkImage(foto)
-                                    : const AssetImage(
-                                          'assets/images/perro.jpg',
-                                        )
-                                        as ImageProvider,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        // Nombre mascota
-                        Container(
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 0, 20, 66),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          child: Text(
-                            nombre,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 22),
-
-                        // -------- FORMULARIO --------
-                        Form(
-                          key: _formKey,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: azulSuave,
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _label("Nombre de la vacuna"),
-                                const SizedBox(height: 6),
-                                _inputText(
-                                  _nombreVacunaCtrl,
-                                  showError: _errNombre,
-                                  icon: Icons.vaccines_outlined,
-                                  onChanged: () {
-                                    if (_errNombre &&
-                                        _nombreVacunaCtrl.text
-                                            .trim()
-                                            .isNotEmpty) {
-                                      setState(() => _errNombre = false);
-                                    }
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-
-                                _label("Fecha de aplicación"),
-                                const SizedBox(height: 6),
-                                _dateField(
-                                  _fechaAplicacion,
-                                  _pickFechaAplicacion,
-                                ),
-                                const SizedBox(height: 16),
-
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _fieldSmall(
-                                        "Lote",
-                                        _loteCtrl,
-                                        _errLote,
-                                        onChanged: () {
-                                          if (_errLote &&
-                                              _loteCtrl.text
-                                                  .trim()
-                                                  .isNotEmpty) {
-                                            setState(() => _errLote = false);
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: _fieldSmall(
-                                        "Dosis",
-                                        _dosisCtrl,
-                                        _errDosis,
-                                        onChanged: () {
-                                          if (_errDosis &&
-                                              _dosisCtrl.text
-                                                  .trim()
-                                                  .isNotEmpty) {
-                                            setState(() => _errDosis = false);
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 16),
-                                _label("Personal Aplicador"),
-                                const SizedBox(height: 6),
-                                _inputText(
-                                  _personalCtrl,
-                                  showError: _errPersonal,
-                                  onChanged: () {
-                                    if (_errPersonal &&
-                                        _personalCtrl.text.trim().isNotEmpty) {
-                                      setState(() => _errPersonal = false);
-                                    }
-                                  },
-                                ),
-
-                                const SizedBox(height: 16),
-                                _label("Fecha de próxima dosis (si aplica)"),
-                                const SizedBox(height: 6),
-                                _dateField(_fechaProxima, _pickFechaProxima),
-
-                                const SizedBox(height: 26),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        onPressed: _guardar,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: botonAzulOscuro,
-                                          minimumSize: const Size.fromHeight(
-                                            52,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          "Guardar",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        onPressed: _cancelar,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: botonGris,
-                                          minimumSize: const Size.fromHeight(
-                                            52,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          "Cancelar",
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
+          return _buildForm(nombre, foto);
         },
       ),
     );
   }
 
-  // --------- Widgets de apoyo ---------
+  Widget _buildForm(String nombre, String? foto) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 430),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                children: [
+                  _fotoMascota(foto),
+                  const SizedBox(height: 8),
+                  _nombreMascota(nombre),
+                  const SizedBox(height: 22),
+                  _formulario(),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _fotoMascota(String? foto) => Container(
+    decoration: BoxDecoration(
+      border: Border.all(color: const Color.fromARGB(255, 0, 20, 66), width: 3),
+      shape: BoxShape.circle,
+    ),
+    padding: const EdgeInsets.all(4),
+    child: CircleAvatar(
+      radius: 50,
+      backgroundImage:
+          foto != null
+              ? NetworkImage(foto)
+              : const AssetImage('assets/images/perro.jpg') as ImageProvider,
+    ),
+  );
+
+  Widget _nombreMascota(String nombre) => Container(
+    decoration: BoxDecoration(
+      color: const Color.fromARGB(255, 0, 20, 66),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+    child: Text(
+      nombre,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
+
+  Widget _formulario() => Form(
+    key: _formKey,
+    child: Container(
+      decoration: BoxDecoration(
+        color: azulSuave,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _label("Nombre de la vacuna"),
+          const SizedBox(height: 6),
+          _inputText(
+            _nombreVacunaCtrl,
+            showError: _errNombre,
+            icon: Icons.vaccines_outlined,
+            onChanged: () {
+              if (_errNombre && _nombreVacunaCtrl.text.trim().isNotEmpty)
+                setState(() => _errNombre = false);
+            },
+          ),
+          const SizedBox(height: 16),
+          _label("Fecha de aplicación"),
+          const SizedBox(height: 6),
+          _dateField(_fechaAplicacion, _pickFechaAplicacion),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _fieldSmall(
+                  "Lote",
+                  _loteCtrl,
+                  _errLote,
+                  onChanged: () {
+                    if (_errLote && _loteCtrl.text.trim().isNotEmpty)
+                      setState(() => _errLote = false);
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _fieldSmall(
+                  "Dosis",
+                  _dosisCtrl,
+                  _errDosis,
+                  onChanged: () {
+                    if (_errDosis && _dosisCtrl.text.trim().isNotEmpty)
+                      setState(() => _errDosis = false);
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _label("Personal Aplicador"),
+          const SizedBox(height: 6),
+          _inputText(
+            _personalCtrl,
+            showError: _errPersonal,
+            onChanged: () {
+              if (_errPersonal && _personalCtrl.text.trim().isNotEmpty)
+                setState(() => _errPersonal = false);
+            },
+          ),
+          const SizedBox(height: 16),
+          _label("Fecha de próxima dosis (si aplica)"),
+          const SizedBox(height: 6),
+          _dateField(_fechaProxima, _pickFechaProxima),
+          const SizedBox(height: 26),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _guardar,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: botonAzulOscuro,
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    "Guardar",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _cancelar,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: botonGris,
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    "Cancelar",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
 
   Widget _label(String text) => Text(
     text,
@@ -431,7 +410,6 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
     ),
   );
 
-  /// Campo con borde azul + mensaje rojo centrado verticalmente
   Widget _inputText(
     TextEditingController controller, {
     required bool showError,
@@ -450,7 +428,6 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
       ),
       child: Stack(
         children: [
-          // TextField "normal"
           Positioned.fill(
             child: TextField(
               controller: controller,
@@ -468,7 +445,6 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
               ),
             ),
           ),
-          // Mensaje de error
           if (showError)
             Positioned.fill(
               child: Align(
