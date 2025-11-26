@@ -67,12 +67,20 @@ class _HistorialMedicoState extends State<HistorialMedico> {
 
           final mascotaData =
               mascotaSnapshot.data!.data() as Map<String, dynamic>;
+
           final nombre = mascotaData['nombre'] ?? 'Sin nombre';
           final especie = mascotaData['especie'] ?? '---';
           final raza = mascotaData['raza'] ?? '---';
-          final edad = mascotaData['edad'] ?? '---';
+          final edad = mascotaData['edad'] ?? '---'; // ya incluye "años"/"meses"
           final sexo = mascotaData['sexo'] ?? '---';
-          final fotoUrl = mascotaData['fotoUrl'];
+
+          // 👇 Soporte para fotoUrl nuevo y foto antiguo
+          final dynamic fotoDynamic =
+              mascotaData['fotoUrl'] ?? mascotaData['foto'];
+          final String? fotoUrl =
+              fotoDynamic is String && fotoDynamic.isNotEmpty
+                  ? fotoDynamic
+                  : null;
 
           return Padding(
             padding: const EdgeInsets.all(16),
@@ -95,20 +103,19 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(50),
-                        child:
-                            fotoUrl != null
-                                ? Image.network(
-                                  fotoUrl,
-                                  width: 70,
-                                  height: 70,
-                                  fit: BoxFit.cover,
-                                )
-                                : Image.asset(
-                                  'assets/images/perro.jpg',
-                                  width: 70,
-                                  height: 70,
-                                  fit: BoxFit.cover,
-                                ),
+                        child: fotoUrl != null
+                            ? Image.network(
+                                fotoUrl,
+                                width: 70,
+                                height: 70,
+                                fit: BoxFit.cover,
+                              )
+                            : Image.asset(
+                                'assets/images/perro.jpg',
+                                width: 70,
+                                height: 70,
+                                fit: BoxFit.cover,
+                              ),
                       ),
                       const SizedBox(width: 15),
                       Expanded(
@@ -123,7 +130,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                             ),
                             Text("Especie: $especie"),
                             Text("Raza: $raza"),
-                            Text("Edad: $edad años"),
+                            Text("Edad: $edad"), // 👈 sin duplicar "años"
                             Text("Sexo: $sexo"),
                           ],
                         ),
@@ -156,9 +163,8 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                 initialDate: DateTime.now(),
                               );
                               if (picked != null) {
-                                String fechaFormateada = DateFormat(
-                                  'dd/MM/yyyy',
-                                ).format(picked);
+                                String fechaFormateada =
+                                    DateFormat('dd/MM/yyyy').format(picked);
                                 setState(() {
                                   _selectedDate = fechaFormateada;
                                   _dateController.text = fechaFormateada;
@@ -189,14 +195,13 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                 const SizedBox(height: 20),
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
-                    stream:
-                        (_selectedDate == null || _selectedDate!.isEmpty)
-                            ? consultasRef
-                                .orderBy('fecha', descending: true)
-                                .snapshots()
-                            : consultasRef
-                                .where('fechaStr', isEqualTo: _selectedDate)
-                                .snapshots(),
+                    stream: (_selectedDate == null || _selectedDate!.isEmpty)
+                        ? consultasRef
+                            .orderBy('fecha', descending: true)
+                            .snapshots()
+                        : consultasRef
+                            .where('fechaStr', isEqualTo: _selectedDate)
+                            .snapshots(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const Center(child: CircularProgressIndicator());
@@ -221,9 +226,8 @@ class _HistorialMedicoState extends State<HistorialMedico> {
 
                           DateTime fecha =
                               (consulta['fecha'] as Timestamp).toDate();
-                          String fechaFormateada = DateFormat(
-                            'dd/MM/yyyy',
-                          ).format(fecha);
+                          String fechaFormateada =
+                              DateFormat('dd/MM/yyyy').format(fecha);
 
                           return Container(
                             margin: const EdgeInsets.only(bottom: 15),
@@ -300,14 +304,15 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                     ),
                                   ),
                                   ...List<Widget>.from(
-                                    (consulta['medicaciones'] as List).map((
-                                      med,
-                                    ) {
-                                      return Text(
-                                        "• ${med['nombre']} — ${med['dosis']} — ${med['frecuencia']} — ${med['duracion']}",
-                                        style: const TextStyle(fontSize: 16),
-                                      );
-                                    }),
+                                    (consulta['medicaciones'] as List).map(
+                                      (med) {
+                                        return Text(
+                                          "• ${med['nombre']} — ${med['dosis']} — ${med['frecuencia']} — ${med['duracion']}",
+                                          style:
+                                              const TextStyle(fontSize: 16),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ] else
                                   const Text("💊 Medicaciones: ---"),
@@ -322,7 +327,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                         consulta,
                                         fechaFormateada,
                                         consultaId,
-                                        fecha, // 👉 pasamos DateTime real
+                                        fecha, // DateTime real
                                       );
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -366,12 +371,14 @@ class _HistorialMedicoState extends State<HistorialMedico> {
     final List<dynamic> medsDynamic = consulta['medicaciones'] ?? [];
     final List<Map<String, dynamic>> medicaciones =
         medsDynamic.cast<Map<String, dynamic>>();
+
     final inicioDia = DateTime(
       fechaConsulta.year,
       fechaConsulta.month,
       fechaConsulta.day,
     );
     final finDia = inicioDia.add(const Duration(days: 1));
+
     final vacunasQuery = FirebaseFirestore.instance
         .collection('clientes')
         .doc(widget.clienteId)
@@ -456,11 +463,10 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                       Expanded(
                         child: _chipDetalle(
                           label: "Peso",
-                          value:
-                              (consulta['peso'] != null &&
-                                      consulta['peso'].toString().isNotEmpty)
-                                  ? "${consulta['peso']} kg"
-                                  : '---',
+                          value: (consulta['peso'] != null &&
+                                  consulta['peso'].toString().isNotEmpty)
+                              ? "${consulta['peso']} kg"
+                              : '---',
                           icon: Icons.monitor_weight,
                         ),
                       ),
@@ -468,13 +474,12 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                       Expanded(
                         child: _chipDetalle(
                           label: "Temperatura",
-                          value:
-                              (consulta['temperatura'] != null &&
-                                      consulta['temperatura']
-                                          .toString()
-                                          .isNotEmpty)
-                                  ? "${consulta['temperatura']} °C"
-                                  : '---',
+                          value: (consulta['temperatura'] != null &&
+                                  consulta['temperatura']
+                                      .toString()
+                                      .isNotEmpty)
+                              ? "${consulta['temperatura']} °C"
+                              : '---',
                           icon: Icons.thermostat,
                         ),
                       ),
@@ -506,57 +511,56 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                     )
                   else
                     Column(
-                      children:
-                          medicaciones.map((m) {
-                            return Container(
-                              width: double.infinity,
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: azulSuave.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: azulFuerte.withOpacity(0.3),
-                                  width: 1,
+                      children: medicaciones.map((m) {
+                        return Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: azulSuave.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: azulFuerte.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                m['nombre'] ?? 'Medicamento',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
                                 ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              const SizedBox(height: 4),
+                              Row(
                                 children: [
-                                  Text(
-                                    m['nombre'] ?? 'Medicamento',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
+                                  Expanded(
+                                    child: _filaEtiquetaValor(
+                                      "Dosis",
+                                      m['dosis'] ?? '---',
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _filaEtiquetaValor(
-                                          "Dosis",
-                                          m['dosis'] ?? '---',
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: _filaEtiquetaValor(
-                                          "Frecuencia",
-                                          m['frecuencia'] ?? '---',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  _filaEtiquetaValor(
-                                    "Duración",
-                                    m['duracion'] ?? '---',
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: _filaEtiquetaValor(
+                                      "Frecuencia",
+                                      m['frecuencia'] ?? '---',
+                                    ),
                                   ),
                                 ],
                               ),
-                            );
-                          }).toList(),
+                              const SizedBox(height: 4),
+                              _filaEtiquetaValor(
+                                "Duración",
+                                m['duracion'] ?? '---',
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                     ),
 
                   const SizedBox(height: 12),
@@ -588,71 +592,70 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                       final vacunasDocs = snapshotVacunas.data!.docs;
 
                       return Column(
-                        children:
-                            vacunasDocs.map((doc) {
-                              final v =
-                                  doc.data() as Map<String, dynamic>? ?? {};
-                              final nombreVacuna =
-                                  v['nombreVacuna'] ?? 'Vacuna';
-                              final lote = v['lote'] ?? '---';
-                              final dosis = v['dosis'] ?? '---';
-                              final aplicador = v['personalAplicador'] ?? '---';
+                        children: vacunasDocs.map((doc) {
+                          final v =
+                              doc.data() as Map<String, dynamic>? ?? {};
+                          final nombreVacuna =
+                              v['nombreVacuna'] ?? 'Vacuna';
+                          final lote = v['lote'] ?? '---';
+                          final dosis = v['dosis'] ?? '---';
+                          final aplicador =
+                              v['personalAplicador'] ?? '---';
 
-                              DateTime? fechaAplicacion;
-                              if (v['fechaAplicacion'] is Timestamp) {
-                                fechaAplicacion =
-                                    (v['fechaAplicacion'] as Timestamp)
-                                        .toDate();
-                              }
+                          DateTime? fechaAplicacion;
+                          if (v['fechaAplicacion'] is Timestamp) {
+                            fechaAplicacion =
+                                (v['fechaAplicacion'] as Timestamp).toDate();
+                          }
 
-                              DateTime? fechaProxima;
-                              if (v['fechaProxima'] is Timestamp) {
-                                fechaProxima =
-                                    (v['fechaProxima'] as Timestamp).toDate();
-                              }
+                          DateTime? fechaProxima;
+                          if (v['fechaProxima'] is Timestamp) {
+                            fechaProxima =
+                                (v['fechaProxima'] as Timestamp).toDate();
+                          }
 
-                              String formatFecha(DateTime? d) {
-                                if (d == null) return 'No aplica';
-                                return DateFormat('dd/MM/yyyy').format(d);
-                              }
+                          String formatFecha(DateTime? d) {
+                            if (d == null) return 'No aplica';
+                            return DateFormat('dd/MM/yyyy').format(d);
+                          }
 
-                              return Container(
-                                width: double.infinity,
-                                margin: const EdgeInsets.only(bottom: 8),
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE7F0FF),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: azulFuerte.withOpacity(0.3),
+                          return Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE7F0FF),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: azulFuerte.withOpacity(0.3),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  nombreVacuna,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
                                   ),
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      nombreVacuna,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    _filaEtiquetaValor("Lote", lote),
-                                    _filaEtiquetaValor("Dosis", dosis),
-                                    _filaEtiquetaValor("Aplicador", aplicador),
-                                    _filaEtiquetaValor(
-                                      "Fecha aplicación",
-                                      formatFecha(fechaAplicacion),
-                                    ),
-                                    _filaEtiquetaValor(
-                                      "Próxima dosis",
-                                      formatFecha(fechaProxima),
-                                    ),
-                                  ],
+                                const SizedBox(height: 4),
+                                _filaEtiquetaValor("Lote", lote),
+                                _filaEtiquetaValor("Dosis", dosis),
+                                _filaEtiquetaValor("Aplicador", aplicador),
+                                _filaEtiquetaValor(
+                                  "Fecha aplicación",
+                                  formatFecha(fechaAplicacion),
                                 ),
-                              );
-                            }).toList(),
+                                _filaEtiquetaValor(
+                                  "Próxima dosis",
+                                  formatFecha(fechaProxima),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
                       );
                     },
                   ),
@@ -741,7 +744,8 @@ class _HistorialMedicoState extends State<HistorialMedico> {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(fontSize: 11, color: Colors.black54),
+                  style:
+                      const TextStyle(fontSize: 11, color: Colors.black54),
                 ),
                 Text(
                   value,

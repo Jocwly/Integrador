@@ -10,9 +10,8 @@ class Cliente extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final clienteRef = FirebaseFirestore.instance
-        .collection('clientes')
-        .doc(clienteId);
+    final clienteRef =
+        FirebaseFirestore.instance.collection('clientes').doc(clienteId);
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 211, 209, 255),
@@ -45,7 +44,8 @@ class Cliente extends StatelessWidget {
                       return const Center(child: CircularProgressIndicator());
                     }
 
-                    final data = snapshot.data!.data() as Map<String, dynamic>;
+                    final data =
+                        snapshot.data!.data() as Map<String, dynamic>;
                     final nombre = data['nombre'] ?? 'Cliente';
                     final direccion = data['direccion'] ?? 'Sin dirección';
                     final telefono = data['telefono'] ?? 'Sin teléfono';
@@ -108,7 +108,7 @@ class _CardContenido extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar
+          // Avatar cliente
           Center(
             child: CircleAvatar(
               radius: 40,
@@ -155,7 +155,7 @@ class _CardContenido extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // Lista de mascotas + botón añadir (DISEÑO MOCKUP)
+          // Lista de mascotas + botón añadir (diseño mockup)
           StreamBuilder<QuerySnapshot>(
             stream: mascotasRef.snapshots(),
             builder: (context, snapshot) {
@@ -189,21 +189,28 @@ class _CardContenido extends StatelessWidget {
                 child: Row(
                   children: [
                     ...docs.map((doc) {
-                      final data = doc.data() as Map<String, dynamic>;
+                      final data =
+                          doc.data() as Map<String, dynamic>;
                       final nombreMascota = data['nombre'] ?? 'Mascota';
-                      final foto = data['foto'];
+
+                      // 👇 Soporte para fotoUrl (nuevo) y foto (antiguo)
+                      final dynamic fotoDynamic =
+                          data['fotoUrl'] ?? data['foto'];
+                      final String? fotoUrl =
+                          fotoDynamic is String && fotoDynamic.isNotEmpty
+                              ? fotoDynamic
+                              : null;
 
                       return GestureDetector(
                         onTap: () {
-                          // MISMA FUNCIONALIDAD: ir al perfil de la mascota
+                          // Ir al perfil de la mascota
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder:
-                                  (_) => PerfilMascota(
-                                    clienteId: clienteId,
-                                    mascotaId: doc.id,
-                                  ),
+                              builder: (_) => PerfilMascota(
+                                clienteId: clienteId,
+                                mascotaId: doc.id,
+                              ),
                             ),
                           );
                         },
@@ -221,12 +228,11 @@ class _CardContenido extends StatelessWidget {
                                 ),
                                 child: CircleAvatar(
                                   radius: 34,
-                                  backgroundImage:
-                                      foto != null
-                                          ? NetworkImage(foto)
-                                          : const NetworkImage(
-                                            'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300',
-                                          ),
+                                  backgroundImage: fotoUrl != null
+                                      ? NetworkImage(fotoUrl)
+                                      : const AssetImage(
+                                          'assets/images/perro.jpg',
+                                        ) as ImageProvider,
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -305,7 +311,7 @@ class _BotonAgregarMascota extends StatelessWidget {
           InkWell(
             borderRadius: BorderRadius.circular(44),
             onTap: () {
-              // MISMA FUNCIONALIDAD DE ANTES: registrar mascota
+              // Registrar nueva mascota
               Navigator.push(
                 context,
                 MaterialPageRoute(

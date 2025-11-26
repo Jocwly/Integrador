@@ -66,9 +66,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   //  Guardar cita en Firestore
   Future<void> guardarCita() async {
     if (fechaSeleccionada == null || horaSeleccionada == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Selecciona fecha y hora')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecciona fecha y hora')),
+      );
       return;
     }
 
@@ -86,14 +86,13 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       return;
     }
 
-    final mascotaRef =
-        FirebaseFirestore.instance
-            .collection('clientes')
-            .doc(widget.clienteId)
-            .collection('mascotas')
-            .doc(widget.mascotaId)
-            .collection('citas')
-            .doc();
+    final mascotaRef = FirebaseFirestore.instance
+        .collection('clientes')
+        .doc(widget.clienteId)
+        .collection('mascotas')
+        .doc(widget.mascotaId)
+        .collection('citas')
+        .doc();
 
     final fechaCompleta = DateTime(
       fechaSeleccionada!.year,
@@ -109,7 +108,6 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       'motivo': motivoController.text,
       'personal': personal,
       'creado': Timestamp.now(),
-
       'completada': false,
       'estado': 'Programada',
     });
@@ -156,12 +154,22 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       body: StreamBuilder<DocumentSnapshot>(
         stream: mascotaRef.snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error al cargar datos'));
+          }
+          if (!snapshot.hasData || !snapshot.data!.exists) {
             return const Center(child: CircularProgressIndicator());
           }
 
           final data = snapshot.data!.data() as Map<String, dynamic>;
           final nombre = data['nombre'] ?? 'Mascota';
+
+          // 👇 Soporte para fotoUrl (nuevo) y foto (antiguo)
+          final dynamic fotoDynamic = data['fotoUrl'] ?? data['foto'];
+          final String? fotoUrl =
+              fotoDynamic is String && fotoDynamic.isNotEmpty
+                  ? fotoDynamic
+                  : null;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
@@ -177,9 +185,12 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                     shape: BoxShape.circle,
                   ),
                   padding: const EdgeInsets.all(4),
-                  child: const CircleAvatar(
+                  child: CircleAvatar(
                     radius: 50,
-                    backgroundImage: AssetImage('assets/images/perro.jpg'),
+                    backgroundImage: fotoUrl != null
+                        ? NetworkImage(fotoUrl)
+                        : const AssetImage('assets/images/perro.jpg')
+                            as ImageProvider,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -231,12 +242,10 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                           Expanded(
                             child: _buildPickerField(
                               icon: Icons.calendar_today_rounded,
-                              text:
-                                  fechaSeleccionada != null
-                                      ? DateFormat(
-                                        'dd/MM/yyyy',
-                                      ).format(fechaSeleccionada!)
-                                      : 'Seleccionar',
+                              text: fechaSeleccionada != null
+                                  ? DateFormat('dd/MM/yyyy')
+                                      .format(fechaSeleccionada!)
+                                  : 'Seleccionar',
                               onTap: () => _seleccionarFecha(context),
                             ),
                           ),
@@ -244,10 +253,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                           Expanded(
                             child: _buildPickerField(
                               icon: Icons.access_time_rounded,
-                              text:
-                                  horaSeleccionada != null
-                                      ? horaSeleccionada!.format(context)
-                                      : 'Seleccionar',
+                              text: horaSeleccionada != null
+                                  ? horaSeleccionada!.format(context)
+                                  : 'Seleccionar',
                               onTap: () => _seleccionarHora(context),
                             ),
                           ),
@@ -360,10 +368,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
         hint: const Text('Seleccionar'),
         decoration: const InputDecoration(border: InputBorder.none),
         icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black87),
-        items:
-            items
-                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-                .toList(),
+        items: items
+            .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+            .toList(),
         onChanged: onChanged,
       ),
     );

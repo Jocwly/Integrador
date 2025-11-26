@@ -68,13 +68,13 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
   }
 
   OutlineInputBorder _softBorder() => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(10),
-    borderSide: BorderSide(color: azulFuerte.withOpacity(0.5), width: 1.5),
-  );
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: azulFuerte.withOpacity(0.5), width: 1.5),
+      );
   OutlineInputBorder _grayBorder() => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(10),
-    borderSide: BorderSide(color: azulFuerte.withOpacity(0.5), width: 1.5),
-  );
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: azulFuerte.withOpacity(0.5), width: 1.5),
+      );
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -105,8 +105,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
       _errMedDuracion = firstMed.duracion.text.trim().isEmpty;
     });
 
-    final hayErrores =
-        _errMotivo ||
+    final hayErrores = _errMotivo ||
         _errPeso ||
         _errTemp ||
         _errDiag ||
@@ -128,6 +127,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
           .doc(widget.clienteId)
           .collection('mascotas')
           .doc(widget.mascotaId);
+
       final List<Map<String, String>> meds = [];
       for (final m in _medicaciones) {
         final nombre = m.nombre.text.trim();
@@ -135,8 +135,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
         final frecuencia = m.frecuencia.text.trim();
         final duracion = m.duracion.text.trim();
 
-        final tieneAlgo =
-            nombre.isNotEmpty ||
+        final tieneAlgo = nombre.isNotEmpty ||
             dosis.isNotEmpty ||
             frecuencia.isNotEmpty ||
             duracion.isNotEmpty;
@@ -150,6 +149,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
           });
         }
       }
+
       String medicamentoPrincipal = '';
       String dosisPrincipal = '';
       String frecuenciaPrincipal = '';
@@ -206,16 +206,14 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     String? suffixText,
   }) {
     final fillColor = Colors.white;
-
     final baseBorder = gray ? _grayBorder() : _softBorder();
 
-    final border =
-        error
-            ? OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Colors.red, width: 1.6),
-            )
-            : baseBorder;
+    final border = error
+        ? OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.red, width: 1.6),
+          )
+        : baseBorder;
 
     return InputDecoration(
       prefixIcon:
@@ -227,7 +225,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
       enabledBorder: border,
       focusedBorder: border,
       border: InputBorder.none,
-      suffixText: suffixText, // APARECE KG AUTOMATICAMENT
+      suffixText: suffixText,
       suffixStyle: const TextStyle(
         fontSize: 14,
         color: Colors.black87,
@@ -337,7 +335,14 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
 
           final datos = snapshot.data!.data() as Map<String, dynamic>;
           final nombre = datos['nombre'] ?? 'Mascota';
-          final fotoUrl = datos['fotoUrl'];
+
+          // 👇 Soporta tanto 'fotoUrl' como 'foto'
+          final dynamic fotoDynamic =
+              datos['fotoUrl'] ?? datos['foto']; // compatibilidad
+          final String? fotoUrl =
+              fotoDynamic is String && fotoDynamic.isNotEmpty
+                  ? fotoDynamic
+                  : null;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
@@ -354,11 +359,10 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                   padding: const EdgeInsets.all(4),
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundImage:
-                        (fotoUrl != null && (fotoUrl as String).isNotEmpty)
-                            ? NetworkImage(fotoUrl)
-                            : const AssetImage('assets/images/perro.jpg')
-                                as ImageProvider,
+                    backgroundImage: fotoUrl != null
+                        ? NetworkImage(fotoUrl)
+                        : const AssetImage('assets/images/perro.jpg')
+                            as ImageProvider,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -419,15 +423,14 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                               showError: _errPeso,
                               keyboardType:
                                   const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
+                                decimal: true,
+                              ),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(
                                   RegExp(r'[0-9.]'),
                                 ),
                               ],
-                              suffixText:
-                                  'kg', //  AQUÍ APARECEN LOS KILOS EN EL CAMPO
+                              suffixText: 'kg',
                               onChanged: (v) {
                                 if (_errPeso && v.trim().isNotEmpty) {
                                   setState(() => _errPeso = false);
@@ -435,7 +438,6 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                               },
                             ),
                           ),
-
                           const SizedBox(width: 12),
                           Expanded(
                             child: _campo(
@@ -446,8 +448,8 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                               showError: _errTemp,
                               keyboardType:
                                   const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
+                                decimal: true,
+                              ),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(
                                   RegExp(r'[0-9.]'),
@@ -474,7 +476,6 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                           }
                         },
                       ),
-
                       const SizedBox(height: 6),
                       const Align(
                         alignment: Alignment.centerLeft,
@@ -488,9 +489,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                         ),
                       ),
                       const SizedBox(height: 10),
-
                       _buildMedicacionesSection(),
-
                       const SizedBox(height: 20),
                       Row(
                         children: [
@@ -498,12 +497,8 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                             child: ElevatedButton(
                               onPressed: _onGuardar,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  13,
-                                  0,
-                                  60,
-                                ),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 13, 0, 60),
                                 minimumSize: const Size.fromHeight(52),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -523,12 +518,8 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                             child: ElevatedButton(
                               onPressed: _onCancelar,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  148,
-                                  148,
-                                  148,
-                                ),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 148, 148, 148),
                                 minimumSize: const Size.fromHeight(52),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),

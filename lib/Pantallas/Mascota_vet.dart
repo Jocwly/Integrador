@@ -61,6 +61,13 @@ class PerfilMascota extends StatelessWidget {
           final raza = data['raza'] ?? '';
           final color = data['color'] ?? '';
 
+          // 👇 Soporte para fotoUrl (nuevo) y foto (antiguo)
+          final dynamic fotoDynamic = data['fotoUrl'] ?? data['foto'];
+          final String? fotoUrl =
+              fotoDynamic is String && fotoDynamic.isNotEmpty
+                  ? fotoDynamic
+                  : null;
+
           return SingleChildScrollView(
             child: Center(
               child: Padding(
@@ -70,7 +77,7 @@ class PerfilMascota extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // Imagen circular de la mascota (placeholder)
+                    // Imagen circular de la mascota
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(
@@ -80,9 +87,12 @@ class PerfilMascota extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       padding: const EdgeInsets.all(4),
-                      child: const CircleAvatar(
+                      child: CircleAvatar(
                         radius: 50,
-                        backgroundImage: AssetImage('assets/images/perro.jpg'),
+                        backgroundImage: fotoUrl != null
+                            ? NetworkImage(fotoUrl)
+                            : const AssetImage('assets/images/perro.jpg')
+                                as ImageProvider,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -146,11 +156,10 @@ class PerfilMascota extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder:
-                                          (context) => CitasMascota(
-                                            clienteId: clienteId,
-                                            mascotaId: mascotaId,
-                                          ),
+                                      builder: (context) => CitasMascota(
+                                        clienteId: clienteId,
+                                        mascotaId: mascotaId,
+                                      ),
                                     ),
                                   );
                                 },
@@ -162,11 +171,10 @@ class PerfilMascota extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder:
-                                          (context) => ProgramarCita(
-                                            clienteId: clienteId,
-                                            mascotaId: mascotaId,
-                                          ),
+                                      builder: (context) => ProgramarCita(
+                                        clienteId: clienteId,
+                                        mascotaId: mascotaId,
+                                      ),
                                     ),
                                   );
                                 },
@@ -184,11 +192,10 @@ class PerfilMascota extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder:
-                                          (context) => RegistrarVacuna(
-                                            clienteId: clienteId,
-                                            mascotaId: mascotaId,
-                                          ),
+                                      builder: (context) => RegistrarVacuna(
+                                        clienteId: clienteId,
+                                        mascotaId: mascotaId,
+                                      ),
                                     ),
                                   );
                                 },
@@ -200,11 +207,10 @@ class PerfilMascota extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder:
-                                          (context) => ConsultaMedica(
-                                            clienteId: clienteId,
-                                            mascotaId: mascotaId,
-                                          ),
+                                      builder: (context) => ConsultaMedica(
+                                        clienteId: clienteId,
+                                        mascotaId: mascotaId,
+                                      ),
                                     ),
                                   );
                                 },
@@ -222,11 +228,10 @@ class PerfilMascota extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder:
-                                          (context) => HistorialMedico(
-                                            clienteId: clienteId,
-                                            mascotaId: mascotaId,
-                                          ),
+                                      builder: (context) => HistorialMedico(
+                                        clienteId: clienteId,
+                                        mascotaId: mascotaId,
+                                      ),
                                     ),
                                   );
                                 },

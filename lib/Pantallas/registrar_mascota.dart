@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class RegistrarMascota extends StatefulWidget {
   final String clienteId;
@@ -85,66 +86,83 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
   }
 
   Future<void> _guardarMascota() async {
-    final nombre = nombreController.text.trim();
-    final edad = edadController.text.trim();
-    final raza = razaController.text.trim();
-    final tamano = tamanoController.text.trim();
-    final peso = pesoController.text.trim();
-    final color = colorController.text.trim();
+  final nombre = nombreController.text.trim();
+  final edad = edadController.text.trim();
+  final raza = razaController.text.trim();
+  final tamano = tamanoController.text.trim();
+  final peso = pesoController.text.trim();
+  final color = colorController.text.trim();
 
-    if (nombre.isEmpty ||
-        especie == null ||
-        sexo == null ||
-        esterilizado == null ||
-        edad.isEmpty ||
-        raza.isEmpty ||
-        tamano.isEmpty ||
-        peso.isEmpty ||
-        color.isEmpty) {
-      setState(() {
-        _mostrarErrores = true;
-      });
+  if (nombre.isEmpty ||
+      especie == null ||
+      sexo == null ||
+      esterilizado == null ||
+      edad.isEmpty ||
+      raza.isEmpty ||
+      tamano.isEmpty ||
+      peso.isEmpty ||
+      color.isEmpty) {
+    setState(() {
+      _mostrarErrores = true;
+    });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor llena todos los campos')),
-      );
-      return;
-    }
-
-    try {
-      final clienteRef = FirebaseFirestore.instance
-          .collection('clientes')
-          .doc(widget.clienteId);
-
-      await clienteRef.collection('mascotas').add({
-        'nombre': nombre,
-        'edad': '$edad $_unidadEdad', // ej. "3 años"
-        'raza': raza,
-        'tamano': tamano,
-        'peso': peso,
-        'color': color,
-        'especie': especie,
-        'sexo': sexo,
-        'esterilizado': esterilizado,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      await clienteRef.update({'mascotas': FieldValue.increment(1)});
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mascota registrada correctamente')),
-      );
-
-      Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Por favor llena todos los campos')),
+    );
+    return;
   }
+
+  try {
+    final clienteRef = FirebaseFirestore.instance
+        .collection('clientes')
+        .doc(widget.clienteId);
+
+    // 1️⃣ Creamos la referencia del documento de la mascota
+    final mascotaRef = clienteRef.collection('mascotas').doc();
+
+    // 2️⃣ Subimos la imagen (si el usuario eligió una)
+    String? fotoUrl;
+    if (_imagenSeleccionada != null) {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('mascotas/${widget.clienteId}/${mascotaRef.id}.jpg');
+
+      final uploadTask = await storageRef.putFile(_imagenSeleccionada!);
+      fotoUrl = await uploadTask.ref.getDownloadURL();
+    }
+
+    // 3️⃣ Guardamos los datos de la mascota en Firestore
+    await mascotaRef.set({
+      'nombre': nombre,
+      'edad': '$edad $_unidadEdad', // ej. "3 años"
+      'raza': raza,
+      'tamano': tamano,
+      'peso': peso,
+      'color': color,
+      'especie': especie,
+      'sexo': sexo,
+      'esterilizado': esterilizado,
+      'fotoUrl': fotoUrl, // 👈 URL de la imagen (puede ser null)
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    // 4️⃣ Aumentamos el contador de mascotas del cliente
+    await clienteRef.update({'mascotas': FieldValue.increment(1)});
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Mascota registrada correctamente')),
+    );
+
+    Navigator.pop(context);
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
