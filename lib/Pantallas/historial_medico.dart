@@ -187,7 +187,6 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                 ),
 
                 const SizedBox(height: 20),
-
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream:
@@ -323,6 +322,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                         consulta,
                                         fechaFormateada,
                                         consultaId,
+                                        fecha, // 👉 pasamos DateTime real
                                       );
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -358,6 +358,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
     Map<String, dynamic> consulta,
     String fechaFormateada,
     String consultaId,
+    DateTime fechaConsulta,
   ) {
     final Color azulSuave = const Color(0xFFD6E1F7);
     final Color azulFuerte = const Color(0xFF2A74D9);
@@ -365,6 +366,21 @@ class _HistorialMedicoState extends State<HistorialMedico> {
     final List<dynamic> medsDynamic = consulta['medicaciones'] ?? [];
     final List<Map<String, dynamic>> medicaciones =
         medsDynamic.cast<Map<String, dynamic>>();
+    final inicioDia = DateTime(
+      fechaConsulta.year,
+      fechaConsulta.month,
+      fechaConsulta.day,
+    );
+    final finDia = inicioDia.add(const Duration(days: 1));
+    final vacunasQuery = FirebaseFirestore.instance
+        .collection('clientes')
+        .doc(widget.clienteId)
+        .collection('mascotas')
+        .doc(widget.mascotaId)
+        .collection('vacunas')
+        .where('fechaAplicacion', isGreaterThanOrEqualTo: inicioDia)
+        .where('fechaAplicacion', isLessThan: finDia)
+        .orderBy('fechaAplicacion', descending: false);
 
     showDialog(
       context: context,
@@ -418,6 +434,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                   const SizedBox(height: 12),
                   const Divider(),
 
+                  // Datos consulta
                   _seccionTitulo(
                     icon: Icons.info_outline,
                     titulo: "Datos de la consulta",
@@ -541,6 +558,104 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                             );
                           }).toList(),
                     ),
+
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  _seccionTitulo(
+                    icon: Icons.vaccines_outlined,
+                    titulo: "Vacunas aplicadas",
+                  ),
+                  const SizedBox(height: 4),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: vacunasQuery.snapshots(),
+                    builder: (context, snapshotVacunas) {
+                      if (snapshotVacunas.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: LinearProgressIndicator(),
+                        );
+                      }
+
+                      if (!snapshotVacunas.hasData ||
+                          snapshotVacunas.data!.docs.isEmpty) {
+                        return const Text(
+                          "No hay vacunas registradas para esta fecha.",
+                          style: TextStyle(fontSize: 14),
+                        );
+                      }
+
+                      final vacunasDocs = snapshotVacunas.data!.docs;
+
+                      return Column(
+                        children:
+                            vacunasDocs.map((doc) {
+                              final v =
+                                  doc.data() as Map<String, dynamic>? ?? {};
+                              final nombreVacuna =
+                                  v['nombreVacuna'] ?? 'Vacuna';
+                              final lote = v['lote'] ?? '---';
+                              final dosis = v['dosis'] ?? '---';
+                              final aplicador = v['personalAplicador'] ?? '---';
+
+                              DateTime? fechaAplicacion;
+                              if (v['fechaAplicacion'] is Timestamp) {
+                                fechaAplicacion =
+                                    (v['fechaAplicacion'] as Timestamp)
+                                        .toDate();
+                              }
+
+                              DateTime? fechaProxima;
+                              if (v['fechaProxima'] is Timestamp) {
+                                fechaProxima =
+                                    (v['fechaProxima'] as Timestamp).toDate();
+                              }
+
+                              String formatFecha(DateTime? d) {
+                                if (d == null) return 'No aplica';
+                                return DateFormat('dd/MM/yyyy').format(d);
+                              }
+
+                              return Container(
+                                width: double.infinity,
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE7F0FF),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: azulFuerte.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      nombreVacuna,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    _filaEtiquetaValor("Lote", lote),
+                                    _filaEtiquetaValor("Dosis", dosis),
+                                    _filaEtiquetaValor("Aplicador", aplicador),
+                                    _filaEtiquetaValor(
+                                      "Fecha aplicación",
+                                      formatFecha(fechaAplicacion),
+                                    ),
+                                    _filaEtiquetaValor(
+                                      "Próxima dosis",
+                                      formatFecha(fechaProxima),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
