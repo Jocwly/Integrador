@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:login/Pantallas/veterinario.dart';
 import 'package:login/Pantallas/registro.dart';
+import 'package:login/Pantallas/mascotadueno.dart';
 
 class Login extends StatefulWidget {
   static const routeName = '/login';
@@ -15,11 +18,68 @@ class _LoginState extends State<Login> {
   final _passCtrl = TextEditingController();
   bool _obscure = true;
 
+  bool _isLoading = false;
+
+  // 🔐 Credenciales predeterminadas del veterinario
+  static const String _vetEmail = 'veterinario@petcare.com';
+  static const String _vetPass = 'vet123456';
+
   @override
   void dispose() {
     _emailCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    final email = _emailCtrl.text.trim();
+    final pass = _passCtrl.text.trim();
+
+    if (email.isEmpty || pass.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ingresa correo y contraseña')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      // 1️⃣ Verificar si es el veterinario
+      if (email == _vetEmail && pass == _vetPass) {
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, Veterinario.routeName);
+        return;
+      }
+
+      // 2️⃣ Si no es veterinario, buscar en la colección "clientes"
+      final query = await FirebaseFirestore.instance
+          .collection('clientes')
+          .where('correo', isEqualTo: email)
+          .where('password', isEqualTo: pass)
+          .limit(1)
+          .get();
+
+      if (!mounted) return;
+
+      if (query.docs.isNotEmpty) {
+        // Cliente encontrado → va a MascotaDueño
+        Navigator.pushReplacementNamed(context, Mascotadueno.routeName);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Correo o contraseña incorrectos')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al iniciar sesión: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -36,7 +96,6 @@ class _LoginState extends State<Login> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 12),
-              // Logo circular
               CircleAvatar(
                 radius: 85,
                 backgroundColor: pillBlue,
@@ -92,18 +151,20 @@ class _LoginState extends State<Login> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed:
-                      () => Navigator.pushReplacementNamed(
-                        context,
-                        Veterinario.routeName,
-                      ),
-                  child: const Text(
-                    'INICIAR SESIÓN',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: .5,
-                    ),
-                  ),
+                  onPressed: _isLoading ? null : _handleLogin,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text(
+                          'INICIAR SESIÓN',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: .5,
+                          ),
+                        ),
                 ),
               ),
 
@@ -113,8 +174,8 @@ class _LoginState extends State<Login> {
                 children: [
                   const Text('¿No tienes una cuenta? '),
                   GestureDetector(
-                    onTap:
-                        () => Navigator.pushNamed(context, Registro.routeName),
+                    onTap: () =>
+                        Navigator.pushNamed(context, Registro.routeName),
                     child: const Text(
                       'Regístrate aquí',
                       style: TextStyle(

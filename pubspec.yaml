@@ -66,7 +66,6 @@ flutter:
   assets:
     - assets/images/perro.jpg
     - assets/images/petcare_logo.jpg
-
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
