@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ConsultaMedicaDetalles extends StatefulWidget {
@@ -261,4 +261,4 @@ class _ConsultaMedicaDetallesState extends State<ConsultaMedicaDetalles> {
       ),
     );
   }
-}
+}*/

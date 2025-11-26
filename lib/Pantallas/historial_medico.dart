@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:login/Pantallas/detalles_hm.dart';
 
 class HistorialMedico extends StatefulWidget {
   final String clienteId;
@@ -253,12 +252,12 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                 const SizedBox(height: 5),
                                 RichText(
                                   text: TextSpan(
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Color.fromARGB(255, 34, 34, 34),
                                       fontSize: 16,
                                     ),
                                     children: [
-                                      TextSpan(
+                                      const TextSpan(
                                         text: '📌 Motivo: ',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -270,14 +269,15 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                     ],
                                   ),
                                 ),
+                                const SizedBox(height: 2),
                                 RichText(
                                   text: TextSpan(
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Color.fromARGB(255, 34, 34, 34),
                                       fontSize: 16,
                                     ),
                                     children: [
-                                      TextSpan(
+                                      const TextSpan(
                                         text: '🩺 Diagnóstico: ',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -290,6 +290,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                   ),
                                 ),
 
+                                const SizedBox(height: 6),
                                 if (consulta['medicaciones'] != null &&
                                     consulta['medicaciones'] is List) ...[
                                   const Text(
@@ -317,16 +318,11 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                   alignment: Alignment.centerRight,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      Navigator.push(
+                                      _mostrarReporteConsulta(
                                         context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (_) => ConsultaMedicaDetalles(
-                                                clienteId: widget.clienteId,
-                                                mascotaId: widget.mascotaId,
-                                                consultaId: consultaId,
-                                              ),
-                                        ),
+                                        consulta,
+                                        fechaFormateada,
+                                        consultaId,
                                       );
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -353,6 +349,311 @@ class _HistorialMedicoState extends State<HistorialMedico> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _mostrarReporteConsulta(
+    BuildContext context,
+    Map<String, dynamic> consulta,
+    String fechaFormateada,
+    String consultaId,
+  ) {
+    final Color azulSuave = const Color(0xFFD6E1F7);
+    final Color azulFuerte = const Color(0xFF2A74D9);
+
+    final List<dynamic> medsDynamic = consulta['medicaciones'] ?? [];
+    final List<Map<String, dynamic>> medicaciones =
+        medsDynamic.cast<Map<String, dynamic>>();
+
+    showDialog(
+      context: context,
+      builder: (_) {
+        final double maxHeight = MediaQuery.of(context).size.height * 0.8;
+        final double maxWidth = MediaQuery.of(context).size.width * 0.95;
+
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: maxHeight,
+              maxWidth: maxWidth,
+            ),
+            padding: const EdgeInsets.all(18),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Encabezado del reporte
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.description_outlined, color: azulFuerte),
+                          const SizedBox(width: 8),
+                          const Text(
+                            "Reporte de consulta médica",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Fecha de consulta: $fechaFormateada",
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade800),
+                  ),
+
+                  const SizedBox(height: 12),
+                  const Divider(),
+
+                  _seccionTitulo(
+                    icon: Icons.info_outline,
+                    titulo: "Datos de la consulta",
+                  ),
+                  _datoReporte(
+                    "Motivo de consulta",
+                    consulta['motivo'] ?? '---',
+                    multiline: true,
+                  ),
+
+                  const SizedBox(height: 6),
+                  _seccionTitulo(
+                    icon: Icons.monitor_heart_outlined,
+                    titulo: "Signos vitales",
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _chipDetalle(
+                          label: "Peso",
+                          value:
+                              (consulta['peso'] != null &&
+                                      consulta['peso'].toString().isNotEmpty)
+                                  ? "${consulta['peso']} kg"
+                                  : '---',
+                          icon: Icons.monitor_weight,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _chipDetalle(
+                          label: "Temperatura",
+                          value:
+                              (consulta['temperatura'] != null &&
+                                      consulta['temperatura']
+                                          .toString()
+                                          .isNotEmpty)
+                                  ? "${consulta['temperatura']} °C"
+                                  : '---',
+                          icon: Icons.thermostat,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+                  _seccionTitulo(
+                    icon: Icons.fact_check_outlined,
+                    titulo: "Diagnóstico",
+                  ),
+                  _datoReporte(
+                    "Diagnóstico clínico",
+                    consulta['diagnostico'] ?? '---',
+                    multiline: true,
+                  ),
+
+                  const SizedBox(height: 8),
+                  _seccionTitulo(
+                    icon: Icons.medication_outlined,
+                    titulo: "Medicación recetada",
+                  ),
+                  const SizedBox(height: 4),
+
+                  if (medicaciones.isEmpty)
+                    const Text(
+                      "No hay medicaciones registradas.",
+                      style: TextStyle(fontSize: 14),
+                    )
+                  else
+                    Column(
+                      children:
+                          medicaciones.map((m) {
+                            return Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: azulSuave.withOpacity(0.7),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: azulFuerte.withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    m['nombre'] ?? 'Medicamento',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _filaEtiquetaValor(
+                                          "Dosis",
+                                          m['dosis'] ?? '---',
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: _filaEtiquetaValor(
+                                          "Frecuencia",
+                                          m['frecuencia'] ?? '---',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  _filaEtiquetaValor(
+                                    "Duración",
+                                    m['duracion'] ?? '---',
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _seccionTitulo({required IconData icon, required String titulo}) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFF2A74D9)),
+          const SizedBox(width: 6),
+          Text(
+            titulo,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _datoReporte(String label, String value, {bool multiline = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6, top: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 245, 245, 245),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 14),
+              maxLines: multiline ? null : 3,
+              overflow:
+                  multiline ? TextOverflow.visible : TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _chipDetalle({
+    required String label,
+    required String value,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 243, 246, 252),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF2A74D9).withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFF2A74D9)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 11, color: Colors.black54),
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _filaEtiquetaValor(String label, String value) {
+    return RichText(
+      text: TextSpan(
+        style: const TextStyle(fontSize: 13, color: Colors.black87),
+        children: [
+          TextSpan(
+            text: "$label: ",
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          TextSpan(text: value),
+        ],
       ),
     );
   }

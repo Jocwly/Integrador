@@ -25,6 +25,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
   String? especie;
   String? sexo;
   String? esterilizado;
+  String _unidadEdad = 'años';
 
   bool _mostrarErrores = false;
 
@@ -44,6 +45,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
   ];
 
   final List<String> razasCaninos = [
+    "Mestizo",
     "Labrador Retriever",
     "Pastor Alemán",
     "Bulldog",
@@ -59,6 +61,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
   ];
 
   final List<String> razasFelinos = [
+    "Mestizo",
     "Siamés",
     "Persa",
     "Maine Coon",
@@ -115,7 +118,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
 
       await clienteRef.collection('mascotas').add({
         'nombre': nombre,
-        'edad': edad,
+        'edad': '$edad $_unidadEdad', // ej. "3 años"
         'raza': raza,
         'tamano': tamano,
         'peso': peso,
@@ -173,7 +176,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // FOTO + "Nueva mascota"
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -228,6 +230,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // NOMBRE (solo)
                   _buildLabel(
                     'Nombre de la mascota:',
                     isError:
@@ -238,23 +241,98 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                     isError:
                         _mostrarErrores && nombreController.text.trim().isEmpty,
                   ),
+
                   const SizedBox(height: 16),
-                  _buildLabel(
-                    'Especie:',
-                    isError: _mostrarErrores && especie == null,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel(
+                              'Especie:',
+                              isError: _mostrarErrores && especie == null,
+                            ),
+                            _buildDropdownBox<String>(
+                              value: especie,
+                              hint: 'Seleccionar',
+                              items: especies,
+                              isError: _mostrarErrores && especie == null,
+                              onChanged: (value) {
+                                setState(() {
+                                  especie = value;
+                                  razaController.clear();
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel(
+                              'Raza:',
+                              isError:
+                                  _mostrarErrores &&
+                                  razaController.text.trim().isEmpty,
+                            ),
+                            _buildRazaField(),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  _buildDropdownBox<String>(
-                    value: especie,
-                    hint: 'Seleccionar',
-                    items: especies,
-                    isError: _mostrarErrores && especie == null,
-                    onChanged: (value) {
-                      setState(() {
-                        especie = value;
-                        razaController.clear();
-                      });
-                    },
+
+                  const SizedBox(height: 16),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel(
+                              'Edad:',
+                              isError:
+                                  _mostrarErrores &&
+                                  edadController.text.trim().isEmpty,
+                            ),
+                            _buildEdadField(),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel(
+                              'Color:',
+                              isError:
+                                  _mostrarErrores &&
+                                  colorController.text.trim().isEmpty,
+                            ),
+                            _buildTextFieldBox(
+                              controller: colorController,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.deny(
+                                  RegExp(r'[0-9]'),
+                                ),
+                              ],
+                              isError:
+                                  _mostrarErrores &&
+                                  colorController.text.trim().isEmpty,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
+
                   const SizedBox(height: 16),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -387,56 +465,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildLabel(
-                              'Edad:',
-                              isError:
-                                  _mostrarErrores &&
-                                  edadController.text.trim().isEmpty,
-                            ),
-                            _buildTextFieldBox(
-                              controller: edadController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d{0,2}(\.\d{0,2})?$'),
-                                ),
-                              ],
-                              suffixText: 'años',
-                              isError:
-                                  _mostrarErrores &&
-                                  edadController.text.trim().isEmpty,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel(
-                              'Raza:',
-                              isError:
-                                  _mostrarErrores &&
-                                  razaController.text.trim().isEmpty,
-                            ),
-                            _buildRazaField(),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel(
                               'Tamaño:',
                               isError:
                                   _mostrarErrores &&
@@ -444,6 +472,8 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                             ),
                             _buildTextFieldBox(
                               controller: tamanoController,
+                              hintText: 'Pequeño, mediano, grande...',
+                              hintStyle: TextStyle(fontSize: 12),
                               inputFormatters: [
                                 FilteringTextInputFormatter.deny(
                                   RegExp(r'[0-9]'),
@@ -489,21 +519,8 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                     ],
                   ),
 
-                  const SizedBox(height: 16),
-                  _buildLabel(
-                    'Color:',
-                    isError:
-                        _mostrarErrores && colorController.text.trim().isEmpty,
-                  ),
-                  _buildTextFieldBox(
-                    controller: colorController,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.deny(RegExp(r'[0-9]')),
-                    ],
-                    isError:
-                        _mostrarErrores && colorController.text.trim().isEmpty,
-                  ),
                   const SizedBox(height: 24),
+
                   Row(
                     children: [
                       Expanded(
@@ -580,6 +597,8 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     TextInputType keyboardType = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
     String? suffixText,
+    String? hintText,
+    TextStyle? hintStyle,
     bool isError = false,
   }) {
     final borderColor =
@@ -599,6 +618,8 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
         decoration: InputDecoration(
           border: InputBorder.none,
           suffixText: suffixText,
+          hintText: hintText,
+          hintStyle: hintStyle,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 4,
             vertical: 10,
@@ -664,5 +685,61 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     }
 
     return _buildTextFieldBox(controller: razaController, isError: isError);
+  }
+
+  Widget _buildEdadField() {
+    final bool isError = _mostrarErrores && edadController.text.trim().isEmpty;
+
+    final borderColor =
+        isError ? Colors.red : const Color(0xFF2A74D9).withOpacity(0.5);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: edadController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                  RegExp(r'^\d{0,2}(\.\d{0,2})?$'),
+                ),
+              ],
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 10,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _unidadEdad,
+              items: const [
+                DropdownMenuItem(value: 'años', child: Text('años')),
+                DropdownMenuItem(value: 'meses', child: Text('meses')),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  _unidadEdad = value;
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

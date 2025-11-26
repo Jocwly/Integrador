@@ -22,7 +22,8 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
   final _nombreVacunaCtrl = TextEditingController();
   final _loteCtrl = TextEditingController();
   final _dosisCtrl = TextEditingController();
-  final _personalCtrl = TextEditingController();
+  final _personalCtrl =
+      TextEditingController(); // ahora lo llenamos desde el dropdown
 
   DateTime? _fechaAplicacion;
   DateTime? _fechaProxima;
@@ -36,6 +37,12 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
   final Color azulBorde = const Color(0xFF2A74D9);
   final Color botonAzulOscuro = const Color(0xFF0B1446);
   final Color botonGris = const Color(0xFF9FA2B4);
+  final List<String> _personalOpciones = const [
+    'Dr. Edson SanJuan',
+    'Dra. Abril Peña',
+    'Adriana Mendoza',
+    'Sharlyn Zenaido',
+  ];
 
   @override
   void initState() {
@@ -96,7 +103,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
       _errNombre = _nombreVacunaCtrl.text.trim().isEmpty;
       _errLote = _loteCtrl.text.trim().isEmpty;
       _errDosis = _dosisCtrl.text.trim().isEmpty;
-      _errPersonal = _personalCtrl.text.trim().isEmpty;
+      _errPersonal = _personalCtrl.text.trim().isEmpty; // sigue validando
     });
 
     if (_errNombre || _errLote || _errDosis || _errPersonal) return;
@@ -340,14 +347,8 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
           const SizedBox(height: 16),
           _label("Personal Aplicador"),
           const SizedBox(height: 6),
-          _inputText(
-            _personalCtrl,
-            showError: _errPersonal,
-            onChanged: () {
-              if (_errPersonal && _personalCtrl.text.trim().isNotEmpty)
-                setState(() => _errPersonal = false);
-            },
-          ),
+          _dropdownPersonalAplicador(),
+
           const SizedBox(height: 16),
           _label("Fecha de próxima dosis (si aplica)"),
           const SizedBox(height: 6),
@@ -476,6 +477,43 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
         const SizedBox(height: 6),
         _inputText(controller, showError: showError, onChanged: onChanged),
       ],
+    );
+  }
+
+  Widget _dropdownPersonalAplicador() {
+    final borderColor = _errPersonal ? Colors.red : azulBorde.withOpacity(0.5);
+
+    return Container(
+      height: 54,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1.6),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _personalCtrl.text.isNotEmpty ? _personalCtrl.text : null,
+          hint: const Text(
+            "Seleccionar personal",
+            style: TextStyle(fontSize: 14),
+          ),
+          isExpanded: true,
+          items:
+              _personalOpciones.map((p) {
+                return DropdownMenuItem<String>(
+                  value: p,
+                  child: Text(p, style: const TextStyle(fontSize: 14)),
+                );
+              }).toList(),
+          onChanged: (value) {
+            setState(() {
+              _personalCtrl.text = value ?? '';
+              _errPersonal = false;
+            });
+          },
+        ),
+      ),
     );
   }
 

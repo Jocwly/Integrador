@@ -20,8 +20,6 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   final TextEditingController motivoController = TextEditingController();
   DateTime? fechaSeleccionada;
   TimeOfDay? horaSeleccionada;
-
-  // AHORA PUEDEN SER NULOS PARA MOSTRAR "Seleccionar"
   String? tipoCita;
   String? personal;
 
@@ -33,10 +31,10 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   ];
 
   final List<String> personalDisponible = [
-    'Jocelyn Angeles',
-    'Dr. Hernández',
-    'Martha López',
-    'Carlos Ruiz',
+    'Dr. Edson SanJuan',
+    'Dra. Abril Peña',
+    'Adriana Mendoza',
+    'Sharlyn Zenaido',
   ];
 
   Future<void> _seleccionarFecha(BuildContext context) async {
@@ -65,7 +63,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
     }
   }
 
-  // 🔹 Guardar cita en Firestore
+  //  Guardar cita en Firestore
   Future<void> guardarCita() async {
     if (fechaSeleccionada == null || horaSeleccionada == null) {
       ScaffoldMessenger.of(
@@ -204,8 +202,6 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // TARJETA DEL FORMULARIO
                 Container(
                   decoration: BoxDecoration(
                     color: azulSuave,
