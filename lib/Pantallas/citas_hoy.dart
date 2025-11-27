@@ -23,7 +23,7 @@ class CitasHoy extends StatelessWidget {
         .collectionGroup('citas')
         .where('fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(inicioHoy))
         .where('fecha', isLessThan: Timestamp.fromDate(finHoy));
-        // OJO: sin orderBy para evitar índice obligatorio
+    // sin orderBy -> no necesitas índice compuesto
 
     return Scaffold(
       backgroundColor: fondo,
@@ -62,49 +62,78 @@ class CitasHoy extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 430),
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: StreamBuilder<QuerySnapshot>(
-                stream: citasHoyQuery.snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return const Center(
-                      child: Text('Error al cargar las citas.'),
-                    );
-                  }
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+              child: Column(
+                children: [
+                  // ====== CARD FECHA (como en el mockup) ======
+                  _FechaSeguimientoCard(fecha: inicioHoy),
+                  const SizedBox(height: 16),
 
-                  // Ordenamos por fecha en Flutter
-                  final docs = snapshot.data!.docs.toList()
-                    ..sort((a, b) {
-                      final fa =
-                          (a['fecha'] as Timestamp?)?.toDate() ??
-                          DateTime(2100);
-                      final fb =
-                          (b['fecha'] as Timestamp?)?.toDate() ??
-                          DateTime(2100);
-                      return fa.compareTo(fb);
-                    });
+                  Expanded(
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream:
+                          FirebaseFirestore.instance
+                              .collectionGroup('citas')
+                              // IMPORTANTE: usamos DateTime directamente, Firestore lo convierte a Timestamp
+                              .where('fecha', isGreaterThanOrEqualTo: inicioHoy)
+                              .where('fecha', isLessThan: finHoy)
+                              .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          // Muestra el error real en pantalla y en consola
+                          print('ERROR FIRESTORE CITAS HOY: ${snapshot.error}');
+                          return Center(
+                            child: Text(
+                              'Error: ${snapshot.error}',
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        }
 
-                  if (docs.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'No hay citas programadas para hoy.',
-                        style: TextStyle(color: Colors.black54),
-                      ),
-                    );
-                  }
+                        if (!snapshot.hasData) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
 
-                  return ListView.separated(
-                    itemCount: docs.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (context, index) {
-                      final data =
-                          docs[index].data() as Map<String, dynamic>;
-                      return _CitaNotificacionCard(data: data);
-                    },
-                  );
-                },
+                        // Ordenamos por fecha en Flutter
+                        final docs =
+                            snapshot.data!.docs.toList()..sort((a, b) {
+                              final fa =
+                                  (a['fecha'] as Timestamp?)?.toDate() ??
+                                  DateTime(2100);
+                              final fb =
+                                  (b['fecha'] as Timestamp?)?.toDate() ??
+                                  DateTime(2100);
+                              return fa.compareTo(fb);
+                            });
+
+                        if (docs.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'No hay citas programadas para hoy.',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                          );
+                        }
+
+                        return ListView.separated(
+                          itemCount: docs.length,
+                          separatorBuilder:
+                              (_, __) => const SizedBox(height: 10),
+                          itemBuilder: (context, index) {
+                            final doc = docs[index];
+                            final data = doc.data() as Map<String, dynamic>;
+
+                            return _CitaNotificacionCard(
+                              data: data,
+                              citaRef: doc.reference,
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -164,24 +193,123 @@ class CitasHoy extends StatelessWidget {
   }
 }
 
-// ========== CARD ESTILO NOTIFICACIÓN ==========
-class _CitaNotificacionCard extends StatelessWidget {
-  final Map<String, dynamic> data;
+// ========== CARD FECHA DE SEGUIMIENTO ==========
+class _FechaSeguimientoCard extends StatelessWidget {
+  final DateTime fecha;
 
-  const _CitaNotificacionCard({required this.data});
+  const _FechaSeguimientoCard({required this.fecha});
 
   @override
   Widget build(BuildContext context) {
+    final fechaStr = DateFormat('dd/MM/yyyy').format(fecha);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Fecha de seguimiento',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 42,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F3F7),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              fechaStr, // <- FECHA DE HOY POR DEFECTO
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CitaNotificacionCard extends StatefulWidget {
+  final Map<String, dynamic> data;
+  final DocumentReference citaRef;
+
+  const _CitaNotificacionCard({required this.data, required this.citaRef});
+
+  @override
+  State<_CitaNotificacionCard> createState() => _CitaNotificacionCardState();
+}
+
+class _CitaNotificacionCardState extends State<_CitaNotificacionCard> {
+  String? nombreMascota;
+  String? nombreDueno;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarNombres();
+  }
+
+  Future<void> _cargarNombres() async {
+    try {
+      final mascotaRef = widget.citaRef.parent.parent;
+      if (mascotaRef == null) return;
+
+      final mascotaSnap = await mascotaRef.get();
+      final mascotaData = mascotaSnap.data() as Map<String, dynamic>?;
+      final nombreMascotaLocal = mascotaData?['nombre'] as String?;
+
+      final clienteRef = mascotaRef.parent.parent;
+      String? nombreDuenoLocal;
+
+      if (clienteRef != null) {
+        final clienteSnap = await clienteRef.get();
+        final clienteData = clienteSnap.data() as Map<String, dynamic>?;
+        nombreDuenoLocal = clienteData?['nombre'] as String?;
+      }
+
+      if (mounted) {
+        setState(() {
+          nombreMascota = nombreMascotaLocal;
+          nombreDueno = nombreDuenoLocal;
+        });
+      }
+    } catch (e) {
+      print('Error cargando nombres de cita: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = widget.data;
+
     final ts = data['fecha'] as Timestamp?;
     final fecha = ts?.toDate();
-
     final horaStr =
         fecha != null ? DateFormat('hh:mm a').format(fecha) : '--:--';
 
-    // SOLO USAMOS CAMPOS QUE SÍ EXISTEN EN TUS CITAS
-    final tipo = data['tipo'] ?? 'Cita';
     final motivo = data['motivo'] ?? 'Motivo no especificado';
-    final personal = data['personal'] ?? 'Sin asignar';
+
+    final pacienteTexto = nombreMascota ?? 'Paciente sin nombre';
+    final duenoTexto = nombreDueno ?? 'Sin dueño';
 
     return Container(
       decoration: BoxDecoration(
@@ -233,10 +361,7 @@ class _CitaNotificacionCard extends StatelessWidget {
                     Spacer(),
                     Text(
                       'Hoy',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.black45,
-                      ),
+                      style: TextStyle(fontSize: 11, color: Colors.black45),
                     ),
                   ],
                 ),
@@ -250,17 +375,14 @@ class _CitaNotificacionCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Tipo: $tipo',
+                  'Paciente: $pacienteTexto.',
                   style: const TextStyle(fontSize: 13),
                 ),
                 Text(
-                  'Personal: $personal',
+                  'Dueño: $duenoTexto.',
                   style: const TextStyle(fontSize: 13),
                 ),
-                Text(
-                  'Motivo: $motivo',
-                  style: const TextStyle(fontSize: 13),
-                ),
+                Text('Motivo: $motivo', style: const TextStyle(fontSize: 13)),
               ],
             ),
           ),

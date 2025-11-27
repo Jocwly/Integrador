@@ -134,23 +134,24 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
 
       await showDialog(
         context: context,
-        builder: (_) => AlertDialog(
-          title: const Text("¡Vacuna registrada! 🎉"),
-          content: Text(
-            "Vacuna: ${_nombreVacunaCtrl.text}\n"
-            "Lote: ${_loteCtrl.text}\n"
-            "Dosis: ${_dosisCtrl.text}\n"
-            "Aplicador: ${_personalCtrl.text}\n\n"
-            "Aplicación: ${_format(_fechaAplicacion)}\n"
-            "Próxima dosis: ${_fechaProxima == null ? 'No aplica' : _format(_fechaProxima)}",
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cerrar"),
+        builder:
+            (_) => AlertDialog(
+              title: const Text("¡Vacuna registrada! 🎉"),
+              content: Text(
+                "Vacuna: ${_nombreVacunaCtrl.text}\n"
+                "Lote: ${_loteCtrl.text}\n"
+                "Dosis: ${_dosisCtrl.text}\n"
+                "Aplicador: ${_personalCtrl.text}\n\n"
+                "Aplicación: ${_format(_fechaAplicacion)}\n"
+                "Próxima dosis: ${_fechaProxima == null ? 'No aplica' : _format(_fechaProxima)}",
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cerrar"),
+                ),
+              ],
             ),
-          ],
-        ),
       );
 
       Navigator.pop(context);
@@ -164,22 +165,23 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
   Future<void> _cancelar() async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("¿Cancelar registro?"),
-        content: const Text(
-          "Se perderá la información. ¿Seguro que quieres cancelar?",
-        ),
-        actions: [
-          TextButton(
-            child: const Text("Seguir editando"),
-            onPressed: () => Navigator.pop(context, false),
+      builder:
+          (_) => AlertDialog(
+            title: const Text("¿Cancelar registro?"),
+            content: const Text(
+              "Se perderá la información. ¿Seguro que quieres cancelar?",
+            ),
+            actions: [
+              TextButton(
+                child: const Text("Seguir editando"),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              ElevatedButton(
+                child: const Text("Sí, cancelar"),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
           ),
-          ElevatedButton(
-            child: const Text("Sí, cancelar"),
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true && mounted) Navigator.pop(context);
@@ -266,160 +268,158 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
   }
 
   Widget _fotoMascota(String? fotoUrl) => Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: const Color.fromARGB(255, 0, 20, 66),
-            width: 3,
-          ),
-          shape: BoxShape.circle,
-        ),
-        padding: const EdgeInsets.all(4),
-        child: CircleAvatar(
-          radius: 50,
-          backgroundImage: fotoUrl != null
+    decoration: BoxDecoration(
+      border: Border.all(color: const Color.fromARGB(255, 0, 20, 66), width: 3),
+      shape: BoxShape.circle,
+    ),
+    padding: const EdgeInsets.all(4),
+    child: CircleAvatar(
+      radius: 50,
+      backgroundImage:
+          fotoUrl != null
               ? NetworkImage(fotoUrl)
               : const AssetImage('assets/images/perro.jpg') as ImageProvider,
-        ),
-      );
+    ),
+  );
 
   Widget _nombreMascota(String nombre) => Container(
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 0, 20, 66),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        child: Text(
-          nombre,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      );
+    decoration: BoxDecoration(
+      color: const Color.fromARGB(255, 0, 20, 66),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+    child: Text(
+      nombre,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
 
   Widget _formulario() => Form(
-        key: _formKey,
-        child: Container(
-          decoration: BoxDecoration(
-            color: azulSuave,
-            borderRadius: BorderRadius.circular(18),
+    key: _formKey,
+    child: Container(
+      decoration: BoxDecoration(
+        color: azulSuave,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _label("Nombre de la vacuna"),
+          const SizedBox(height: 6),
+          _inputText(
+            _nombreVacunaCtrl,
+            showError: _errNombre,
+            icon: Icons.vaccines_outlined,
+            onChanged: () {
+              if (_errNombre && _nombreVacunaCtrl.text.trim().isNotEmpty) {
+                setState(() => _errNombre = false);
+              }
+            },
           ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 16),
+          _label("Fecha de aplicación"),
+          const SizedBox(height: 6),
+          _dateField(_fechaAplicacion, _pickFechaAplicacion),
+          const SizedBox(height: 16),
+          Row(
             children: [
-              _label("Nombre de la vacuna"),
-              const SizedBox(height: 6),
-              _inputText(
-                _nombreVacunaCtrl,
-                showError: _errNombre,
-                icon: Icons.vaccines_outlined,
-                onChanged: () {
-                  if (_errNombre && _nombreVacunaCtrl.text.trim().isNotEmpty) {
-                    setState(() => _errNombre = false);
-                  }
-                },
+              Expanded(
+                child: _fieldSmall(
+                  "Lote",
+                  _loteCtrl,
+                  _errLote,
+                  onChanged: () {
+                    if (_errLote && _loteCtrl.text.trim().isNotEmpty) {
+                      setState(() => _errLote = false);
+                    }
+                  },
+                ),
               ),
-              const SizedBox(height: 16),
-              _label("Fecha de aplicación"),
-              const SizedBox(height: 6),
-              _dateField(_fechaAplicacion, _pickFechaAplicacion),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _fieldSmall(
-                      "Lote",
-                      _loteCtrl,
-                      _errLote,
-                      onChanged: () {
-                        if (_errLote && _loteCtrl.text.trim().isNotEmpty) {
-                          setState(() => _errLote = false);
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _fieldSmall(
-                      "Dosis",
-                      _dosisCtrl,
-                      _errDosis,
-                      onChanged: () {
-                        if (_errDosis && _dosisCtrl.text.trim().isNotEmpty) {
-                          setState(() => _errDosis = false);
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _label("Personal Aplicador"),
-              const SizedBox(height: 6),
-              _dropdownPersonalAplicador(),
-              const SizedBox(height: 16),
-              _label("Fecha de próxima dosis (si aplica)"),
-              const SizedBox(height: 6),
-              _dateField(_fechaProxima, _pickFechaProxima),
-              const SizedBox(height: 26),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _guardar,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: botonAzulOscuro,
-                        minimumSize: const Size.fromHeight(52),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        "Guardar",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _cancelar,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: botonGris,
-                        minimumSize: const Size.fromHeight(52),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        "Cancelar",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: _fieldSmall(
+                  "Dosis",
+                  _dosisCtrl,
+                  _errDosis,
+                  onChanged: () {
+                    if (_errDosis && _dosisCtrl.text.trim().isNotEmpty) {
+                      setState(() => _errDosis = false);
+                    }
+                  },
+                ),
               ),
             ],
           ),
-        ),
-      );
+          const SizedBox(height: 16),
+          _label("Personal Aplicador"),
+          const SizedBox(height: 6),
+          _dropdownPersonalAplicador(),
+          const SizedBox(height: 16),
+          _label("Fecha de próxima dosis (si aplica)"),
+          const SizedBox(height: 6),
+          _dateField(_fechaProxima, _pickFechaProxima),
+          const SizedBox(height: 26),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _guardar,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: botonAzulOscuro,
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    "Guardar",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _cancelar,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: botonGris,
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    "Cancelar",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
 
   Widget _label(String text) => Text(
-        text,
-        style: const TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 14,
-          color: Colors.black87,
-        ),
-      );
+    text,
+    style: const TextStyle(
+      fontWeight: FontWeight.w700,
+      fontSize: 14,
+      color: Colors.black87,
+    ),
+  );
 
   Widget _inputText(
     TextEditingController controller, {
@@ -509,12 +509,13 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
             style: TextStyle(fontSize: 14),
           ),
           isExpanded: true,
-          items: _personalOpciones.map((p) {
-            return DropdownMenuItem<String>(
-              value: p,
-              child: Text(p, style: const TextStyle(fontSize: 14)),
-            );
-          }).toList(),
+          items:
+              _personalOpciones.map((p) {
+                return DropdownMenuItem<String>(
+                  value: p,
+                  child: Text(p, style: const TextStyle(fontSize: 14)),
+                );
+              }).toList(),
           onChanged: (value) {
             setState(() {
               _personalCtrl.text = value ?? '';
@@ -527,28 +528,28 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
   }
 
   Widget _dateField(DateTime? value, VoidCallback onTap) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: azulBorde.withOpacity(0.5), width: 1.6),
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: azulBorde.withOpacity(0.5), width: 1.6),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.calendar_today_rounded,
+            color: Colors.black87,
+            size: 18,
           ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.calendar_today_rounded,
-                color: Colors.black87,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                value == null ? "Seleccionar" : _format(value),
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
-              ),
-            ],
+          const SizedBox(width: 8),
+          Text(
+            value == null ? "Seleccionar" : _format(value),
+            style: const TextStyle(fontSize: 14, color: Colors.black87),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }

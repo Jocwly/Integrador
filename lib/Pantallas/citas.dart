@@ -92,15 +92,17 @@ class _CitasMascotaState extends State<CitasMascota> {
               final docs = citasSnap.data!.docs;
 
               // separar completadas y pendientes
-              final completadas = docs.where((d) {
-                final data = d.data() as Map<String, dynamic>;
-                return (data['completada'] ?? false) == true;
-              }).toList();
+              final completadas =
+                  docs.where((d) {
+                    final data = d.data() as Map<String, dynamic>;
+                    return (data['completada'] ?? false) == true;
+                  }).toList();
 
-              final pendientes = docs.where((d) {
-                final data = d.data() as Map<String, dynamic>;
-                return (data['completada'] ?? false) == false;
-              }).toList();
+              final pendientes =
+                  docs.where((d) {
+                    final data = d.data() as Map<String, dynamic>;
+                    return (data['completada'] ?? false) == false;
+                  }).toList();
 
               final listaActual = _tabIndex == 0 ? completadas : pendientes;
 
@@ -123,12 +125,13 @@ class _CitasMascotaState extends State<CitasMascota> {
                           padding: const EdgeInsets.all(4),
                           child: CircleAvatar(
                             radius: 50,
-                            backgroundImage: fotoUrl != null
-                                ? NetworkImage(fotoUrl)
-                                : const AssetImage(
-                                        'assets/images/perro.jpg',
-                                      )
-                                    as ImageProvider,
+                            backgroundImage:
+                                fotoUrl != null
+                                    ? NetworkImage(fotoUrl)
+                                    : const AssetImage(
+                                          'assets/images/perro.jpg',
+                                        )
+                                        as ImageProvider,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -190,9 +193,10 @@ class _CitasMascotaState extends State<CitasMascota> {
                                   onTap: () => setState(() => _tabIndex = 0),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: _tabIndex == 0
-                                          ? Colors.white
-                                          : Colors.transparent,
+                                      color:
+                                          _tabIndex == 0
+                                              ? Colors.white
+                                              : Colors.transparent,
                                       borderRadius: BorderRadius.circular(18),
                                     ),
                                     alignment: Alignment.center,
@@ -200,9 +204,10 @@ class _CitasMascotaState extends State<CitasMascota> {
                                       'Completadas',
                                       style: TextStyle(
                                         fontWeight: FontWeight.w600,
-                                        color: _tabIndex == 0
-                                            ? Colors.black
-                                            : Colors.white,
+                                        color:
+                                            _tabIndex == 0
+                                                ? Colors.black
+                                                : Colors.white,
                                       ),
                                     ),
                                   ),
@@ -213,9 +218,10 @@ class _CitasMascotaState extends State<CitasMascota> {
                                   onTap: () => setState(() => _tabIndex = 1),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: _tabIndex == 1
-                                          ? Colors.white
-                                          : Colors.transparent,
+                                      color:
+                                          _tabIndex == 1
+                                              ? Colors.white
+                                              : Colors.transparent,
                                       borderRadius: BorderRadius.circular(18),
                                     ),
                                     alignment: Alignment.center,
@@ -223,9 +229,10 @@ class _CitasMascotaState extends State<CitasMascota> {
                                       'Pendientes',
                                       style: TextStyle(
                                         fontWeight: FontWeight.w600,
-                                        color: _tabIndex == 1
-                                            ? Colors.black
-                                            : Colors.white,
+                                        color:
+                                            _tabIndex == 1
+                                                ? Colors.black
+                                                : Colors.white,
                                       ),
                                     ),
                                   ),
@@ -238,33 +245,34 @@ class _CitasMascotaState extends State<CitasMascota> {
 
                         // SOLO LA LISTA DESPLAZABLE
                         Expanded(
-                          child: listaActual.isEmpty
-                              ? const Center(
-                                  child: Text(
-                                    'No hay citas en esta categoría.',
-                                    style: TextStyle(color: Colors.black54),
+                          child:
+                              listaActual.isEmpty
+                                  ? const Center(
+                                    child: Text(
+                                      'No hay citas en esta categoría.',
+                                      style: TextStyle(color: Colors.black54),
+                                    ),
+                                  )
+                                  : ListView.separated(
+                                    itemCount: listaActual.length,
+                                    separatorBuilder:
+                                        (_, __) => const SizedBox(height: 12),
+                                    itemBuilder: (context, index) {
+                                      final doc = listaActual[index];
+                                      final data =
+                                          doc.data() as Map<String, dynamic>;
+                                      return _citaCard(
+                                        data: data,
+                                        citaId: doc.id,
+                                        citasRef: citasRef,
+                                        azulSuave: azulSuave,
+                                        azulFuerte: azulFuerte,
+                                        completada:
+                                            (data['completada'] ?? false) ==
+                                            true,
+                                      );
+                                    },
                                   ),
-                                )
-                              : ListView.separated(
-                                  itemCount: listaActual.length,
-                                  separatorBuilder: (_, __) =>
-                                      const SizedBox(height: 12),
-                                  itemBuilder: (context, index) {
-                                    final doc = listaActual[index];
-                                    final data =
-                                        doc.data() as Map<String, dynamic>;
-                                    return _citaCard(
-                                      data: data,
-                                      citaId: doc.id,
-                                      citasRef: citasRef,
-                                      azulSuave: azulSuave,
-                                      azulFuerte: azulFuerte,
-                                      completada:
-                                          (data['completada'] ?? false) ==
-                                              true,
-                                    );
-                                  },
-                                ),
                         ),
                       ],
                     ),
@@ -366,10 +374,7 @@ class _CitasMascotaState extends State<CitasMascota> {
               ),
               const SizedBox(width: 8),
               _chip(
-                tipo
-                    .replaceAll('Cita ', '')
-                    .replaceAll('Consulta ', '')
-                    .trim(),
+                tipo.replaceAll('Cita ', '').replaceAll('Consulta ', '').trim(),
               ),
               const SizedBox(width: 6),
               _chip(
@@ -440,12 +445,13 @@ class _CitasMascotaState extends State<CitasMascota> {
             Row(
               children: [
                 ElevatedButton(
-                  onPressed: () => _editarFechaHora(
-                    context: context,
-                    citasRef: citasRef,
-                    citaId: citaId,
-                    fechaActual: fecha,
-                  ),
+                  onPressed:
+                      () => _editarFechaHora(
+                        context: context,
+                        citasRef: citasRef,
+                        citaId: citaId,
+                        fechaActual: fecha,
+                      ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: azulFuerte,
                     padding: const EdgeInsets.symmetric(
@@ -595,22 +601,23 @@ class _CitasMascotaState extends State<CitasMascota> {
   ) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Cancelar cita'),
-        content: const Text(
-          '¿Seguro que deseas cancelar esta cita? Se eliminará de la lista.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('No'),
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Cancelar cita'),
+            content: const Text(
+              '¿Seguro que deseas cancelar esta cita? Se eliminará de la lista.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('No'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Sí, cancelar'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sí, cancelar'),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true) {

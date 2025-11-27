@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:login/servicios/notification_service.dart'; // ajusta la ruta según tu proyecto
 
 class ProgramarCita extends StatefulWidget {
   final String clienteId;
@@ -22,6 +23,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   TimeOfDay? horaSeleccionada;
   String? tipoCita;
   String? personal;
+  String? nombreMascota;
 
   final List<String> tiposCita = [
     'Cita estética',
@@ -66,9 +68,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   //  Guardar cita en Firestore
   Future<void> guardarCita() async {
     if (fechaSeleccionada == null || horaSeleccionada == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecciona fecha y hora')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Selecciona fecha y hora')));
       return;
     }
 
@@ -86,14 +88,17 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       return;
     }
 
-    final mascotaRef = FirebaseFirestore.instance
-        .collection('clientes')
-        .doc(widget.clienteId)
-        .collection('mascotas')
-        .doc(widget.mascotaId)
-        .collection('citas')
-        .doc();
+    // Referencia al documento de la cita
+    final mascotaRef =
+        FirebaseFirestore.instance
+            .collection('clientes')
+            .doc(widget.clienteId)
+            .collection('mascotas')
+            .doc(widget.mascotaId)
+            .collection('citas')
+            .doc(); // genera ID automático
 
+    // Fecha y hora completas
     final fechaCompleta = DateTime(
       fechaSeleccionada!.year,
       fechaSeleccionada!.month,
@@ -102,6 +107,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       horaSeleccionada!.minute,
     );
 
+    // Guardar en Firestore
     await mascotaRef.set({
       'tipo': tipoCita,
       'fecha': fechaCompleta,
@@ -111,6 +117,31 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       'completada': false,
       'estado': 'Programada',
     });
+
+    // 👉 Programar notificaciones locales
+    // ID único basado en el ID del documento de la cita
+    final int idCita = mascotaRef.id.hashCode;
+
+    // Opcional: obtener nombre del cliente (dueño)
+    final clienteSnap =
+        await FirebaseFirestore.instance
+            .collection('clientes')
+            .doc(widget.clienteId)
+            .get();
+
+    final String nombreDuenio =
+        (clienteSnap.data()?['nombre'] ?? 'Propietario') as String;
+
+    await NotificationService.programarNotificacionesCita(
+      idCita: idCita,
+      fechaHoraCita: fechaCompleta,
+      paciente: nombreMascota ?? 'Mascota',
+      duenio: nombreDuenio,
+      motivo:
+          motivoController.text.isNotEmpty
+              ? motivoController.text
+              : (tipoCita ?? 'Cita veterinaria'),
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Cita programada correctamente')),
@@ -163,6 +194,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
 
           final data = snapshot.data!.data() as Map<String, dynamic>;
           final nombre = data['nombre'] ?? 'Mascota';
+          nombreMascota ??= nombre;
 
           // 👇 Soporte para fotoUrl (nuevo) y foto (antiguo)
           final dynamic fotoDynamic = data['fotoUrl'] ?? data['foto'];
@@ -187,10 +219,11 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                   padding: const EdgeInsets.all(4),
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundImage: fotoUrl != null
-                        ? NetworkImage(fotoUrl)
-                        : const AssetImage('assets/images/perro.jpg')
-                            as ImageProvider,
+                    backgroundImage:
+                        fotoUrl != null
+                            ? NetworkImage(fotoUrl)
+                            : const AssetImage('assets/images/perro.jpg')
+                                as ImageProvider,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -242,10 +275,12 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                           Expanded(
                             child: _buildPickerField(
                               icon: Icons.calendar_today_rounded,
-                              text: fechaSeleccionada != null
-                                  ? DateFormat('dd/MM/yyyy')
-                                      .format(fechaSeleccionada!)
-                                  : 'Seleccionar',
+                              text:
+                                  fechaSeleccionada != null
+                                      ? DateFormat(
+                                        'dd/MM/yyyy',
+                                      ).format(fechaSeleccionada!)
+                                      : 'Seleccionar',
                               onTap: () => _seleccionarFecha(context),
                             ),
                           ),
@@ -253,9 +288,10 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                           Expanded(
                             child: _buildPickerField(
                               icon: Icons.access_time_rounded,
-                              text: horaSeleccionada != null
-                                  ? horaSeleccionada!.format(context)
-                                  : 'Seleccionar',
+                              text:
+                                  horaSeleccionada != null
+                                      ? horaSeleccionada!.format(context)
+                                      : 'Seleccionar',
                               onTap: () => _seleccionarHora(context),
                             ),
                           ),
@@ -368,9 +404,10 @@ class _ProgramarCitaState extends State<ProgramarCita> {
         hint: const Text('Seleccionar'),
         decoration: const InputDecoration(border: InputBorder.none),
         icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black87),
-        items: items
-            .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-            .toList(),
+        items:
+            items
+                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+                .toList(),
         onChanged: onChanged,
       ),
     );

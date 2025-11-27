@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login/Pantallas/citas_hoy.dart';
 import 'package:login/Pantallas/perfil_cliente.dart'; // Cliente
-import 'package:login/main.dart'; // para cerrar sesión
 import 'package:login/Pantallas/veterinario.dart'; // pantalla de inicio
 
 class Clientes extends StatelessWidget {
@@ -28,30 +27,30 @@ class Clientes extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF71B3FF),
-                Color(0xFF2E63D8),
-              ],
+              colors: [Color(0xFF71B3FF), Color(0xFF2E63D8)],
             ),
           ),
         ),
         title: Row(
           children: [
-
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Icon(Icons.person_outline_outlined,
-                            color: Colors.white, size: 25),
+                        Icon(
+                          Icons.person_outline_outlined,
+                          color: Colors.white,
+                          size: 25,
+                        ),
                         SizedBox(width: 8),
                         Text(
                           'Gestión de Clientes',
@@ -69,7 +68,6 @@ class Clientes extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            
           ],
         ),
       ),
@@ -79,16 +77,17 @@ class Clientes extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ===== LISTA DE CLIENTES =====
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: clientesRef
-                    .orderBy('createdAt', descending: false)
-                    .snapshots(),
+                stream:
+                    clientesRef
+                        .orderBy('createdAt', descending: false)
+                        .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return const Center(
-                        child: Text('Error al cargar clientes'));
+                      child: Text('Error al cargar clientes'),
+                    );
                   }
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -97,7 +96,8 @@ class Clientes extends StatelessWidget {
                   final docs = snapshot.data!.docs;
                   if (docs.isEmpty) {
                     return const Center(
-                        child: Text('No hay clientes registrados'));
+                      child: Text('No hay clientes registrados'),
+                    );
                   }
 
                   return ListView.builder(
@@ -133,13 +133,13 @@ class Clientes extends StatelessWidget {
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(ctx).pop(false),
+                                    onPressed:
+                                        () => Navigator.of(ctx).pop(false),
                                     child: const Text('Cancelar'),
                                   ),
                                   TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(ctx).pop(true),
+                                    onPressed:
+                                        () => Navigator.of(ctx).pop(true),
                                     child: const Text(
                                       'Eliminar',
                                       style: TextStyle(color: Colors.red),
@@ -155,22 +155,20 @@ class Clientes extends StatelessWidget {
                             await clientesRef.doc(doc.id).delete();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content:
-                                    Text('Cliente "$nombre" eliminado'),
+                                content: Text('Cliente "$nombre" eliminado'),
                               ),
                             );
                           } catch (e) {
                             debugPrint("ERROR AL ELIMINAR: $e");
                           }
                         },
+
                         child: GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => Cliente(
-                                  clienteId: doc.id,
-                                ),
+                                builder: (_) => Cliente(clienteId: doc.id),
                               ),
                             );
                           },
@@ -188,6 +186,8 @@ class Clientes extends StatelessWidget {
                                 ),
                               ],
                             ),
+
+                            // ===== ROW PRINCIPAL CON CONTADOR =====
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
@@ -206,8 +206,7 @@ class Clientes extends StatelessWidget {
                                       const SizedBox(height: 2),
                                       Text(
                                         correo,
-                                        style:
-                                            const TextStyle(fontSize: 14),
+                                        style: const TextStyle(fontSize: 14),
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
@@ -218,6 +217,24 @@ class Clientes extends StatelessWidget {
                                         ),
                                       ),
                                     ],
+                                  ),
+                                ),
+
+                                // === CONTADOR AZUL DE MASCOTAS ===
+                                Container(
+                                  width: 30,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    color: azulOscuro,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    mascotas.toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -234,7 +251,6 @@ class Clientes extends StatelessWidget {
         ),
       ),
 
-      // ===== MENÚ INFERIOR =====
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -250,20 +266,21 @@ class Clientes extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
           selectedItemColor: azulOscuro,
-          unselectedItemColor: azulClaro.withOpacity(0.7),
+          unselectedItemColor: azulClaro,
           showUnselectedLabels: true,
-          currentIndex: 1, // Clientes seleccionado
+          currentIndex: 1,
           onTap: (index) {
-            if (index == 1) return; // ya estamos aquí
-
+            if (index == 1) return;
             if (index == 0) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const Veterinario()),
               );
             } else if (index == 2) {
-              Navigator.pushReplacement(context, 
-              MaterialPageRoute(builder: (_) => const CitasHoy()));
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const CitasHoy()),
+              );
             }
           },
           items: const [

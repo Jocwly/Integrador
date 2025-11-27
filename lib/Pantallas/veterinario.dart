@@ -30,8 +30,9 @@ class Veterinario extends StatelessWidget {
         .where('fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(inicioHoy))
         .where('fecha', isLessThan: Timestamp.fromDate(finHoy));
 
-    final mascotasQuery =
-        FirebaseFirestore.instance.collectionGroup('mascotas');
+    final mascotasQuery = FirebaseFirestore.instance.collectionGroup(
+      'mascotas',
+    );
 
     return Scaffold(
       backgroundColor: fondo,
@@ -46,10 +47,7 @@ class Veterinario extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF71B3FF),
-                Color(0xFF2E63D8),
-              ],
+              colors: [Color(0xFF71B3FF), Color(0xFF2E63D8)],
             ),
           ),
         ),
@@ -69,32 +67,33 @@ class Veterinario extends StatelessWidget {
                   );
                 }
               },
-              itemBuilder: (context) => const [
-                PopupMenuItem<int>(
-                  enabled: false,
-                  child: Row(
-                    children: [
-                      Icon(Icons.person, color: Colors.black),
-                      SizedBox(width: 8),
-                      Text('Dr. José'),
-                    ],
-                  ),
-                ),
-                PopupMenuDivider(),
-                PopupMenuItem<int>(
-                  value: 1,
-                  child: Row(
-                    children: [
-                      Icon(Icons.exit_to_app, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text(
-                        'Cerrar Sesión',
-                        style: TextStyle(color: Colors.red),
+              itemBuilder:
+                  (context) => const [
+                    PopupMenuItem<int>(
+                      enabled: false,
+                      child: Row(
+                        children: [
+                          Icon(Icons.person, color: Colors.black),
+                          SizedBox(width: 8),
+                          Text('Dr. José'),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ],
+                    ),
+                    PopupMenuDivider(),
+                    PopupMenuItem<int>(
+                      value: 1,
+                      child: Row(
+                        children: [
+                          Icon(Icons.exit_to_app, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text(
+                            'Cerrar Sesión',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
               child: const CircleAvatar(
                 radius: 20,
                 backgroundColor: Color.fromARGB(0, 0, 0, 0),
@@ -107,8 +106,10 @@ class Veterinario extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
                       color: Colors.white.withOpacity(0.15),
@@ -116,8 +117,11 @@ class Veterinario extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Icon(Icons.favorite_border,
-                            color: Colors.white, size: 20),
+                        Icon(
+                          Icons.favorite_border,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                         SizedBox(width: 8),
                         Text(
                           'PetCare',
@@ -128,14 +132,6 @@ class Veterinario extends StatelessWidget {
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Gestión Veterinaria',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
                     ),
                   ),
                 ],
@@ -170,10 +166,7 @@ class Veterinario extends StatelessWidget {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF4D8CFF),
-                        Color(0xFF003067),
-                      ],
+                      colors: [Color(0xFF4D8CFF), Color(0xFF003067)],
                     ),
                     boxShadow: const [
                       BoxShadow(
@@ -203,12 +196,12 @@ class Veterinario extends StatelessWidget {
                               ),
                             ),
                             SizedBox(height: 2),
-                           // Text(
-                           //   'martes, 25 nov',
-                             // style: TextStyle(
-                                //color: Color(0xFFCBDDFF),
-                               // fontSize: 15,
-                             // ),
+                            // Text(
+                            //   'martes, 25 nov',
+                            // style: TextStyle(
+                            //color: Color(0xFFCBDDFF),
+                            // fontSize: 15,
+                            // ),
                             //),
                             SizedBox(height: 6),
                             Text(
@@ -225,7 +218,9 @@ class Veterinario extends StatelessWidget {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(22),
                         child: SizedBox(
-                          width: size.width * 0.32, // ancho fijo para parecerse al mockup
+                          width:
+                              size.width *
+                              0.40, // ancho fijo para parecerse al mockup
                           child: AspectRatio(
                             aspectRatio: 4 / 3,
                             child: Image.network(
@@ -247,12 +242,12 @@ class Veterinario extends StatelessWidget {
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: fondo,
-                ),
+                decoration: const BoxDecoration(color: fondo),
                 child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -335,8 +330,7 @@ class Veterinario extends StatelessWidget {
                                 return _InfoCard(
                                   titulo: 'Citas de Hoy',
                                   valor: totalHoy.toString(),
-                                  subtitulo:
-                                      '$completadasHoy completadas',
+                                  subtitulo: '$completadasHoy completadas',
                                   icono: Icons.calendar_today_outlined,
                                   height: cardMinHeight,
                                 );
@@ -423,17 +417,10 @@ class _SquareIcon extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF5B9DFF),
-            Color(0xFF244BCC),
-          ],
+          colors: [Color(0xFF5B9DFF), Color(0xFF244BCC)],
         ),
       ),
-      child: Icon(
-        icon,
-        color: Colors.white,
-        size: 30,
-      ),
+      child: Icon(icon, color: Colors.white, size: 30),
     );
   }
 }
@@ -465,10 +452,7 @@ class _InfoCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [
-            Color(0xFFEFF4FF),
-            Color(0xFFFFFFFF),
-          ],
+          colors: [Color(0xFFEFF4FF), Color(0xFFFFFFFF)],
         ),
         border: Border.all(color: Color(0xFFE1E6F2), width: 1),
         boxShadow: const [
@@ -491,17 +475,10 @@ class _InfoCard extends StatelessWidget {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF5B9DFF),
-                  Color(0xFF244BCC),
-                ],
+                colors: [Color(0xFF5B9DFF), Color(0xFF244BCC)],
               ),
             ),
-            child: Icon(
-              icono,
-              color: Colors.white,
-              size: 26,
-            ),
+            child: Icon(icono, color: Colors.white, size: 26),
           ),
           const SizedBox(height: 14),
           Text(
@@ -524,11 +501,7 @@ class _InfoCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              const Icon(
-                Icons.trending_up,
-                size: 16,
-                color: Color(0xFF7C93FF),
-              ),
+              const Icon(Icons.trending_up, size: 16, color: Color(0xFF7C93FF)),
               const SizedBox(width: 6),
               Text(
                 subtitulo,
