@@ -47,7 +47,7 @@ class Veterinario extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF71B3FF), Color(0xFF2E63D8)],
+              colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
             ),
           ),
         ),
@@ -166,7 +166,7 @@ class Veterinario extends StatelessWidget {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFF4D8CFF), Color(0xFF003067)],
+                      colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
                     ),
                     boxShadow: const [
                       BoxShadow(
@@ -185,7 +185,10 @@ class Veterinario extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: const [
-                            _SquareIcon(icon: Icons.person),
+                            _SquareIcon(
+                              icon: Icons.person,
+                              color: Color.fromARGB(47, 255, 254, 254),
+                            ),
                             SizedBox(height: 6),
                             Text(
                               '¡Bienvenido, Dr.!',
@@ -405,7 +408,7 @@ class Veterinario extends StatelessWidget {
 class _SquareIcon extends StatelessWidget {
   final IconData icon;
 
-  const _SquareIcon({required this.icon});
+  const _SquareIcon({required this.icon, required Color color});
 
   @override
   Widget build(BuildContext context) {

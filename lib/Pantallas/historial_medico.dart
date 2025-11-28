@@ -33,23 +33,49 @@ class _HistorialMedicoState extends State<HistorialMedico> {
     final azulClaro = const Color(0xffe6e8ff);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_circle_left_rounded,
-            color: Color(0xFF2A74D9),
+      backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
-        title: const Text(
-          'Historial Médico',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+          child: SafeArea(
+            bottom: false,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.pets_rounded, color: Colors.white, size: 20),
+                      SizedBox(width: 6),
+                      Text(
+                        'Historial médico',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // espacio para compensar el IconButton de la izquierda
+                const SizedBox(width: 48),
+              ],
+            ),
           ),
         ),
       ),
@@ -396,56 +422,63 @@ class _HistorialMedicoState extends State<HistorialMedico> {
     showDialog(
       context: context,
       builder: (_) {
-        final double maxHeight = MediaQuery.of(context).size.height * 0.8;
-        final double maxWidth = MediaQuery.of(context).size.width * 0.95;
+        // ⭐ ANCHOS AJUSTADOS
+        final double maxWidth = MediaQuery.of(context).size.width * 0.92;
+        final double maxHeight = MediaQuery.of(context).size.height * 0.85;
 
         return Dialog(
+          backgroundColor: Colors.white, // fondo blanco 100%
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: 20,
+          ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(24),
           ),
           child: Container(
-            constraints: BoxConstraints(
-              maxHeight: maxHeight,
-              maxWidth: maxWidth,
-            ),
-            padding: const EdgeInsets.all(18),
+            width: maxWidth,
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            padding: const EdgeInsets.all(22),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Encabezado del reporte
+                  // ⭐ HEADER ANCHO Y ELEGANTE
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.description_outlined, color: azulFuerte),
-                          const SizedBox(width: 8),
-                          const Text(
-                            "Reporte de consulta médica",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      Icon(
+                        Icons.description_outlined,
+                        color: azulFuerte,
+                        size: 26,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "Reporte de consulta médica",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black87,
                           ),
-                        ],
+                        ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(Icons.close, size: 26),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+
+                  const SizedBox(height: 6),
                   Text(
                     "Fecha de consulta: $fechaFormateada",
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade800),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
                   ),
 
-                  const SizedBox(height: 12),
-                  const Divider(),
+                  const SizedBox(height: 14),
+                  Divider(color: Colors.grey.shade300),
 
-                  // Datos consulta
+                  // ⭐ DATOS PRINCIPALES
                   _seccionTitulo(
                     icon: Icons.info_outline,
                     titulo: "Datos de la consulta",
@@ -456,12 +489,13 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                     multiline: true,
                   ),
 
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   _seccionTitulo(
                     icon: Icons.monitor_heart_outlined,
                     titulo: "Signos vitales",
                   ),
-                  const SizedBox(height: 4),
+
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       Expanded(
@@ -475,7 +509,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                           icon: Icons.monitor_weight,
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: _chipDetalle(
                           label: "Temperatura",
@@ -492,7 +526,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                     ],
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   _seccionTitulo(
                     icon: Icons.fact_check_outlined,
                     titulo: "Diagnóstico",
@@ -503,17 +537,17 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                     multiline: true,
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   _seccionTitulo(
                     icon: Icons.medication_outlined,
                     titulo: "Medicación recetada",
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
 
                   if (medicaciones.isEmpty)
                     const Text(
                       "No hay medicaciones registradas.",
-                      style: TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: 15),
                     )
                   else
                     Column(
@@ -521,14 +555,13 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                           medicaciones.map((m) {
                             return Container(
                               width: double.infinity,
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(10),
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.all(14),
                               decoration: BoxDecoration(
-                                color: azulSuave.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(12),
+                                color: azulSuave.withOpacity(0.55),
+                                borderRadius: BorderRadius.circular(14),
                                 border: Border.all(
-                                  color: azulFuerte.withOpacity(0.3),
-                                  width: 1,
+                                  color: azulFuerte.withOpacity(0.35),
                                 ),
                               ),
                               child: Column(
@@ -537,32 +570,22 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                   Text(
                                     m['nombre'] ?? 'Medicamento',
                                     style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _filaEtiquetaValor(
-                                          "Dosis",
-                                          m['dosis'] ?? '---',
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: _filaEtiquetaValor(
-                                          "Frecuencia",
-                                          m['frecuencia'] ?? '---',
-                                        ),
-                                      ),
-                                    ],
+                                  const SizedBox(height: 6),
+                                  _filaEtiquetaValor(
+                                    "Dosis",
+                                    m['dosis'] ?? "---",
                                   ),
-                                  const SizedBox(height: 4),
+                                  _filaEtiquetaValor(
+                                    "Frecuencia",
+                                    m['frecuencia'] ?? "---",
+                                  ),
                                   _filaEtiquetaValor(
                                     "Duración",
-                                    m['duracion'] ?? '---',
+                                    m['duracion'] ?? "---",
                                   ),
                                 ],
                               ),
@@ -570,95 +593,92 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                           }).toList(),
                     ),
 
-                  const SizedBox(height: 12),
-                  const Divider(),
+                  const SizedBox(height: 14),
+                  Divider(color: Colors.grey.shade300),
+
                   _seccionTitulo(
                     icon: Icons.vaccines_outlined,
                     titulo: "Vacunas aplicadas",
                   ),
-                  const SizedBox(height: 4),
+
+                  const SizedBox(height: 6),
                   StreamBuilder<QuerySnapshot>(
                     stream: vacunasQuery.snapshots(),
                     builder: (context, snapshotVacunas) {
-                      if (snapshotVacunas.connectionState ==
-                          ConnectionState.waiting) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: LinearProgressIndicator(),
-                        );
+                      if (!snapshotVacunas.hasData) {
+                        return const LinearProgressIndicator();
                       }
 
-                      if (!snapshotVacunas.hasData ||
-                          snapshotVacunas.data!.docs.isEmpty) {
+                      if (snapshotVacunas.data!.docs.isEmpty) {
                         return const Text(
                           "No hay vacunas registradas para esta fecha.",
                           style: TextStyle(fontSize: 14),
                         );
                       }
 
-                      final vacunasDocs = snapshotVacunas.data!.docs;
-
                       return Column(
                         children:
-                            vacunasDocs.map((doc) {
-                              final v =
-                                  doc.data() as Map<String, dynamic>? ?? {};
-                              final nombreVacuna =
-                                  v['nombreVacuna'] ?? 'Vacuna';
-                              final lote = v['lote'] ?? '---';
-                              final dosis = v['dosis'] ?? '---';
-                              final aplicador = v['personalAplicador'] ?? '---';
+                            snapshotVacunas.data!.docs.map((doc) {
+                              final v = doc.data() as Map<String, dynamic>;
 
-                              DateTime? fechaAplicacion;
-                              if (v['fechaAplicacion'] is Timestamp) {
-                                fechaAplicacion =
-                                    (v['fechaAplicacion'] as Timestamp)
-                                        .toDate();
-                              }
+                              DateTime? fAplicacion =
+                                  v['fechaAplicacion'] is Timestamp
+                                      ? (v['fechaAplicacion'] as Timestamp)
+                                          .toDate()
+                                      : null;
 
-                              DateTime? fechaProxima;
-                              if (v['fechaProxima'] is Timestamp) {
-                                fechaProxima =
-                                    (v['fechaProxima'] as Timestamp).toDate();
-                              }
+                              DateTime? fProxima =
+                                  v['fechaProxima'] is Timestamp
+                                      ? (v['fechaProxima'] as Timestamp)
+                                          .toDate()
+                                      : null;
 
-                              String formatFecha(DateTime? d) {
-                                if (d == null) return 'No aplica';
-                                return DateFormat('dd/MM/yyyy').format(d);
-                              }
+                              String format(DateTime? d) =>
+                                  d == null
+                                      ? 'No aplica'
+                                      : DateFormat('dd/MM/yyyy').format(d);
 
                               return Container(
                                 width: double.infinity,
-                                margin: const EdgeInsets.only(bottom: 8),
-                                padding: const EdgeInsets.all(10),
+                                margin: const EdgeInsets.only(bottom: 10),
+                                padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFE7F0FF),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: azulFuerte.withOpacity(0.3),
+                                    color: azulFuerte.withOpacity(0.25),
                                   ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      nombreVacuna,
+                                      v['nombreVacuna'] ?? "Vacuna",
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    _filaEtiquetaValor("Lote", lote),
-                                    _filaEtiquetaValor("Dosis", dosis),
-                                    _filaEtiquetaValor("Aplicador", aplicador),
+                                    const SizedBox(height: 6),
+                                    _filaEtiquetaValor(
+                                      "Lote",
+                                      v['lote'] ?? "---",
+                                    ),
+                                    _filaEtiquetaValor(
+                                      "Dosis",
+                                      v['dosis'] ?? "---",
+                                    ),
+                                    _filaEtiquetaValor(
+                                      "Aplicador",
+                                      v['personalAplicador'] ?? "---",
+                                    ),
                                     _filaEtiquetaValor(
                                       "Fecha aplicación",
-                                      formatFecha(fechaAplicacion),
+                                      format(fAplicacion),
                                     ),
                                     _filaEtiquetaValor(
                                       "Próxima dosis",
-                                      formatFecha(fechaProxima),
+                                      format(fProxima),
                                     ),
                                   ],
                                 ),

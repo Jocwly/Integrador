@@ -18,19 +18,15 @@ class Cliente extends StatelessWidget {
     final double horizontalPadding = size.width < 360 ? 12 : 16;
 
     return Scaffold(
-      // fondo base lila suave
       backgroundColor: const Color(0xFFD7D2FF),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        // barra con degradado azul como la imagen
+        toolbarHeight: 80,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Color(0xFF67A8FF), // azul claro arriba
-                Color(0xFF2464EB), // azul más intenso abajo
-              ],
+              colors: [Color(0xFF4E78FF), Color.fromARGB(255, 26, 36, 90)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -38,7 +34,7 @@ class Cliente extends StatelessWidget {
         ),
         leading: IconButton(
           icon: const Icon(
-            Icons.arrow_back_ios_outlined,
+            Icons.arrow_back_ios_new_outlined,
             color: Colors.white,
             size: 26,
           ),
@@ -209,7 +205,7 @@ class _CardContenido extends StatelessWidget {
                           Icon(Icons.pets, size: 14, color: azulChip),
                           SizedBox(width: 4),
                           Text(
-                            'Cliente PetCare',
+                            'Cliente',
                             style: TextStyle(
                               fontSize: 11,
                               color: azulChip,
@@ -322,12 +318,16 @@ class _CardContenido extends StatelessWidget {
                         final data = doc.data() as Map<String, dynamic>;
                         final nombreMascota = data['nombre'] ?? 'Mascota';
 
-                        final dynamic fotoDynamic =
-                            data['fotoUrl'] ?? data['foto'];
+                        // 🔹 LEER fotoUrl (la que guardas en RegistrarMascota)
                         final String? fotoUrl =
-                            fotoDynamic is String && fotoDynamic.isNotEmpty
-                                ? fotoDynamic
+                            (data['fotoUrl'] ?? data['foto']) is String
+                                ? (data['fotoUrl'] ?? data['foto']) as String
                                 : null;
+
+                        // 🔹 Para que veas en consola si realmente llega la URL
+                        debugPrint(
+                          'Mascota ${doc.id} -> nombre: $nombreMascota, fotoUrl: $fotoUrl',
+                        );
 
                         return GestureDetector(
                           onTap: () {
@@ -362,8 +362,9 @@ class _CardContenido extends StatelessWidget {
                                 padding: const EdgeInsets.all(3),
                                 child: CircleAvatar(
                                   radius: 32,
+                                  backgroundColor: const Color(0xFFEDEFF3),
                                   backgroundImage:
-                                      fotoUrl != null
+                                      (fotoUrl != null && fotoUrl.isNotEmpty)
                                           ? NetworkImage(fotoUrl)
                                           : const AssetImage(
                                                 'assets/images/perro.jpg',

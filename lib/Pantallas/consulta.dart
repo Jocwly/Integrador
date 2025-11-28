@@ -33,8 +33,10 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
 
   final List<_MedicationFields> _medicaciones = [_MedicationFields()];
 
-  final Color azulSuave = const Color(0xFFD6E1F7);
-  final Color azulFuerte = const Color(0xFF2A74D9);
+  // Colores copiados del perfil de cliente
+  final Color azulSuave = const Color(0xFFF4F6FF);
+  final Color azulFuerte = const Color(0xFF5F79FF);
+  final Color azulOscuro = const Color(0xFF0B1446);
 
   bool _errMotivo = false;
   bool _errPeso = false;
@@ -68,12 +70,13 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
   }
 
   OutlineInputBorder _softBorder() => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(10),
-    borderSide: BorderSide(color: azulFuerte.withOpacity(0.5), width: 1.5),
+    borderRadius: BorderRadius.circular(18),
+    borderSide: BorderSide(color: azulFuerte.withOpacity(0.5), width: 1.3),
   );
+
   OutlineInputBorder _grayBorder() => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(10),
-    borderSide: BorderSide(color: azulFuerte.withOpacity(0.5), width: 1.5),
+    borderRadius: BorderRadius.circular(18),
+    borderSide: BorderSide(color: azulFuerte.withOpacity(0.25), width: 1.3),
   );
 
   Future<void> _pickDate() async {
@@ -207,24 +210,23 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     bool error = false,
     String? suffixText,
   }) {
-    final fillColor = Colors.white;
+    final fillColor = const Color(0xFFF4F6FF); // mismo fondo que las "pills"
     final baseBorder = gray ? _grayBorder() : _softBorder();
 
     final border =
         error
             ? OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(18),
               borderSide: const BorderSide(color: Colors.red, width: 1.6),
             )
             : baseBorder;
 
     return InputDecoration(
-      prefixIcon:
-          icon != null ? Icon(icon, color: Colors.black54, size: 20) : null,
+      prefixIcon: icon != null ? Icon(icon, color: azulFuerte, size: 20) : null,
       hintText: hint,
       filled: true,
       fillColor: fillColor,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       enabledBorder: border,
       focusedBorder: border,
       border: InputBorder.none,
@@ -303,258 +305,348 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
         .collection('mascotas')
         .doc(widget.mascotaId);
 
+    final size = MediaQuery.of(context).size;
+    final double horizontalPadding = size.width < 360 ? 12 : 16;
+    final double cardRadius = size.width < 360 ? 22 : 28;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      // mismo fondo base lila
+      backgroundColor: const Color(0xFFD7D2FF),
+
+      // 🔵 APPBAR IGUAL QUE PERFIL DEL CLIENTE
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        toolbarHeight: 80,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF67A8FF), Color(0xFF2464EB)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(
-            Icons.arrow_circle_left_rounded,
-            color: Colors.black,
+            Icons.arrow_back_ios_new_outlined,
+            color: Colors.white,
+            size: 26,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.of(context).maybePop(),
         ),
         centerTitle: true,
-        title: const Text(
-          'Nueva consulta médica',
-          style: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 0, 0, 0),
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(
+              Icons.medical_services_outlined,
+              color: Colors.white,
+              size: 20,
+            ),
+            SizedBox(width: 6),
+            Text(
+              'Nueva consulta médica',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
+          ],
         ),
       ),
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: mascotaRef.snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error al cargar datos'));
-          }
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: CircularProgressIndicator());
-          }
 
-          final datos = snapshot.data!.data() as Map<String, dynamic>;
-          final nombre = datos['nombre'] ?? 'Mascota';
-
-          // 👇 Soporta tanto 'fotoUrl' como 'foto'
-          final dynamic fotoDynamic =
-              datos['fotoUrl'] ?? datos['foto']; // compatibilidad
-          final String? fotoUrl =
-              fotoDynamic is String && fotoDynamic.isNotEmpty
-                  ? fotoDynamic
-                  : null;
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 13, 0, 60),
-                      width: 3,
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(4),
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage:
-                        fotoUrl != null
-                            ? NetworkImage(fotoUrl)
-                            : const AssetImage('assets/images/perro.jpg')
-                                as ImageProvider,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 13, 0, 60),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 6,
-                  ),
-                  child: Text(
-                    nombre,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    color: azulSuave,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _campo(
-                        'Fecha:',
-                        _dateCtrl,
-                        icon: Icons.event_outlined,
-                        onTap: _pickDate,
-                        grayField: true,
-                        showError: false,
-                      ),
-                      _campo(
-                        'Motivo de la consulta',
-                        _reasonCtrl,
-                        showError: _errMotivo,
-                        onChanged: (v) {
-                          if (_errMotivo && v.trim().isNotEmpty) {
-                            setState(() => _errMotivo = false);
-                          }
-                        },
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _campo(
-                              'Peso',
-                              _weightCtrl,
-                              icon: Icons.monitor_weight,
-                              grayField: true,
-                              showError: _errPeso,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'[0-9.]'),
-                                ),
-                              ],
-                              suffixText: 'kg',
-                              onChanged: (v) {
-                                if (_errPeso && v.trim().isNotEmpty) {
-                                  setState(() => _errPeso = false);
-                                }
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _campo(
-                              'Temperatura',
-                              _tempCtrl,
-                              icon: Icons.thermostat_sharp,
-                              grayField: true,
-                              showError: _errTemp,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'[0-9.]'),
-                                ),
-                              ],
-                              suffixText: '°C',
-                              onChanged: (v) {
-                                if (_errTemp && v.trim().isNotEmpty) {
-                                  setState(() => _errTemp = false);
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      _campo(
-                        'Diagnóstico',
-                        _diagnosisCtrl,
-                        maxLines: 3,
-                        showError: _errDiag,
-                        onChanged: (v) {
-                          if (_errDiag && v.trim().isNotEmpty) {
-                            setState(() => _errDiag = false);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 6),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Medicación prescrita',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      _buildMedicacionesSection(),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: _onGuardar,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  13,
-                                  0,
-                                  60,
-                                ),
-                                minimumSize: const Size.fromHeight(52),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: const Text(
-                                'Guardar',
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 255, 255, 255),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: _onCancelar,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  148,
-                                  148,
-                                  148,
-                                ),
-                                minimumSize: const Size.fromHeight(52),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: const Text(
-                                'Cancelar',
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 0, 0, 0),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+      body: SafeArea(
+        child: Container(
+          // mismo degradado del cuerpo
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFD7D2FF), Color(0xFFF1EEFF)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-          );
-        },
+          ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 430),
+              child: StreamBuilder<DocumentSnapshot>(
+                stream: mascotaRef.snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('Error al cargar datos'));
+                  }
+                  if (!snapshot.hasData || !snapshot.data!.exists) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final datos = snapshot.data!.data() as Map<String, dynamic>;
+                  final nombre = datos['nombre'] ?? 'Mascota';
+
+                  final dynamic fotoDynamic = datos['fotoUrl'] ?? datos['foto'];
+                  final String? fotoUrl =
+                      fotoDynamic is String && fotoDynamic.isNotEmpty
+                          ? fotoDynamic
+                          : null;
+
+                  return SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      16,
+                      horizontalPadding,
+                      24,
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(cardRadius),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x22000000),
+                            blurRadius: 18,
+                            offset: Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Encabezado tipo perfil
+                          Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: azulFuerte.withOpacity(0.5),
+                                    width: 2,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(3),
+                                child: CircleAvatar(
+                                  radius: 32,
+                                  backgroundColor: const Color(0xFFEDEFF3),
+                                  backgroundImage:
+                                      fotoUrl != null
+                                          ? NetworkImage(fotoUrl)
+                                          : const AssetImage(
+                                                'assets/images/perro.jpg',
+                                              )
+                                              as ImageProvider,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      nombre,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 22,
+                                        color: Color(0xFF0B1446),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: azulFuerte.withOpacity(.08),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.pets,
+                                            size: 14,
+                                            color: Color(0xFF5F79FF),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Paciente PetCare',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: azulFuerte,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 22),
+                          const Divider(height: 1),
+
+                          const SizedBox(height: 18),
+
+                          _campo(
+                            'Fecha',
+                            _dateCtrl,
+                            icon: Icons.event_outlined,
+                            onTap: _pickDate,
+                            grayField: true,
+                            showError: false,
+                          ),
+                          _campo(
+                            'Motivo de la consulta',
+                            _reasonCtrl,
+                            showError: _errMotivo,
+                            onChanged: (v) {
+                              if (_errMotivo && v.trim().isNotEmpty) {
+                                setState(() => _errMotivo = false);
+                              }
+                            },
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _campo(
+                                  'Peso',
+                                  _weightCtrl,
+                                  icon: Icons.monitor_weight,
+                                  grayField: true,
+                                  showError: _errPeso,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'[0-9.]'),
+                                    ),
+                                  ],
+                                  suffixText: 'kg',
+                                  onChanged: (v) {
+                                    if (_errPeso && v.trim().isNotEmpty) {
+                                      setState(() => _errPeso = false);
+                                    }
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _campo(
+                                  'Temperatura',
+                                  _tempCtrl,
+                                  icon: Icons.thermostat_sharp,
+                                  grayField: true,
+                                  showError: _errTemp,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'[0-9.]'),
+                                    ),
+                                  ],
+                                  suffixText: '°C',
+                                  onChanged: (v) {
+                                    if (_errTemp && v.trim().isNotEmpty) {
+                                      setState(() => _errTemp = false);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          _campo(
+                            'Diagnóstico',
+                            _diagnosisCtrl,
+                            maxLines: 3,
+                            showError: _errDiag,
+                            onChanged: (v) {
+                              if (_errDiag && v.trim().isNotEmpty) {
+                                setState(() => _errDiag = false);
+                              }
+                            },
+                          ),
+
+                          const SizedBox(height: 6),
+                          const Text(
+                            'Medicación prescrita',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          _buildMedicacionesSection(),
+
+                          const SizedBox(height: 18),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: _onGuardar,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: azulOscuro,
+                                    minimumSize: const Size.fromHeight(52),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                    shadowColor: const Color(0x33000000),
+                                    elevation: 4,
+                                  ),
+                                  child: const Text(
+                                    'Guardar',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: _onCancelar,
+                                  style: OutlinedButton.styleFrom(
+                                    minimumSize: const Size.fromHeight(52),
+                                    side: BorderSide(
+                                      color: Colors.grey.shade400,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                    backgroundColor: Colors.white,
+                                  ),
+                                  child: const Text(
+                                    'Cancelar',
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -626,13 +718,13 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
             },
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
-              foregroundColor: Colors.black,
+              foregroundColor: azulFuerte,
               textStyle: const TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),
             ),
-            icon: const Icon(Icons.add, size: 18, color: Colors.black),
+            icon: const Icon(Icons.add, size: 18),
             label: const Text('Agregar medicación'),
           ),
         ),

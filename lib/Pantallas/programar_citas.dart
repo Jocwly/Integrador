@@ -39,6 +39,26 @@ class _ProgramarCitaState extends State<ProgramarCita> {
     'Sharlyn Zenaido',
   ];
 
+  // Focus para cambio de borde
+  final FocusNode _focusFecha = FocusNode();
+  final FocusNode _focusHora = FocusNode();
+  final FocusNode _focusTipo = FocusNode();
+  final FocusNode _focusPersonal = FocusNode();
+
+  // Colores de borde
+  final Color _borderNormal = const Color(0xFF2A74D9).withOpacity(0.45);
+  final Color _borderFocus = const Color(0xFF4E78FF);
+
+  @override
+  void dispose() {
+    motivoController.dispose();
+    _focusFecha.dispose();
+    _focusHora.dispose();
+    _focusTipo.dispose();
+    _focusPersonal.dispose();
+    super.dispose();
+  }
+
   Future<void> _seleccionarFecha(BuildContext context) async {
     final DateTime? seleccion = await showDatePicker(
       context: context,
@@ -107,6 +127,17 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       horaSeleccionada!.minute,
     );
 
+    // 🔴 Validar que la cita sea en el futuro
+    if (fechaCompleta.isBefore(DateTime.now())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'La fecha y hora de la cita deben ser posteriores a ahora',
+          ),
+        ),
+      );
+      return;
+    }
     // Guardar en Firestore
     await mascotaRef.set({
       'tipo': tipoCita,
@@ -119,10 +150,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
     });
 
     // 👉 Programar notificaciones locales
-    // ID único basado en el ID del documento de la cita
     final int idCita = mascotaRef.id.hashCode;
 
-    // Opcional: obtener nombre del cliente (dueño)
+    // Obtener nombre del cliente (dueño)
     final clienteSnap =
         await FirebaseFirestore.instance
             .collection('clientes')
@@ -152,7 +182,12 @@ class _ProgramarCitaState extends State<ProgramarCita> {
 
   @override
   Widget build(BuildContext context) {
-    final azulSuave = const Color(0xFFD6E1F7);
+    const azulFondoArriba = Color(0xFF67A8FF);
+    const azulFondoAbajo = Color(0xFF2464EB);
+    const lilaFondo1 = Color(0xFFD7D2FF);
+    const lilaFondo2 = Color(0xFFF1EEFF);
+    const azulOscuro = Color(0xFF0B1446);
+    const panelAzulSuave = Color(0xFFE1E8FF);
 
     final mascotaRef = FirebaseFirestore.instance
         .collection('clientes')
@@ -161,211 +196,285 @@ class _ProgramarCitaState extends State<ProgramarCita> {
         .doc(widget.mascotaId);
 
     return Scaffold(
+      backgroundColor: lilaFondo1,
+      // ───── APPBAR TIPO PERFIL MASCOTA ─────
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        toolbarHeight: 80,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [azulFondoArriba, azulFondoAbajo],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(
-            Icons.arrow_circle_left_rounded,
-            color: Color.fromARGB(255, 0, 0, 0),
+            Icons.arrow_back_ios_new_outlined,
+            color: Colors.white,
+            size: 24,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.of(context).maybePop(),
         ),
         centerTitle: true,
-        title: const Text(
-          'Programar cita',
-          style: TextStyle(
-            fontFamily: 'Roboto',
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.event_available_rounded, color: Colors.white, size: 20),
+            SizedBox(width: 6),
+            Text(
+              'Programar cita',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
+          ],
         ),
       ),
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: mascotaRef.snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error al cargar datos'));
-          }
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: CircularProgressIndicator());
-          }
 
-          final data = snapshot.data!.data() as Map<String, dynamic>;
-          final nombre = data['nombre'] ?? 'Mascota';
-          nombreMascota ??= nombre;
-
-          // 👇 Soporte para fotoUrl (nuevo) y foto (antiguo)
-          final dynamic fotoDynamic = data['fotoUrl'] ?? data['foto'];
-          final String? fotoUrl =
-              fotoDynamic is String && fotoDynamic.isNotEmpty
-                  ? fotoDynamic
-                  : null;
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                // FOTO + NOMBRE
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 0, 20, 66),
-                      width: 3,
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                  padding: const EdgeInsets.all(4),
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage:
-                        fotoUrl != null
-                            ? NetworkImage(fotoUrl)
-                            : const AssetImage('assets/images/perro.jpg')
-                                as ImageProvider,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 13, 0, 60),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 6,
-                  ),
-                  child: Text(
-                    nombre,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    color: azulSuave,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel('Tipo de cita:'),
-                      _buildDropdown(
-                        tipoCita,
-                        tiposCita,
-                        (value) => setState(() => tipoCita = value),
-                      ),
-                      const SizedBox(height: 16),
-
-                      Row(
-                        children: [
-                          Expanded(child: _buildLabel('Fecha:')),
-                          const SizedBox(width: 16),
-                          Expanded(child: _buildLabel('Hora:')),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildPickerField(
-                              icon: Icons.calendar_today_rounded,
-                              text:
-                                  fechaSeleccionada != null
-                                      ? DateFormat(
-                                        'dd/MM/yyyy',
-                                      ).format(fechaSeleccionada!)
-                                      : 'Seleccionar',
-                              onTap: () => _seleccionarFecha(context),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _buildPickerField(
-                              icon: Icons.access_time_rounded,
-                              text:
-                                  horaSeleccionada != null
-                                      ? horaSeleccionada!.format(context)
-                                      : 'Seleccionar',
-                              onTap: () => _seleccionarHora(context),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      _buildLabel('Motivo/Descripción:'),
-                      _buildTextArea(motivoController),
-                      const SizedBox(height: 16),
-
-                      _buildLabel('Personal asignado:'),
-                      _buildDropdown(
-                        personal,
-                        personalDisponible,
-                        (value) => setState(() => personal = value),
-                      ),
-                      const SizedBox(height: 20),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: guardarCita,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  13,
-                                  0,
-                                  60,
-                                ),
-                                minimumSize: const Size.fromHeight(52),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: const Text(
-                                'Programar cita',
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 255, 255, 255),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey,
-                                minimumSize: const Size.fromHeight(52),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: const Text(
-                                'Cancelar',
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 0, 0, 0),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+      body: SafeArea(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [lilaFondo1, lilaFondo2],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-          );
-        },
+          ),
+          child: StreamBuilder<DocumentSnapshot>(
+            stream: mascotaRef.snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Center(child: Text('Error al cargar datos'));
+              }
+              if (!snapshot.hasData || !snapshot.data!.exists) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final data = snapshot.data!.data() as Map<String, dynamic>;
+              final nombre = data['nombre'] ?? 'Mascota';
+              nombreMascota ??= nombre;
+
+              final dynamic fotoDynamic = data['fotoUrl'] ?? data['foto'];
+              final String? fotoUrl =
+                  fotoDynamic is String && fotoDynamic.isNotEmpty
+                      ? fotoDynamic
+                      : null;
+
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 430),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 22, 16, 24),
+                    child: Column(
+                      children: [
+                        // FOTO + NOMBRE
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: azulOscuro, width: 3),
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          child: CircleAvatar(
+                            radius: 46,
+                            backgroundColor: const Color(0xFFEDEFF3),
+                            backgroundImage:
+                                fotoUrl != null
+                                    ? NetworkImage(fotoUrl)
+                                    : const AssetImage(
+                                          'assets/images/perro.jpg',
+                                        )
+                                        as ImageProvider,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: azulOscuro,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x33000000),
+                                blurRadius: 8,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 6,
+                          ),
+                          child: Text(
+                            nombre,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // TARJETA PRINCIPAL DEL FORMULARIO
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(26),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x22000000),
+                                blurRadius: 16,
+                                offset: Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 18),
+
+                              _buildLabel('Tipo de cita:'),
+                              _buildDropdown(
+                                value: tipoCita,
+                                items: tiposCita,
+                                borderColor: _borderNormal,
+                                focusNode: _focusTipo,
+                                onChanged:
+                                    (value) => setState(() => tipoCita = value),
+                              ),
+                              const SizedBox(height: 18),
+
+                              Row(
+                                children: [
+                                  Expanded(child: _buildLabel('Fecha:')),
+                                  const SizedBox(width: 16),
+                                  Expanded(child: _buildLabel('Hora:')),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildPickerField(
+                                      icon: Icons.calendar_today_rounded,
+                                      text:
+                                          fechaSeleccionada != null
+                                              ? DateFormat(
+                                                'dd/MM/yyyy',
+                                              ).format(fechaSeleccionada!)
+                                              : 'Seleccionar',
+                                      onTap: () => _seleccionarFecha(context),
+                                      borderColor: _borderNormal,
+                                      focusNode: _focusFecha,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: _buildPickerField(
+                                      icon: Icons.access_time_rounded,
+                                      text:
+                                          horaSeleccionada != null
+                                              ? horaSeleccionada!.format(
+                                                context,
+                                              )
+                                              : 'Seleccionar',
+                                      onTap: () => _seleccionarHora(context),
+                                      borderColor: _borderNormal,
+                                      focusNode: _focusHora,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 18),
+
+                              _buildLabel('Motivo/Descripción:'),
+                              // TextArea SIN efecto de foco especial
+                              _buildTextArea(
+                                controller: motivoController,
+                                borderColor: _borderNormal,
+                              ),
+                              const SizedBox(height: 18),
+
+                              _buildLabel('Personal asignado:'),
+                              _buildDropdown(
+                                value: personal,
+                                items: personalDisponible,
+                                borderColor: _borderNormal,
+                                focusNode: _focusPersonal,
+                                onChanged:
+                                    (value) => setState(() => personal = value),
+                              ),
+                              const SizedBox(height: 22),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: guardarCita,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: azulOscuro,
+                                        minimumSize: const Size.fromHeight(50),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
+                                        ),
+                                        elevation: 3,
+                                      ),
+                                      child: const Text(
+                                        'Programar cita',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed:
+                                          () =>
+                                              Navigator.of(context).maybePop(),
+                                      style: OutlinedButton.styleFrom(
+                                        minimumSize: const Size.fromHeight(50),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
+                                        ),
+                                        side: BorderSide(
+                                          color: Colors.grey.shade400,
+                                        ),
+                                        backgroundColor: Colors.grey.shade200,
+                                      ),
+                                      child: const Text(
+                                        'Cancelar',
+                                        style: TextStyle(
+                                          color: Colors.black87,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -384,75 +493,101 @@ class _ProgramarCitaState extends State<ProgramarCita> {
     );
   }
 
-  Widget _buildDropdown(
-    String? value,
-    List<String> items,
-    ValueChanged<String?> onChanged,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFF2A74D9).withOpacity(0.5),
-          width: 1.5,
+  // Dropdown con borde que cambia al focus
+  Widget _buildDropdown({
+    required String? value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+    required Color borderColor,
+    required FocusNode focusNode,
+  }) {
+    return Focus(
+      focusNode: focusNode,
+      onFocusChange: (_) => setState(() {}),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: focusNode.hasFocus ? _borderFocus : borderColor,
+            width: 1.6,
+          ),
         ),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: DropdownButtonFormField<String>(
-        value: value, // puede ser null → muestra hint
-        hint: const Text('Seleccionar'),
-        decoration: const InputDecoration(border: InputBorder.none),
-        icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black87),
-        items:
-            items
-                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-                .toList(),
-        onChanged: onChanged,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: DropdownButtonFormField<String>(
+          value: value,
+          hint: const Text('Seleccionar'),
+          decoration: const InputDecoration(border: InputBorder.none),
+          icon: const Icon(
+            Icons.arrow_drop_down_rounded,
+            color: Colors.black87,
+          ),
+          items:
+              items
+                  .map(
+                    (item) => DropdownMenuItem(value: item, child: Text(item)),
+                  )
+                  .toList(),
+          onChanged: onChanged,
+          onTap: () => focusNode.requestFocus(),
+        ),
       ),
     );
   }
 
+  // Campo de fecha/hora con borde que cambia al focus
   Widget _buildPickerField({
     required IconData icon,
     required String text,
     required VoidCallback onTap,
+    required Color borderColor,
+    required FocusNode focusNode,
   }) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: const Color(0xFF2A74D9).withOpacity(0.5),
-            width: 1.5,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.black54, size: 18),
-            const SizedBox(width: 8),
-            Text(
-              text,
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
+      onTap: () {
+        focusNode.requestFocus();
+        onTap();
+      },
+      child: Focus(
+        focusNode: focusNode,
+        onFocusChange: (_) => setState(() {}),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: focusNode.hasFocus ? _borderFocus : borderColor,
+              width: 1.6,
             ),
-          ],
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: Colors.black54, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  text,
+                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTextArea(TextEditingController controller) {
+  // TextArea normal (sin efecto de focus especial)
+  Widget _buildTextArea({
+    required TextEditingController controller,
+    required Color borderColor,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFF2A74D9).withOpacity(0.5),
-          width: 1.5,
-        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1.3),
       ),
       child: TextField(
         controller: controller,

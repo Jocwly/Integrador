@@ -39,7 +39,7 @@ class CitasHoy extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF71B3FF), Color(0xFF2E63D8)],
+              colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
             ),
           ),
         ),
@@ -64,7 +64,6 @@ class CitasHoy extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // ====== CARD FECHA (como en el mockup) ======
                   _FechaSeguimientoCard(fecha: inicioHoy),
                   const SizedBox(height: 16),
 
@@ -73,13 +72,11 @@ class CitasHoy extends StatelessWidget {
                       stream:
                           FirebaseFirestore.instance
                               .collectionGroup('citas')
-                              // IMPORTANTE: usamos DateTime directamente, Firestore lo convierte a Timestamp
                               .where('fecha', isGreaterThanOrEqualTo: inicioHoy)
                               .where('fecha', isLessThan: finHoy)
                               .snapshots(),
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {
-                          // Muestra el error real en pantalla y en consola
                           print('ERROR FIRESTORE CITAS HOY: ${snapshot.error}');
                           return Center(
                             child: Text(
@@ -225,7 +222,7 @@ class _FechaSeguimientoCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Colors.black54,
+              color: Color.fromARGB(255, 0, 0, 0),
             ),
           ),
           const SizedBox(height: 8),

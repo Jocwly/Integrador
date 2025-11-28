@@ -21,8 +21,7 @@ class _LoginState extends State<Login> {
   bool _obscure = true;
   bool _isLoading = false;
 
-  // 🔐 Credenciales predeterminadas del veterinario
-  static const String _vetEmail = 'veterinario@petcare.com';
+  static const String _vetEmail = 'veterinario@gmail.com';
   static const String _vetPass = 'vet123456';
 
   @override
@@ -39,14 +38,11 @@ class _LoginState extends State<Login> {
     setState(() => _isLoading = true);
 
     try {
-      // 1️⃣ Verificar si es el veterinario
       if (email == _vetEmail && pass == _vetPass) {
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, Veterinario.routeName);
         return;
       }
-
-      // 2️⃣ Si no es veterinario, buscar en la colección "clientes"
       final query =
           await FirebaseFirestore.instance
               .collection('clientes')
@@ -58,7 +54,6 @@ class _LoginState extends State<Login> {
       if (!mounted) return;
 
       if (query.docs.isNotEmpty) {
-        // Cliente encontrado → va a MascotaDueño
         Navigator.pushReplacementNamed(context, Mascotadueno.routeName);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -83,13 +78,14 @@ class _LoginState extends State<Login> {
     const lightBlue = Color(0xFF66A6FF);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Container(
         // 🎨 Fondo degradado azul
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF90C2FF), Color(0xFF4E78FF)],
+            colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
           ),
         ),
         child: SafeArea(

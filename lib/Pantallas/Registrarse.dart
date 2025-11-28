@@ -40,7 +40,7 @@ class _RegistroState extends State<Registro> {
 
   OutlineInputBorder _outlineBlue(double w) => OutlineInputBorder(
     borderRadius: BorderRadius.circular(12),
-    borderSide: BorderSide(color: const Color(0xFF5F79FF), width: w),
+    borderSide: BorderSide(color: const Color(0xFF4E78FF), width: w),
   );
 
   OutlineInputBorder _outlineRed(double w) => OutlineInputBorder(
@@ -48,7 +48,7 @@ class _RegistroState extends State<Registro> {
     borderSide: BorderSide(color: Colors.red, width: w),
   );
 
-  // ---------- Validadores reutilizables ----------
+  // ---------- Validadores ----------
 
   String? _validateTelefono(String value) {
     final v = value.trim();
@@ -87,9 +87,7 @@ class _RegistroState extends State<Registro> {
   // ---------- SnackBars con estilo ----------
   void _showStyledSnackBar(String message, {bool success = true}) {
     final Color bg =
-        success
-            ? const Color(0xFF4CAF50) // verde éxito
-            : const Color(0xFFE53935); // rojo error
+        success ? const Color(0xFF4CAF50) : const Color(0xFFE53935);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -135,7 +133,7 @@ class _RegistroState extends State<Registro> {
 
       if (!mounted) return;
 
-      _showStyledSnackBar('Registro exitoso ✅', success: true);
+      _showStyledSnackBar('Registro exitoso', success: true);
 
       Navigator.pushReplacementNamed(context, Login.routeName);
     } catch (e) {
@@ -149,7 +147,6 @@ class _RegistroState extends State<Registro> {
 
   // Validaciones + Confirmación
   Future<void> _confirmarRegistro() async {
-    // Validamos TODO al presionar el botón
     setState(() {
       _phoneError = _validateTelefono(_phoneCtrl.text);
       _emailError = _validateEmail(_emailCtrl.text);
@@ -249,9 +246,8 @@ class _RegistroState extends State<Registro> {
 
   @override
   Widget build(BuildContext context) {
-    const pillBlue = Color(0xFFD8E1FF);
-
     return Scaffold(
+      // Flecha atrás sobre el degradado azul
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -261,7 +257,7 @@ class _RegistroState extends State<Registro> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF0B1446), Color(0xFF5F79FF)],
+            colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -269,71 +265,59 @@ class _RegistroState extends State<Registro> {
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
+                constraints: const BoxConstraints(
+                  maxWidth: 460,
+                ), // 👈 más ancho
                 child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
-                    vertical: 22,
+                    vertical: 26,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withOpacity(0.18),
                         blurRadius: 18,
                         offset: const Offset(0, 10),
                       ),
                     ],
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CircleAvatar(
-                        radius: 54,
-                        backgroundColor: pillBlue,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(50),
-                          child: const Image(
-                            image: AssetImage('assets/images/petcare_logo.jpg'),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 4),
                       const Text(
                         'Registrarse',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFF0B1446),
+                          color: Color.fromARGB(255, 0, 0, 0),
                         ),
+                      ),
+                      const SizedBox(height: 22),
+
+                      _LabeledField(
+                        label: 'Nombre',
+                        controller: _nameCtrl,
+                        icon: Icons.person_outline,
                       ),
                       const SizedBox(height: 14),
 
                       _LabeledField(
-                        label: 'Nombre:',
-                        icon: Icons.person_2_rounded,
-                        controller: _nameCtrl,
-                        outlineBlue: _outlineBlue,
-                        outlineRed: _outlineRed,
-                      ),
-                      const SizedBox(height: 12),
-
-                      _LabeledField(
-                        label: 'Teléfono:',
-                        icon: Icons.phone_outlined,
+                        label: 'Teléfono',
                         controller: _phoneCtrl,
+                        icon: Icons.phone_iphone,
                         keyboardType: TextInputType.phone,
                         errorText: _phoneError,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(10),
                         ],
-                        outlineBlue: _outlineBlue,
-                        outlineRed: _outlineRed,
                         onChanged: (value) {
                           setState(() {
                             _phoneError =
@@ -344,16 +328,14 @@ class _RegistroState extends State<Registro> {
                           });
                         },
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
 
                       _LabeledField(
-                        label: 'Correo electrónico:',
-                        icon: Icons.mail_rounded,
+                        label: 'Correo electrónico',
                         controller: _emailCtrl,
+                        icon: Icons.mail_outline,
                         keyboardType: TextInputType.emailAddress,
                         errorText: _emailError,
-                        outlineBlue: _outlineBlue,
-                        outlineRed: _outlineRed,
                         onChanged: (value) {
                           setState(() {
                             _emailError =
@@ -364,123 +346,145 @@ class _RegistroState extends State<Registro> {
                           });
                         },
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
 
                       _LabeledField(
-                        label: 'Dirección:',
-                        icon: Icons.home_filled,
+                        label: 'Dirección',
                         controller: _addressCtrl,
-                        outlineBlue: _outlineBlue,
-                        outlineRed: _outlineRed,
+                        icon: Icons.location_on_outlined,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
 
                       // Contraseña
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Contraseña:',
-                            style: TextStyle(fontWeight: FontWeight.w700),
+                      const Text(
+                        'Contraseña',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: _passCtrl,
+                        obscureText: _obscure,
+                        onChanged: (value) {
+                          setState(() {
+                            _passError =
+                                _validatePass(value) == null &&
+                                        value.trim().isNotEmpty
+                                    ? null
+                                    : _validatePass(value);
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: 'Contraseña',
+                          prefixIcon: Icon(
+                            Icons.lock_outline,
+                            color: Colors.grey[500],
                           ),
-                          const SizedBox(height: 6),
-                          TextField(
-                            controller: _passCtrl,
-                            obscureText: _obscure,
-                            onChanged: (value) {
-                              setState(() {
-                                _passError =
-                                    _validatePass(value) == null &&
-                                            value.trim().isNotEmpty
-                                        ? null
-                                        : _validatePass(value);
-                              });
-                            },
-                            decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.lock_rounded),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscure
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                ),
-                                onPressed:
-                                    () => setState(() => _obscure = !_obscure),
-                              ),
-                              errorText: _passError,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 14,
-                              ),
-                              enabledBorder: _outlineBlue(1.2),
-                              focusedBorder: _outlineBlue(1.6),
-                              errorBorder: _outlineRed(1.3),
-                              focusedErrorBorder: _outlineRed(1.6),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscure
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: Colors.grey[500],
+                            ),
+                            onPressed:
+                                () => setState(() => _obscure = !_obscure),
+                          ),
+                          errorText: _passError,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 14,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color.fromARGB(255, 204, 204, 204),
+                              width: 1.5,
                             ),
                           ),
-                        ],
+                          focusedBorder: _outlineBlue(1.4),
+                          errorBorder: _outlineRed(1.2),
+                          focusedErrorBorder: _outlineRed(1.4),
+                        ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
 
                       // Confirmar contraseña
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Confirmar contraseña:',
-                            style: TextStyle(fontWeight: FontWeight.w700),
+                      const Text(
+                        'Confirmar contraseña',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: _confirmPassCtrl,
+                        obscureText: _obscure,
+                        onChanged: (value) {
+                          setState(() {
+                            _confirmPassError =
+                                _validateConfirmPass(value) == null &&
+                                        value.trim().isNotEmpty
+                                    ? null
+                                    : _validateConfirmPass(value);
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: 'Confirmar contraseña',
+                          prefixIcon: Icon(
+                            Icons.lock_outline,
+                            color: Colors.grey[500],
                           ),
-                          const SizedBox(height: 6),
-                          TextField(
-                            controller: _confirmPassCtrl,
-                            obscureText: _obscure,
-                            onChanged: (value) {
-                              setState(() {
-                                _confirmPassError =
-                                    _validateConfirmPass(value) == null &&
-                                            value.trim().isNotEmpty
-                                        ? null
-                                        : _validateConfirmPass(value);
-                              });
-                            },
-                            decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.lock_rounded),
-                              errorText: _confirmPassError,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 14,
-                              ),
-                              enabledBorder: _outlineBlue(1.2),
-                              focusedBorder: _outlineBlue(1.6),
-                              errorBorder: _outlineRed(1.3),
-                              focusedErrorBorder: _outlineRed(1.6),
+                          errorText: _confirmPassError,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 14,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color.fromARGB(255, 204, 204, 204),
+                              width: 1.5,
                             ),
                           ),
-                        ],
+                          focusedBorder: _outlineBlue(1.4),
+                          errorBorder: _outlineRed(1.2),
+                          focusedErrorBorder: _outlineRed(1.4),
+                        ),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0B1446),
+                            backgroundColor: const Color(0xFF081B4D),
                             foregroundColor: Colors.white,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
-                            elevation: 3,
                           ),
                           onPressed: _confirmarRegistro,
                           child: const Text(
                             'Registrarse',
-                            style: TextStyle(fontWeight: FontWeight.w800),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),
 
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -492,7 +496,7 @@ class _RegistroState extends State<Registro> {
                                   Login.routeName,
                                 ),
                             child: const Text(
-                              'Inicia sesión aquí',
+                              'Inicia Sesión aquí',
                               style: TextStyle(
                                 decoration: TextDecoration.underline,
                                 fontWeight: FontWeight.w600,
@@ -501,16 +505,6 @@ class _RegistroState extends State<Registro> {
                             ),
                           ),
                         ],
-                      ),
-
-                      const SizedBox(height: 22),
-                      Container(
-                        height: 4,
-                        width: 140,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
                       ),
                     ],
                   ),
@@ -524,48 +518,35 @@ class _RegistroState extends State<Registro> {
   }
 }
 
+// ---------- Campo reutilizable con estilo del mockup ----------
 class _LabeledField extends StatelessWidget {
   final String label;
-  final IconData icon;
   final TextEditingController controller;
   final TextInputType? keyboardType;
   final String? errorText;
   final List<TextInputFormatter>? inputFormatters;
-  final OutlineInputBorder Function(double)? outlineBlue;
-  final OutlineInputBorder Function(double)? outlineRed;
   final ValueChanged<String>? onChanged;
+  final IconData? icon;
 
   const _LabeledField({
     required this.label,
-    required this.icon,
     required this.controller,
     this.keyboardType,
     this.errorText,
     this.inputFormatters,
-    this.outlineBlue,
-    this.outlineRed,
     this.onChanged,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    final ob =
-        outlineBlue ??
-        (double w) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: const Color(0xFF5F79FF), width: 20),
-        );
-    final or =
-        outlineRed ??
-        (double w) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: Colors.red, width: 20),
-        );
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+        ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
@@ -573,16 +554,37 @@ class _LabeledField extends StatelessWidget {
           inputFormatters: inputFormatters,
           onChanged: onChanged,
           decoration: InputDecoration(
-            prefixIcon: Icon(icon),
+            filled: true,
+            fillColor: Colors.white,
             errorText: errorText,
+            prefixIcon:
+                icon != null ? Icon(icon, color: Colors.grey[500]) : null,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 14,
             ),
-            enabledBorder: ob(1.2),
-            focusedBorder: ob(1.6),
-            errorBorder: or(1.3),
-            focusedErrorBorder: or(1.6),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(11),
+              borderSide: const BorderSide(
+                color: Color.fromARGB(255, 204, 204, 204),
+                width: 1.5,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(11),
+              borderSide: const BorderSide(
+                color: Color(0xFF4E78FF),
+                width: 1.5,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(11),
+              borderSide: const BorderSide(color: Colors.red, width: 1.2),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(11),
+              borderSide: const BorderSide(color: Colors.red, width: 1.4),
+            ),
           ),
         ),
       ],

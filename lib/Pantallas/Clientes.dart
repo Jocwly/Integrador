@@ -27,7 +27,7 @@ class Clientes extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF71B3FF), Color(0xFF2E63D8)],
+              colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
             ),
           ),
         ),

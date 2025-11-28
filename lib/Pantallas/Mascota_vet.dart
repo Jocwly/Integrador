@@ -100,13 +100,46 @@ class PerfilMascota extends StatelessWidget {
         .doc(mascotaId);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFD7D2FF),
+      backgroundColor: const Color.fromARGB(255, 151, 151, 151),
 
       // NUEVO APPBAR
-      appBar: GradientTopBar(
-        title: "Mi Mascota",
-        icon: Icons.pets_rounded,
-        onBack: () => Navigator.pop(context),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        toolbarHeight: 80,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF4E78FF), Color.fromARGB(255, 26, 36, 90)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_outlined,
+            color: Colors.white,
+            size: 26,
+          ),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+        centerTitle: true,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.pets_sharp, color: Colors.white, size: 20),
+            SizedBox(width: 6),
+            Text(
+              'Perfil Mascota',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
       ),
 
       body: SafeArea(
@@ -269,7 +302,7 @@ class _CardMascota extends StatelessWidget {
                     Icon(Icons.pets, size: 14, color: azulChip),
                     SizedBox(width: 4),
                     Text(
-                      "Paciente PetCare",
+                      "Paciente",
                       style: TextStyle(fontSize: 11, color: azulChip),
                     ),
                   ],
