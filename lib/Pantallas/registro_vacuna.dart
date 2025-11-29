@@ -241,7 +241,8 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [azulFondoArriba, azulFondoAbajo],
+              colors: [Color(0xFF4E78FF), Color.fromARGB(255, 26, 36, 90)],
+              //colors: [azulFondoArriba, azulFondoAbajo],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),

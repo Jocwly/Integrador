@@ -239,6 +239,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     );
   }
 
+  /// 🔴 AQUÍ ES DONDE COPIAMOS EL COMPORTAMIENTO DEL OTRO CÓDIGO
   Widget _buildTextFieldWithError({
     required TextEditingController controller,
     required String hint,
@@ -252,7 +253,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     String? suffixText,
   }) {
     final decoration = _inputDecoration(
-      hint: showError ? '' : hint,
+      hint: hint,
       icon: icon,
       gray: gray,
       error: showError,
@@ -263,26 +264,22 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
       controller: controller,
       maxLines: maxLines,
       decoration: decoration,
-      style: TextStyle(
-        color: showError ? Colors.transparent : Colors.black,
-        fontSize: 14,
-      ),
+      style: const TextStyle(color: Colors.black, fontSize: 14),
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       onChanged: onChanged,
     );
 
+    // Altura fija para campos de una línea (como lo tenías)
     final double? height = maxLines == 1 ? 52 : null;
 
-    if (!showError) {
-      return SizedBox(height: height, child: field);
-    }
-    return SizedBox(
-      height: height,
-      child: Stack(
-        children: [
-          field,
-          const Center(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: height, child: field),
+        if (showError)
+          const Padding(
+            padding: EdgeInsets.only(left: 4, top: 4),
             child: Text(
               'Este campo es requerido',
               style: TextStyle(
@@ -292,8 +289,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
               ),
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -321,7 +317,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF67A8FF), Color(0xFF2464EB)],
+              colors: [Color(0xFF4E78FF), Color.fromARGB(255, 26, 36, 90)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),

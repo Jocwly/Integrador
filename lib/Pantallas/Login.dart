@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:login/servicios/notification_service.dart';
 import 'package:login/Pantallas/veterinario.dart';
 import 'package:login/Pantallas/Registrarse.dart';
 import 'package:login/Pantallas/mascotadueno.dart';
@@ -236,6 +236,12 @@ class _LoginState extends State<Login> {
                                         ),
                                       ),
                             ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              await NotificationService.mostrarNotificacionPrueba();
+                            },
+                            child: const Text('Probar notificación'),
                           ),
 
                           const SizedBox(height: 16),

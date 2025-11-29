@@ -3,22 +3,21 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
-  // Plugin interno que usaremos en toda la app
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
   static const AndroidNotificationChannel _androidChannel =
       AndroidNotificationChannel(
-        'citas_channel', // id único
-        'Recordatorios de citas', // nombre visible
+        'citas_channel',
+        'Recordatorios de citas',
         description: 'Notificaciones para citas de PETCARE',
         importance: Importance.max,
         playSound: true,
       );
 
-  /// Llamar UNA VEZ al iniciar la app (en main)
+  /// Llamar EN main() una sola vez
   static Future<void> init() async {
-    // Zona horaria (puedes cambiarla si estás en otro país)
+    // Inicializar zonas horarias
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('America/Mexico_City'));
 
@@ -37,7 +36,7 @@ class NotificationService {
 
     await _notificationsPlugin.initialize(initSettings);
 
-    // Crear el canal en Android + pedir permiso de notificaciones
+    // Crear canal y pedir permiso en Android
     final androidPlugin =
         _notificationsPlugin
             .resolvePlatformSpecificImplementation<
@@ -46,8 +45,8 @@ class NotificationService {
 
     if (androidPlugin != null) {
       await androidPlugin.createNotificationChannel(_androidChannel);
-      await androidPlugin
-          .requestNotificationsPermission(); // 👈 permiso correcto
+      // Si aquí te marca error, COMÉNTALO con //
+      await androidPlugin.requestNotificationsPermission();
     }
   }
 
@@ -59,7 +58,7 @@ class NotificationService {
         channelDescription: _androidChannel.description,
         importance: Importance.max,
         priority: Priority.high,
-        playSound: true, // sonido por defecto
+        playSound: true,
       ),
       iOS: const DarwinNotificationDetails(
         presentAlert: true,
@@ -75,7 +74,7 @@ class NotificationService {
     return '$h:$m';
   }
 
-  /// 👉 Notificación inmediata de prueba (opcional)
+  /// Notificación de prueba
   static Future<void> mostrarNotificacionPrueba() async {
     final details = _notificationDetails();
     await _notificationsPlugin.show(
@@ -86,8 +85,8 @@ class NotificationService {
     );
   }
 
-  /// Programa 3 notificaciones: 1 día antes, 1 hora antes y a la hora exacta
-    /// Programa 3 notificaciones: 1 día antes, 1 hora antes y a la hora exacta
+  /// 🔴 Versión sencilla: una notificación a la hora de la cita
+  /// (si la fecha ya pasó, se mueve 10 segundos al futuro para pruebas)
   static Future<void> programarNotificacionesCita({
     required int idCita,
     required DateTime fechaHoraCita,
@@ -95,52 +94,44 @@ class NotificationService {
     required String duenio,
     required String motivo,
   }) async {
-    final tz.TZDateTime cita = tz.TZDateTime.from(fechaHoraCita, tz.local);
-
-    final tz.TZDateTime unDiaAntes = cita.subtract(const Duration(days: 1));
-    final tz.TZDateTime unaHoraAntes = cita.subtract(const Duration(hours: 1));
-
     final details = _notificationDetails();
 
-    final titulo = 'Cita próxima - ${_formatearHora(cita)}';
-    final cuerpo = 'Paciente: $paciente.\nDueño: $duenio\nMotivo: $motivo';
+    // Convertimos la fecha a TZDateTime
+    tz.TZDateTime cuando = tz.TZDateTime.from(fechaHoraCita, tz.local);
+    final tz.TZDateTime ahora = tz.TZDateTime.now(tz.local);
 
-    // 👉 Aseguramos que el ID base sea un int positivo y pequeño
-    final int baseId = (idCita & 0x7fffffff) % 1000000; // máximo 999,999
-
-    // IDs distintos pero seguros (< 2,147,483,647)
-    final int idDiaAntes = baseId * 10 + 1;
-    final int idHoraAntes = baseId * 10 + 2;
-    final int idHoraExacta = baseId * 10 + 3;
-
-    Future<void> _scheduleIfFuture(
-      int id,
-      String etiqueta,
-      tz.TZDateTime fecha,
-    ) async {
-      final ahora = tz.TZDateTime.now(tz.local);
-      print('[$etiqueta] ahora: $ahora, programada: $fecha (id=$id)');
-
-      if (fecha.isAfter(ahora)) {
-        print('[$etiqueta] ✅ se programa notificación');
-        await _notificationsPlugin.zonedSchedule(
-          id,
-          titulo,
-          cuerpo,
-          fecha,
-          details,
-          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-        );
-      } else {
-        print('[$etiqueta] ❌ NO se programa, fecha en el pasado');
-      }
+    // Si ya pasó, la movemos 10 segundos al futuro (para que VEAS algo)
+    if (!cuando.isAfter(ahora)) {
+      print(
+        '[CITA] La fecha estaba en el pasado ($cuando), se ajusta unos segundos al futuro',
+      );
+      cuando = ahora.add(const Duration(seconds: 10));
     }
 
-    await _scheduleIfFuture(idDiaAntes, '1 día antes', unDiaAntes);
-    await _scheduleIfFuture(idHoraAntes, '1 hora antes', unaHoraAntes);
-    await _scheduleIfFuture(idHoraExacta, 'hora exacta', cita);
+    final String titulo = 'Cita próxima - ${_formatearHora(cuando)}';
+    final String cuerpo =
+        'Paciente: $paciente.\nDueño: $duenio\nMotivo: $motivo';
+
+    // ID único derivado de la cita
+    final int notifId = (idCita & 0x7fffffff) % 1000000;
+
+    print('[CITA] Programando notificación id=$notifId para $cuando');
+
+    try {
+      await _notificationsPlugin.zonedSchedule(
+        notifId,
+        titulo,
+        cuerpo,
+        cuando,
+        details,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        androidAllowWhileIdle: true,
+      );
+      print('[CITA] ✅ Notificación programada correctamente');
+    } catch (e) {
+      print('[CITA] ❌ ERROR al programar notificación: $e');
+    }
 
     final pendientes = await _notificationsPlugin.pendingNotificationRequests();
     print('Pendientes: ${pendientes.length}');
@@ -148,5 +139,4 @@ class NotificationService {
       print('  - id=${p.id}, title=${p.title}');
     }
   }
-
 }
