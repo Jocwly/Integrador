@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login/Pantallas/Clientes.dart';
 import 'package:login/Pantallas/citas_hoy.dart';
-import 'package:login/main.dart';
+import 'package:login/Pantallas/Login.dart';
 
 class Veterinario extends StatelessWidget {
   static String routeName = '/veterinario';
@@ -61,10 +61,7 @@ class Veterinario extends StatelessWidget {
               ),
               onSelected: (value) {
                 if (value == 1) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => MyApp()),
-                  );
+                 Navigator.pushNamedAndRemoveUntil(context, Login.routeName, (route)=>false,);
                 }
               },
               itemBuilder:
@@ -199,13 +196,6 @@ class Veterinario extends StatelessWidget {
                               ),
                             ),
                             SizedBox(height: 2),
-                            // Text(
-                            //   'martes, 25 nov',
-                            // style: TextStyle(
-                            //color: Color(0xFFCBDDFF),
-                            // fontSize: 15,
-                            // ),
-                            //),
                             SizedBox(height: 6),
                             Text(
                               '',

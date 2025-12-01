@@ -8,16 +8,14 @@ class NotificationService {
 
   static const AndroidNotificationChannel _androidChannel =
       AndroidNotificationChannel(
-        'citas_channel',
-        'Recordatorios de citas',
-        description: 'Notificaciones para citas de PETCARE',
-        importance: Importance.max,
-        playSound: true,
-      );
+    'citas_channel',
+    'Recordatorios de citas',
+    description: 'Notificaciones para citas de PETCARE',
+    importance: Importance.max,
+    playSound: true,
+  );
 
-  /// Llamar EN main() una sola vez
   static Future<void> init() async {
-    // Inicializar zonas horarias
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('America/Mexico_City'));
 
@@ -36,16 +34,12 @@ class NotificationService {
 
     await _notificationsPlugin.initialize(initSettings);
 
-    // Crear canal y pedir permiso en Android
     final androidPlugin =
-        _notificationsPlugin
-            .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >();
+        _notificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidPlugin != null) {
       await androidPlugin.createNotificationChannel(_androidChannel);
-      // Si aquí te marca error, COMÉNTALO con //
       await androidPlugin.requestNotificationsPermission();
     }
   }
@@ -74,7 +68,6 @@ class NotificationService {
     return '$h:$m';
   }
 
-  /// Notificación de prueba
   static Future<void> mostrarNotificacionPrueba() async {
     final details = _notificationDetails();
     await _notificationsPlugin.show(
@@ -85,8 +78,6 @@ class NotificationService {
     );
   }
 
-  /// 🔴 Versión sencilla: una notificación a la hora de la cita
-  /// (si la fecha ya pasó, se mueve 10 segundos al futuro para pruebas)
   static Future<void> programarNotificacionesCita({
     required int idCita,
     required DateTime fechaHoraCita,
@@ -96,42 +87,50 @@ class NotificationService {
   }) async {
     final details = _notificationDetails();
 
-    // Convertimos la fecha a TZDateTime
-    tz.TZDateTime cuando = tz.TZDateTime.from(fechaHoraCita, tz.local);
-    final tz.TZDateTime ahora = tz.TZDateTime.now(tz.local);
+    final tz.TZDateTime cita = tz.TZDateTime.from(fechaHoraCita, tz.local);
+    final tz.TZDateTime unDiaAntes = cita.subtract(const Duration(days: 1));
+    final tz.TZDateTime unaHoraAntes = cita.subtract(const Duration(hours: 1));
 
-    // Si ya pasó, la movemos 10 segundos al futuro (para que VEAS algo)
-    if (!cuando.isAfter(ahora)) {
-      print(
-        '[CITA] La fecha estaba en el pasado ($cuando), se ajusta unos segundos al futuro',
-      );
-      cuando = ahora.add(const Duration(seconds: 10));
+    final titulo = 'Cita próxima - ${_formatearHora(cita)}';
+    final cuerpo = 'Paciente: $paciente.\nDueño: $duenio\nMotivo: $motivo';
+
+    final int baseId = (idCita & 0x7fffffff) % 1000000;
+    final int idDiaAntes = baseId * 10 + 1;
+    final int idHoraAntes = baseId * 10 + 2;
+    final int idHoraExacta = baseId * 10 + 3;
+
+    Future<void> _scheduleIfFuture(
+      int id,
+      String etiqueta,
+      tz.TZDateTime cuando,
+    ) async {
+      final ahora = tz.TZDateTime.now(tz.local);
+      print('[$etiqueta] ahora: $ahora, programada: $cuando (id=$id)');
+
+      if (cuando.isAfter(ahora)) {
+        try {
+          await _notificationsPlugin.zonedSchedule(
+            id,
+            titulo,
+            cuerpo,
+            cuando,
+            details,
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+          );
+          print('[$etiqueta] ✅ Notificación programada');
+        } catch (e) {
+          print('[$etiqueta] ❌ ERROR al programar: $e');
+        }
+      } else {
+        print('[$etiqueta] ❌ NO se programa (fecha en el pasado)');
+      }
     }
 
-    final String titulo = 'Cita próxima - ${_formatearHora(cuando)}';
-    final String cuerpo =
-        'Paciente: $paciente.\nDueño: $duenio\nMotivo: $motivo';
-
-    // ID único derivado de la cita
-    final int notifId = (idCita & 0x7fffffff) % 1000000;
-
-    print('[CITA] Programando notificación id=$notifId para $cuando');
-
-    try {
-      await _notificationsPlugin.zonedSchedule(
-        notifId,
-        titulo,
-        cuerpo,
-        cuando,
-        details,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        androidAllowWhileIdle: true,
-      );
-      print('[CITA] ✅ Notificación programada correctamente');
-    } catch (e) {
-      print('[CITA] ❌ ERROR al programar notificación: $e');
-    }
+    await _scheduleIfFuture(idDiaAntes, '1 día antes', unDiaAntes);
+    await _scheduleIfFuture(idHoraAntes, '1 hora antes', unaHoraAntes);
+    await _scheduleIfFuture(idHoraExacta, 'hora exacta', cita);
 
     final pendientes = await _notificationsPlugin.pendingNotificationRequests();
     print('Pendientes: ${pendientes.length}');

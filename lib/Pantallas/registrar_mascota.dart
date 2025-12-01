@@ -97,48 +97,45 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     }
   }
 
-  Future<void> _guardarMascota() async {
-    final nombre = nombreController.text.trim();
-    final edad = edadController.text.trim();
-    final raza = razaController.text.trim();
-    final tamano = tamanoController.text.trim();
-    final peso = pesoController.text.trim();
-    final color = colorController.text.trim();
+Future<void> _guardarMascota() async {
+  final nombre = nombreController.text.trim();
+  final edad = edadController.text.trim();
+  final raza = razaController.text.trim();
+  final tamano = tamanoController.text.trim();
+  final peso = pesoController.text.trim();
+  final color = colorController.text.trim();
 
-    if (_imagenSeleccionada == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecciona una foto de la mascota')),
-      );
-      return;
-    }
+  // 👀 Ya NO validamos que haya foto
+  if (nombre.isEmpty ||
+      especie == null ||
+      sexo == null ||
+      esterilizado == null ||
+      edad.isEmpty ||
+      raza.isEmpty ||
+      tamano.isEmpty ||
+      peso.isEmpty ||
+      color.isEmpty) {
+    setState(() {
+      _mostrarErrores = true;
+    });
 
-    if (nombre.isEmpty ||
-        especie == null ||
-        sexo == null ||
-        esterilizado == null ||
-        edad.isEmpty ||
-        raza.isEmpty ||
-        tamano.isEmpty ||
-        peso.isEmpty ||
-        color.isEmpty) {
-      setState(() {
-        _mostrarErrores = true;
-      });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Por favor llena todos los campos')),
+    );
+    return;
+  }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor llena todos los campos')),
-      );
-      return;
-    }
+  try {
+    final clienteRef =
+        FirebaseFirestore.instance.collection('clientes').doc(widget.clienteId);
 
-    try {
-      final clienteRef =
-          FirebaseFirestore.instance.collection('clientes').doc(widget.clienteId);
+    final mascotaRef = clienteRef.collection('mascotas').doc();
 
-      final mascotaRef = clienteRef.collection('mascotas').doc();
+    // 🔹 Foto puede ser null o venir de inicial
+    String? fotoUrl = _fotoUrlRemota;
 
-      String fotoUrl;
-
+    // 🔹 Solo subimos a Storage si el usuario seleccionó una imagen nueva
+    if (_imagenSeleccionada != null) {
       try {
         final storageRef = FirebaseStorage.instance
             .ref()
@@ -159,90 +156,92 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
         );
         return;
       }
+    }
 
-      await mascotaRef.set({
-        'nombre': nombre,
-        'edad': '$edad $_unidadEdad',
-        'raza': raza,
-        'tamano': tamano,
-        'peso': peso,
-        'color': color,
-        'especie': especie,
-        'sexo': sexo,
-        'esterilizado': esterilizado,
-        'fotoUrl': fotoUrl,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+    await mascotaRef.set({
+      'nombre': nombre,
+      'edad': '$edad $_unidadEdad',
+      'raza': raza,
+      'tamano': tamano,
+      'peso': peso,
+      'color': color,
+      'especie': especie,
+      'sexo': sexo,
+      'esterilizado': esterilizado,
+      // 👇 Puede ser null si no se subió foto
+      'fotoUrl': fotoUrl,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
 
-      await clienteRef.update({'mascotas': FieldValue.increment(1)});
+    await clienteRef.update({'mascotas': FieldValue.increment(1)});
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      // ✅ Mensaje bonito de éxito
-      await showDialog(
-        context: context,
-        builder: (_) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-            contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-            actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-            title: Row(
-              children: const [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Color(0xFFD6E1F7),
-                  child: Icon(
-                    Icons.pets_rounded,
-                    color: Color(0xFF0B1446),
-                    size: 20,
-                  ),
+    await showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+          contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+          title: Row(
+            children: const [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: Color(0xFFD6E1F7),
+                child: Icon(
+                  Icons.pets_rounded,
+                  color: Color(0xFF0B1446),
+                  size: 20,
                 ),
-                SizedBox(width: 10),
-                Text(
-                  'Mascota agregada',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 18,
-                  ),
-                ),
-              ],
-            ),
-            content: Text(
-              'Se agregó la mascota "$nombre" correctamente.',
-              style: const TextStyle(fontSize: 15),
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0B1446),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Aceptar',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              SizedBox(width: 10),
+              Text(
+                'Mascota agregada',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
                 ),
               ),
             ],
-          );
-        },
-      );
+          ),
+          content: Text(
+            'Se agregó la mascota "$nombre" correctamente.',
+            style: const TextStyle(fontSize: 15),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0B1446),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Aceptar',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        );
+      },
+    );
 
-      if (!mounted) return;
-      Navigator.pop(context); // cerrar pantalla de registro
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    }
+    if (!mounted) return;
+    Navigator.pop(context);
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +270,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
               child: ConstrainedBox(
                 // 🔹 más ancho máximo
-                constraints: const BoxConstraints(maxWidth: 500),
+                constraints: const BoxConstraints(maxWidth: 560),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [

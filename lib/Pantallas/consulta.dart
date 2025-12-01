@@ -36,7 +36,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
   // Colores copiados del perfil de cliente
   final Color azulSuave = const Color(0xFFF4F6FF);
   final Color azulFuerte = const Color(0xFF5F79FF);
-  final Color azulOscuro = const Color(0xFF0B1446);
+  final Color azulOscuro = Color(0xFF0B1446);
 
   bool _errMotivo = false;
   bool _errPeso = false;
@@ -222,7 +222,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
             : baseBorder;
 
     return InputDecoration(
-      prefixIcon: icon != null ? Icon(icon, color: azulFuerte, size: 20) : null,
+      prefixIcon: icon != null ? Icon(icon, color: Color(0xFF0B1446), size: 20) : null,
       hintText: hint,
       filled: true,
       fillColor: fillColor,
@@ -467,10 +467,10 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
-                                            'Paciente PetCare',
+                                            'Paciente',
                                             style: TextStyle(
                                               fontSize: 11,
-                                              color: azulFuerte,
+                                              color: Color(0xFF0B1446),
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -714,7 +714,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
             },
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
-              foregroundColor: azulFuerte,
+              foregroundColor:Color(0xFF0B1446),
               textStyle: const TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,

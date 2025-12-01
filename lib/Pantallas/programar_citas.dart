@@ -150,7 +150,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
     });
 
     // 👉 Programar notificaciones locales
-    final int idCita = mascotaRef.id.hashCode;
+// 👉 Programar notificaciones locales
+final int idCita = (mascotaRef.id.hashCode & 0x7fffffff);
+
 
     // Obtener nombre del cliente (dueño)
     final clienteSnap =
@@ -179,166 +181,216 @@ class _ProgramarCitaState extends State<ProgramarCita> {
 
     Navigator.pop(context);
   }
+@override
+Widget build(BuildContext context) {
+  const lilaFondo1 = Color(0xFFD7D2FF);
+  const lilaFondo2 = Color(0xFFF1EEFF);
+  const azulOscuro = Color(0xFF0B1446);
+  const azulChipOscuro = Color(0xFF0B1446);
 
-  @override
-  Widget build(BuildContext context) {
-    const azulFondoArriba = Color(0xFF67A8FF);
-    const azulFondoAbajo = Color(0xFF2464EB);
-    const lilaFondo1 = Color(0xFFD7D2FF);
-    const lilaFondo2 = Color(0xFFF1EEFF);
-    const azulOscuro = Color(0xFF0B1446);
-    const panelAzulSuave = Color(0xFFE1E8FF);
+  final mascotaRef = FirebaseFirestore.instance
+      .collection('clientes')
+      .doc(widget.clienteId)
+      .collection('mascotas')
+      .doc(widget.mascotaId);
 
-    final mascotaRef = FirebaseFirestore.instance
-        .collection('clientes')
-        .doc(widget.clienteId)
-        .collection('mascotas')
-        .doc(widget.mascotaId);
-
-    return Scaffold(
-      backgroundColor: lilaFondo1,
-      // ───── APPBAR TIPO PERFIL MASCOTA ─────
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        toolbarHeight: 80,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF4E78FF), Color.fromARGB(255, 26, 36, 90)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+  return Scaffold(
+    backgroundColor: lilaFondo1,
+    appBar: AppBar(
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      toolbarHeight: 80,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF4E78FF), Color.fromARGB(255, 26, 36, 90)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-        ),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_outlined,
-            color: Colors.white,
-            size: 24,
-          ),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
-        centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.event_available_rounded, color: Colors.white, size: 20),
-            SizedBox(width: 6),
-            Text(
-              'Programar cita',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-              ),
-            ),
-          ],
         ),
       ),
-
-      body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [lilaFondo1, lilaFondo2],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+      leading: IconButton(
+        icon: const Icon(
+          Icons.arrow_back_ios_new_outlined,
+          color: Colors.white,
+          size: 24,
+        ),
+        onPressed: () => Navigator.of(context).maybePop(),
+      ),
+      centerTitle: true,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Icon(Icons.event_available_rounded, color: Colors.white, size: 20),
+          SizedBox(width: 6),
+          Text(
+            'Programar cita',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
             ),
           ),
-          child: StreamBuilder<DocumentSnapshot>(
-            stream: mascotaRef.snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Center(child: Text('Error al cargar datos'));
-              }
-              if (!snapshot.hasData || !snapshot.data!.exists) {
-                return const Center(child: CircularProgressIndicator());
-              }
+        ],
+      ),
+    ),
+    body: SafeArea(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [lilaFondo1, lilaFondo2],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: mascotaRef.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Center(child: Text('Error al cargar datos'));
+            }
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-              final data = snapshot.data!.data() as Map<String, dynamic>;
-              final nombre = data['nombre'] ?? 'Mascota';
-              nombreMascota ??= nombre;
+            final data = snapshot.data!.data() as Map<String, dynamic>;
+            final nombre = data['nombre'] ?? 'Mascota';
+            nombreMascota ??= nombre;
 
-              final dynamic fotoDynamic = data['fotoUrl'] ?? data['foto'];
-              final String? fotoUrl =
-                  fotoDynamic is String && fotoDynamic.isNotEmpty
-                      ? fotoDynamic
-                      : null;
+            final dynamic fotoDynamic = data['fotoUrl'] ?? data['foto'];
+            final String? fotoUrl =
+                fotoDynamic is String && fotoDynamic.isNotEmpty
+                    ? fotoDynamic
+                    : null;
 
-              return Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 430),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(16, 22, 16, 24),
-                    child: Column(
-                      children: [
-                        // FOTO + NOMBRE
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: azulOscuro, width: 3),
-                          ),
-                          padding: const EdgeInsets.all(4),
-                          child: CircleAvatar(
-                            radius: 46,
-                            backgroundColor: const Color(0xFFEDEFF3),
-                            backgroundImage:
-                                fotoUrl != null
-                                    ? NetworkImage(fotoUrl)
-                                    : const AssetImage(
-                                          'assets/images/perro.jpg',
-                                        )
-                                        as ImageProvider,
-                          ),
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 430),
+                child: SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(26),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x22000000),
+                          blurRadius: 16,
+                          offset: Offset(0, 8),
                         ),
-                        const SizedBox(height: 8),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // ===== CABECERA TIPO CONSULTA MÉDICA =====
                         Container(
                           decoration: BoxDecoration(
-                            color: azulOscuro,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x33000000),
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 6,
-                          ),
-                          child: Text(
-                            nombre,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                            color: const Color(0xFFF3F4FF),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(26),
+                              topRight: Radius.circular(26),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // TARJETA PRINCIPAL DEL FORMULARIO
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(26),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x22000000),
-                                blurRadius: 16,
-                                offset: Offset(0, 8),
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                          child: Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: azulChipOscuro,
+                                    width: 3,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(4),
+                                child: CircleAvatar(
+                                  radius: 34,
+                                  backgroundColor: const Color(0xFFEDEFF3),
+                                  backgroundImage:
+                                      fotoUrl != null
+                                          ? NetworkImage(fotoUrl)
+                                          : const AssetImage(
+                                                'assets/images/perro.jpg',
+                                              )
+                                              as ImageProvider,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      nombre,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE0E7FF),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: const [
+                                          Icon(
+                                            Icons.pets_rounded,
+                                            size: 14,
+                                            color: azulChipOscuro,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            "Paciente",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: azulChipOscuro,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
-                          padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
+                        ),
+
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Color(0xFFE4E6F2),
+                        ),
+
+                        // ===== CONTENIDO DEL FORMULARIO =====
+                        Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(16, 18, 16, 20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(height: 18),
+                              const Text(
+                                'Detalles de la cita',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 14),
 
+                              // Tipo de cita
                               _buildLabel('Tipo de cita:'),
                               _buildDropdown(
                                 value: tipoCita,
@@ -350,6 +402,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                               ),
                               const SizedBox(height: 18),
 
+                              // Fecha y hora
                               Row(
                                 children: [
                                   Expanded(child: _buildLabel('Fecha:')),
@@ -364,9 +417,9 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                                       icon: Icons.calendar_today_rounded,
                                       text:
                                           fechaSeleccionada != null
-                                              ? DateFormat(
-                                                'dd/MM/yyyy',
-                                              ).format(fechaSeleccionada!)
+                                              ? DateFormat('dd/MM/yyyy').format(
+                                                fechaSeleccionada!,
+                                              )
                                               : 'Seleccionar',
                                       onTap: () => _seleccionarFecha(context),
                                       borderColor: _borderNormal,
@@ -392,14 +445,15 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                               ),
                               const SizedBox(height: 18),
 
+                              // Motivo
                               _buildLabel('Motivo/Descripción:'),
-                              // TextArea SIN efecto de foco especial
                               _buildTextArea(
                                 controller: motivoController,
                                 borderColor: _borderNormal,
                               ),
                               const SizedBox(height: 18),
 
+                              // Personal
                               _buildLabel('Personal asignado:'),
                               _buildDropdown(
                                 value: personal,
@@ -411,6 +465,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                               ),
                               const SizedBox(height: 22),
 
+                              // Botones
                               Row(
                                 children: [
                                   Expanded(
@@ -418,11 +473,11 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                                       onPressed: guardarCita,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: azulOscuro,
-                                        minimumSize: const Size.fromHeight(50),
+                                        minimumSize:
+                                            const Size.fromHeight(50),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            14,
-                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(14),
                                         ),
                                         elevation: 3,
                                       ),
@@ -438,20 +493,20 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: OutlinedButton(
-                                      onPressed:
-                                          () =>
-                                              Navigator.of(context).maybePop(),
+                                      onPressed: () =>
+                                          Navigator.of(context).maybePop(),
                                       style: OutlinedButton.styleFrom(
-                                        minimumSize: const Size.fromHeight(50),
+                                        minimumSize:
+                                            const Size.fromHeight(50),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            14,
-                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(14),
                                         ),
                                         side: BorderSide(
                                           color: Colors.grey.shade400,
                                         ),
-                                        backgroundColor: Colors.grey.shade200,
+                                        backgroundColor:
+                                            Colors.grey.shade200,
                                       ),
                                       child: const Text(
                                         'Cancelar',
@@ -471,13 +526,15 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                     ),
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildLabel(String text) {
     return Padding(

@@ -218,166 +218,206 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
     if (confirm == true && mounted) Navigator.pop(context);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    const azulFondoArriba = Color(0xFF67A8FF);
-    const azulFondoAbajo = Color(0xFF2464EB);
-    const lilaFondo1 = Color(0xFFD7D2FF);
-    const lilaFondo2 = Color(0xFFF1EEFF);
-    const azulChipOscuro = Color(0xFF0B1446);
+ @override
+Widget build(BuildContext context) {
+  const lilaFondo1 = Color(0xFFD7D2FF);
+  const lilaFondo2 = Color(0xFFF1EEFF);
+  const azulChipOscuro = Color(0xFF0B1446);
 
-    final mascotaRef = FirebaseFirestore.instance
-        .collection('clientes')
-        .doc(widget.clienteId)
-        .collection('mascotas')
-        .doc(widget.mascotaId);
+  final mascotaRef = FirebaseFirestore.instance
+      .collection('clientes')
+      .doc(widget.clienteId)
+      .collection('mascotas')
+      .doc(widget.mascotaId);
 
-    return Scaffold(
-      backgroundColor: lilaFondo1,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        toolbarHeight: 80,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF4E78FF), Color.fromARGB(255, 26, 36, 90)],
-              //colors: [azulFondoArriba, azulFondoAbajo],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+  return Scaffold(
+    backgroundColor: lilaFondo1,
+    appBar: AppBar(
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      toolbarHeight: 80,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-        ),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_outlined,
-            color: Colors.white,
-            size: 24,
-          ),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
-        centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.vaccines_rounded, color: Colors.white, size: 20),
-            SizedBox(width: 6),
-            Text(
-              "Registrar vacuna",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-              ),
-            ),
-          ],
         ),
       ),
-      body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [lilaFondo1, lilaFondo2],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+      leading: IconButton(
+        icon: const Icon(
+          Icons.arrow_back_ios_new_outlined,
+          color: Colors.white,
+          size: 24,
+        ),
+        onPressed: () => Navigator.of(context).maybePop(),
+      ),
+      centerTitle: true,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Icon(Icons.vaccines_rounded, color: Colors.white, size: 20),
+          SizedBox(width: 6),
+          Text(
+            "Registrar vacuna",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
             ),
           ),
-          child: StreamBuilder<DocumentSnapshot>(
-            stream: mascotaRef.snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Center(child: Text("Error al cargar los datos"));
-              }
-              if (!snapshot.hasData || !snapshot.data!.exists) {
-                return const Center(child: CircularProgressIndicator());
-              }
+        ],
+      ),
+    ),
+    body: SafeArea(
+      child: Container
+        (
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [lilaFondo1, lilaFondo2],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: mascotaRef.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Center(child: Text("Error al cargar los datos"));
+            }
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-              final data = snapshot.data!.data() as Map<String, dynamic>;
-              final nombre = data['nombre'] ?? 'Mascota';
+            final data = snapshot.data!.data() as Map<String, dynamic>;
+            final nombre = data['nombre'] ?? 'Mascota';
 
-              final dynamic fotoDynamic = data['fotoUrl'] ?? data['foto'];
-              final String? fotoUrl =
-                  fotoDynamic is String && fotoDynamic.isNotEmpty
-                      ? fotoDynamic
-                      : null;
+            final dynamic fotoDynamic = data['fotoUrl'] ?? data['foto'];
+            final String? fotoUrl =
+                fotoDynamic is String && fotoDynamic.isNotEmpty
+                    ? fotoDynamic
+                    : null;
 
-              return Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 430),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 20,
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 430),
+                child: SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(26),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x22000000),
+                          blurRadius: 16,
+                          offset: Offset(0, 8),
+                        ),
+                      ],
                     ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // FOTO
+                        // ====== CABECERA TIPO CONSULTA MÉDICA ======
                         Container(
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: azulChipOscuro, width: 3),
-                          ),
-                          padding: const EdgeInsets.all(4),
-                          child: CircleAvatar(
-                            radius: 46,
-                            backgroundColor: const Color(0xFFEDEFF3),
-                            backgroundImage:
-                                fotoUrl != null
-                                    ? NetworkImage(fotoUrl)
-                                    : const AssetImage(
-                                          'assets/images/perro.jpg',
-                                        )
-                                        as ImageProvider,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // CHIP CON NOMBRE
-                        Container(
-                          decoration: BoxDecoration(
-                            color: azulChipOscuro,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x33000000),
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 6,
-                          ),
-                          child: Text(
-                            nombre,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                            color: const Color(0xFFF3F4FF),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(26),
+                              topRight: Radius.circular(26),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 22),
-
-                        // CARD PRINCIPAL
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(26),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x22000000),
-                                blurRadius: 16,
-                                offset: Offset(0, 8),
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                          child: Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: azulChipOscuro,
+                                    width: 3,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(4),
+                                child: CircleAvatar(
+                                  radius: 34,
+                                  backgroundColor: const Color(0xFFEDEFF3),
+                                  backgroundImage:
+                                      fotoUrl != null
+                                          ? NetworkImage(fotoUrl)
+                                          : const AssetImage(
+                                                'assets/images/perro.jpg',
+                                              )
+                                              as ImageProvider,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      nombre,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE0E7FF),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: const [
+                                          Icon(
+                                            Icons.pets_rounded,
+                                            size: 14,
+                                            color: azulChipOscuro,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            "Paciente",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: azulChipOscuro,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
+                        ),
+
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Color(0xFFE4E6F2),
+                        ),
+
+                        // ====== CONTENIDO DEL FORMULARIO ======
+                        Padding(
                           padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
                           child: Form(
                             key: _formKey,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                const SizedBox(height: 4),
                                 const Text(
                                   'Detalles de la vacuna',
                                   style: TextStyle(
@@ -386,38 +426,9 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                     color: Colors.black87,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: azulSuave,
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  child: Row(
-                                    children: const [
-                                      Icon(
-                                        Icons.info_outline_rounded,
-                                        size: 18,
-                                        color: Color(0xFF0B1446),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          'Registra los detalles de la vacuna aplicada y la próxima dosis si aplica.',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 18),
+                                const SizedBox(height: 14),
 
+                                // Nombre vacuna
                                 _label("Nombre de la vacuna"),
                                 const SizedBox(height: 6),
                                 _inputText(
@@ -436,6 +447,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                 ),
                                 const SizedBox(height: 16),
 
+                                // Fecha aplicación
                                 _label("Fecha de aplicación"),
                                 const SizedBox(height: 6),
                                 _dateField(
@@ -445,6 +457,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                 ),
                                 const SizedBox(height: 16),
 
+                                // Lote / dosis
                                 Row(
                                   children: [
                                     Expanded(
@@ -484,11 +497,13 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                 ),
                                 const SizedBox(height: 16),
 
+                                // Personal
                                 _label("Personal aplicador"),
                                 const SizedBox(height: 6),
                                 _dropdownPersonalAplicador(),
                                 const SizedBox(height: 16),
 
+                                // Próxima dosis
                                 _label("Fecha de próxima dosis (si aplica)"),
                                 const SizedBox(height: 6),
                                 _dateField(
@@ -498,6 +513,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                 ),
                                 const SizedBox(height: 26),
 
+                                // Botones
                                 Row(
                                   children: [
                                     Expanded(
@@ -505,13 +521,11 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                         onPressed: _guardar,
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: botonAzulOscuro,
-                                          minimumSize: const Size.fromHeight(
-                                            50,
-                                          ),
+                                          minimumSize:
+                                              const Size.fromHeight(50),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              14,
-                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(14),
                                           ),
                                           elevation: 3,
                                         ),
@@ -529,13 +543,11 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                       child: OutlinedButton(
                                         onPressed: _cancelar,
                                         style: OutlinedButton.styleFrom(
-                                          minimumSize: const Size.fromHeight(
-                                            50,
-                                          ),
+                                          minimumSize:
+                                              const Size.fromHeight(50),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              14,
-                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(14),
                                           ),
                                           backgroundColor: botonGris,
                                           side: BorderSide(
@@ -561,13 +573,15 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                     ),
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   // ---------- Widgets auxiliares de estilo ----------
 

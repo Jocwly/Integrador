@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:login/servicios/notification_service.dart';
 import 'package:login/Pantallas/veterinario.dart';
 import 'package:login/Pantallas/Registrarse.dart';
 import 'package:login/Pantallas/mascotadueno.dart';
@@ -75,7 +74,6 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     const darkBlue = Color(0xFF081B4D);
-    const lightBlue = Color(0xFF66A6FF);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -237,13 +235,6 @@ class _LoginState extends State<Login> {
                                       ),
                             ),
                           ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              await NotificationService.mostrarNotificacionPrueba();
-                            },
-                            child: const Text('Probar notificación'),
-                          ),
-
                           const SizedBox(height: 16),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
