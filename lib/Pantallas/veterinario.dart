@@ -213,11 +213,11 @@ class Veterinario extends StatelessWidget {
                         child: SizedBox(
                           width:
                               size.width *
-                              0.40, // ancho fijo para parecerse al mockup
+                              0.45, // ancho fijo para parecerse al mockup
                           child: AspectRatio(
                             aspectRatio: 4 / 3,
-                            child: Image.network(
-                              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmuJh-ioHIdZI15Qna5kPbjnsir2qasTnHA&s',
+                            child: Image.asset(
+                              'assets/images/animales.png',
                               fit: BoxFit.cover,
                             ),
                           ),
