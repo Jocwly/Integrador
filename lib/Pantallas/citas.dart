@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:login/servicios/notification_service.dart';
 
 class CitasMascota extends StatefulWidget {
   final String clienteId;
@@ -508,6 +509,7 @@ class _CitasMascotaState extends State<CitasMascota> {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: () => _cancelarCita(context, citasRef, citaId),
+                 // onPressed: () => NotificationService().showTestNotification(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(

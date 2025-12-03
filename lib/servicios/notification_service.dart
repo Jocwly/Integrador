@@ -1,141 +1,147 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin _notificationsPlugin =
+  NotificationService._internal();
+
+  static final NotificationService _instance = NotificationService._internal();
+
+  factory NotificationService() => _instance;
+
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  static const AndroidNotificationChannel _androidChannel =
-      AndroidNotificationChannel(
-    'citas_channel',
-    'Recordatorios de citas',
-    description: 'Notificaciones para citas de PETCARE',
-    importance: Importance.max,
-    playSound: true,
-  );
+  Future<void> init() async {
+    const AndroidInitializationSettings androidInit =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  static Future<void> init() async {
-    tz.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation('America/Mexico_City'));
+    const DarwinInitializationSettings iosInit = DarwinInitializationSettings();
 
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    final iosInit = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestSoundPermission: true,
-      requestBadgePermission: true,
-    );
-
-    final initSettings = InitializationSettings(
+    const InitializationSettings initSettings = InitializationSettings(
       android: androidInit,
       iOS: iosInit,
     );
 
-    await _notificationsPlugin.initialize(initSettings);
-
-    final androidPlugin =
-        _notificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
-
-    if (androidPlugin != null) {
-      await androidPlugin.createNotificationChannel(_androidChannel);
-      await androidPlugin.requestNotificationsPermission();
-    }
+    await _flutterLocalNotificationsPlugin.initialize(initSettings);
+    // No pedimos permisos especiales aquí, ya vimos que las inmediatas sí llegan.
   }
 
-  static NotificationDetails _notificationDetails() {
-    return NotificationDetails(
-      android: AndroidNotificationDetails(
-        _androidChannel.id,
-        _androidChannel.name,
-        channelDescription: _androidChannel.description,
-        importance: Importance.max,
-        priority: Priority.high,
-        playSound: true,
-      ),
-      iOS: const DarwinNotificationDetails(
-        presentAlert: true,
-        presentSound: true,
-        presentBadge: true,
-      ),
+  NotificationDetails _defaultDetails() {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+      'citas_channel_id',
+      'Recordatorios de citas',
+      channelDescription: 'Notificaciones para recordatorios de citas',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails();
+
+    return const NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
     );
   }
 
-  static String _formatearHora(tz.TZDateTime fecha) {
-    final h = fecha.hour.toString().padLeft(2, '0');
-    final m = fecha.minute.toString().padLeft(2, '0');
-    return '$h:$m';
-  }
-
-  static Future<void> mostrarNotificacionPrueba() async {
-    final details = _notificationDetails();
-    await _notificationsPlugin.show(
-      999,
-      'Prueba de notificación',
-      'Si ves esto, las notificaciones locales funcionan ✨',
-      details,
-    );
-  }
-
-  static Future<void> programarNotificacionesCita({
-    required int idCita,
-    required DateTime fechaHoraCita,
-    required String paciente,
-    required String duenio,
-    required String motivo,
+  Future<void> _scheduleSingleNotification({
+    required int id,
+    required DateTime dateTime,
+    required String title,
+    required String body,
   }) async {
-    final details = _notificationDetails();
+    final now = DateTime.now();
+    print('[NOTIF] Programando id=$id para: $dateTime (ahora: $now)');
 
-    final tz.TZDateTime cita = tz.TZDateTime.from(fechaHoraCita, tz.local);
-    final tz.TZDateTime unDiaAntes = cita.subtract(const Duration(days: 1));
-    final tz.TZDateTime unaHoraAntes = cita.subtract(const Duration(hours: 1));
-
-    final titulo = 'Cita próxima - ${_formatearHora(cita)}';
-    final cuerpo = 'Paciente: $paciente.\nDueño: $duenio\nMotivo: $motivo';
-
-    final int baseId = (idCita & 0x7fffffff) % 1000000;
-    final int idDiaAntes = baseId * 10 + 1;
-    final int idHoraAntes = baseId * 10 + 2;
-    final int idHoraExacta = baseId * 10 + 3;
-
-    Future<void> _scheduleIfFuture(
-      int id,
-      String etiqueta,
-      tz.TZDateTime cuando,
-    ) async {
-      final ahora = tz.TZDateTime.now(tz.local);
-      print('[$etiqueta] ahora: $ahora, programada: $cuando (id=$id)');
-
-      if (cuando.isAfter(ahora)) {
-        try {
-          await _notificationsPlugin.zonedSchedule(
-            id,
-            titulo,
-            cuerpo,
-            cuando,
-            details,
-            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation:
-                UILocalNotificationDateInterpretation.absoluteTime,
-          );
-          print('[$etiqueta] ✅ Notificación programada');
-        } catch (e) {
-          print('[$etiqueta] ❌ ERROR al programar: $e');
-        }
-      } else {
-        print('[$etiqueta] ❌ NO se programa (fecha en el pasado)');
-      }
+    if (dateTime.isBefore(now)) {
+      print('[NOTIF] ❌ No se programa $id porque está en el pasado');
+      return;
     }
 
-    await _scheduleIfFuture(idDiaAntes, '1 día antes', unDiaAntes);
-    await _scheduleIfFuture(idHoraAntes, '1 hora antes', unaHoraAntes);
-    await _scheduleIfFuture(idHoraExacta, 'hora exacta', cita);
+    await _flutterLocalNotificationsPlugin.schedule(
+      id,
+      title,
+      body,
+      dateTime,
+      _defaultDetails(),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      // sin matchDateTimeComponents porque NO es repetitiva
+    );
 
-    final pendientes = await _notificationsPlugin.pendingNotificationRequests();
-    print('Pendientes: ${pendientes.length}');
-    for (final p in pendientes) {
-      print('  - id=${p.id}, title=${p.title}');
+    print('[NOTIF] ✔ Notificación $id programada correctamente');
+  }
+
+  // Notificación inmediata (ya sabes que funciona)
+  Future<void> showTestNotification() async {
+    await _flutterLocalNotificationsPlugin.show(
+      999,
+      'Test inmediata',
+      'Si ves esto, las notificaciones locales funcionan.',
+      _defaultDetails(),
+    );
+  }
+
+  /// Programa:
+  ///  - 1 día antes
+  ///  - 1 hora antes
+  ///  - A la hora exacta
+  Future<void> scheduleCitaNotifications({
+    required DateTime fechaCita,
+    required String nombreMascota,
+    required String tipoCita,
+  }) async {
+    final ahora = DateTime.now();
+
+    final DateTime unDiaAntes = fechaCita.subtract(const Duration(days: 1));
+    final DateTime unaHoraAntes = fechaCita.subtract(const Duration(hours: 1));
+
+    final baseId = fechaCita.millisecondsSinceEpoch ~/ 1000;
+
+    print('========== PROGRAMANDO CITAS ==========');
+    print('Cita:        $fechaCita');
+    print('1 día antes: $unDiaAntes');
+    print('1 hora ant.: $unaHoraAntes');
+    print('Ahora:       $ahora');
+
+    // 1 día antes
+    if (unDiaAntes.isAfter(ahora)) {
+      await _scheduleSingleNotification(
+        id: baseId + 1,
+        dateTime: unDiaAntes,
+        title: 'Recordatorio de cita para $nombreMascota',
+        body: 'Mañana tienes una $tipoCita programada para $nombreMascota.',
+      );
+    } else {
+      print('[NOTIF] ❌ 1 día antes ya pasó, no se programa.');
+    }
+
+    // 1 hora antes
+    if (unaHoraAntes.isAfter(ahora)) {
+      await _scheduleSingleNotification(
+        id: baseId + 2,
+        dateTime: unaHoraAntes,
+        title: 'Cita próxima para $nombreMascota',
+        body: 'En 1 hora tienes una $tipoCita para $nombreMascota.',
+      );
+    } else {
+      print('[NOTIF] ❌ 1 hora antes ya pasó, no se programa.');
+    }
+
+    // Hora exacta
+    if (fechaCita.isAfter(ahora)) {
+      await _scheduleSingleNotification(
+        id: baseId + 3,
+        dateTime: fechaCita,
+        title: '¡Cita ahora para $nombreMascota!',
+        body: 'Es hora de la $tipoCita de $nombreMascota.',
+      );
+    } else {
+      print('[NOTIF] ❌ Hora exacta ya pasó, no se programa.');
     }
   }
+}
+
+extension on FlutterLocalNotificationsPlugin {
+  schedule(int id, String title, String body, DateTime dateTime, NotificationDetails defaultDetails, {required AndroidScheduleMode androidScheduleMode, required UILocalNotificationDateInterpretation uiLocalNotificationDateInterpretation}) {}
 }

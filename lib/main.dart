@@ -15,7 +15,7 @@ Future<void> main() async {
   );
 
   // 👇 inicializamos las notificaciones locales
-  await NotificationService.init();
+  await NotificationService().init();
 
   runApp(const MyApp());
 }

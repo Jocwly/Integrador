@@ -222,7 +222,8 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
             : baseBorder;
 
     return InputDecoration(
-      prefixIcon: icon != null ? Icon(icon, color: Color(0xFF0B1446), size: 20) : null,
+      prefixIcon:
+          icon != null ? Icon(icon, color: Color(0xFF0B1446), size: 20) : null,
       hintText: hint,
       filled: true,
       fillColor: fillColor,
@@ -714,7 +715,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
             },
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
-              foregroundColor:Color(0xFF0B1446),
+              foregroundColor: Color(0xFF0B1446),
               textStyle: const TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,

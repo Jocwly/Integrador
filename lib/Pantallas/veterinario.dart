@@ -61,7 +61,11 @@ class Veterinario extends StatelessWidget {
               ),
               onSelected: (value) {
                 if (value == 1) {
-                 Navigator.pushNamedAndRemoveUntil(context, Login.routeName, (route)=>false,);
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    Login.routeName,
+                    (route) => false,
+                  );
                 }
               },
               itemBuilder:
@@ -213,7 +217,7 @@ class Veterinario extends StatelessWidget {
                         child: SizedBox(
                           width:
                               size.width *
-                              0.45, // ancho fijo para parecerse al mockup
+                              0.40, // ancho fijo para parecerse al mockup
                           child: AspectRatio(
                             aspectRatio: 4 / 3,
                             child: Image.asset(

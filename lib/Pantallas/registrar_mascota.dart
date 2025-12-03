@@ -97,161 +97,159 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     }
   }
 
-Future<void> _guardarMascota() async {
-  final nombre = nombreController.text.trim();
-  final edad = edadController.text.trim();
-  final raza = razaController.text.trim();
-  final tamano = tamanoController.text.trim();
-  final peso = pesoController.text.trim();
-  final color = colorController.text.trim();
+  Future<void> _guardarMascota() async {
+    final nombre = nombreController.text.trim();
+    final edad = edadController.text.trim();
+    final raza = razaController.text.trim();
+    final tamano = tamanoController.text.trim();
+    final peso = pesoController.text.trim();
+    final color = colorController.text.trim();
 
-  // 👀 Ya NO validamos que haya foto
-  if (nombre.isEmpty ||
-      especie == null ||
-      sexo == null ||
-      esterilizado == null ||
-      edad.isEmpty ||
-      raza.isEmpty ||
-      tamano.isEmpty ||
-      peso.isEmpty ||
-      color.isEmpty) {
-    setState(() {
-      _mostrarErrores = true;
-    });
+    // 👀 Ya NO validamos que haya foto
+    if (nombre.isEmpty ||
+        especie == null ||
+        sexo == null ||
+        esterilizado == null ||
+        edad.isEmpty ||
+        raza.isEmpty ||
+        tamano.isEmpty ||
+        peso.isEmpty ||
+        color.isEmpty) {
+      setState(() {
+        _mostrarErrores = true;
+      });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Por favor llena todos los campos')),
-    );
-    return;
-  }
-
-  try {
-    final clienteRef =
-        FirebaseFirestore.instance.collection('clientes').doc(widget.clienteId);
-
-    final mascotaRef = clienteRef.collection('mascotas').doc();
-
-    // 🔹 Foto puede ser null o venir de inicial
-    String? fotoUrl = _fotoUrlRemota;
-
-    // 🔹 Solo subimos a Storage si el usuario seleccionó una imagen nueva
-    if (_imagenSeleccionada != null) {
-      try {
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('mascotas')
-            .child(widget.clienteId)
-            .child('${mascotaRef.id}.jpg');
-
-        final snapshot = await storageRef.putFile(
-          _imagenSeleccionada!,
-          SettableMetadata(contentType: 'image/jpeg'),
-        );
-
-        fotoUrl = await snapshot.ref.getDownloadURL();
-      } on FirebaseException catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al subir la imagen: ${e.message}')),
-        );
-        return;
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor llena todos los campos')),
+      );
+      return;
     }
 
-    await mascotaRef.set({
-      'nombre': nombre,
-      'edad': '$edad $_unidadEdad',
-      'raza': raza,
-      'tamano': tamano,
-      'peso': peso,
-      'color': color,
-      'especie': especie,
-      'sexo': sexo,
-      'esterilizado': esterilizado,
-      // 👇 Puede ser null si no se subió foto
-      'fotoUrl': fotoUrl,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    try {
+      final clienteRef = FirebaseFirestore.instance
+          .collection('clientes')
+          .doc(widget.clienteId);
 
-    await clienteRef.update({'mascotas': FieldValue.increment(1)});
+      final mascotaRef = clienteRef.collection('mascotas').doc();
 
-    if (!mounted) return;
+      // 🔹 Foto puede ser null o venir de inicial
+      String? fotoUrl = _fotoUrlRemota;
 
-    await showDialog(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-          contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-          title: Row(
-            children: const [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: Color(0xFFD6E1F7),
-                child: Icon(
-                  Icons.pets_rounded,
-                  color: Color(0xFF0B1446),
-                  size: 20,
+      // 🔹 Solo subimos a Storage si el usuario seleccionó una imagen nueva
+      if (_imagenSeleccionada != null) {
+        try {
+          final storageRef = FirebaseStorage.instance
+              .ref()
+              .child('mascotas')
+              .child(widget.clienteId)
+              .child('${mascotaRef.id}.jpg');
+
+          final snapshot = await storageRef.putFile(
+            _imagenSeleccionada!,
+            SettableMetadata(contentType: 'image/jpeg'),
+          );
+
+          fotoUrl = await snapshot.ref.getDownloadURL();
+        } on FirebaseException catch (e) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error al subir la imagen: ${e.message}')),
+          );
+          return;
+        }
+      }
+
+      await mascotaRef.set({
+        'nombre': nombre,
+        'edad': '$edad $_unidadEdad',
+        'raza': raza,
+        'tamano': tamano,
+        'peso': peso,
+        'color': color,
+        'especie': especie,
+        'sexo': sexo,
+        'esterilizado': esterilizado,
+        // 👇 Puede ser null si no se subió foto
+        'fotoUrl': fotoUrl,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      await clienteRef.update({'mascotas': FieldValue.increment(1)});
+
+      if (!mounted) return;
+
+      await showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+            contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            title: Row(
+              children: const [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Color(0xFFD6E1F7),
+                  child: Icon(
+                    Icons.pets_rounded,
+                    color: Color(0xFF0B1446),
+                    size: 20,
+                  ),
                 ),
-              ),
-              SizedBox(width: 10),
-              Text(
-                'Mascota agregada',
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
+                SizedBox(width: 10),
+                Text(
+                  'Mascota agregada',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                ),
+              ],
+            ),
+            content: Text(
+              'Se agregó la mascota "$nombre" correctamente.',
+              style: const TextStyle(fontSize: 15),
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0B1446),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Aceptar',
+                  style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ],
-          ),
-          content: Text(
-            'Se agregó la mascota "$nombre" correctamente.',
-            style: const TextStyle(fontSize: 15),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0B1446),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'Aceptar',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+          );
+        },
+      );
 
-    if (!mounted) return;
-    Navigator.pop(context);
-  } catch (e) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: $e')),
-    );
+      if (!mounted) return;
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
     final azulSuave = const Color(0xFFD6E1F7);
 
-    final ImageProvider? avatarImage = _imagenSeleccionada != null
-        ? FileImage(_imagenSeleccionada!)
-        : (_fotoUrlRemota != null && _fotoUrlRemota!.isNotEmpty
-            ? NetworkImage(_fotoUrlRemota!) as ImageProvider
-            : null);
+    final ImageProvider? avatarImage =
+        _imagenSeleccionada != null
+            ? FileImage(_imagenSeleccionada!)
+            : (_fotoUrlRemota != null && _fotoUrlRemota!.isNotEmpty
+                ? NetworkImage(_fotoUrlRemota!) as ImageProvider
+                : null);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -327,8 +325,7 @@ Future<void> _guardarMascota() async {
                               Container(
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                    color:
-                                        const Color.fromARGB(255, 0, 20, 66),
+                                    color: const Color.fromARGB(255, 0, 20, 66),
                                     width: 3,
                                   ),
                                   shape: BoxShape.circle,
@@ -340,13 +337,14 @@ Future<void> _guardarMascota() async {
                                     radius: 52,
                                     backgroundColor: Colors.grey[300],
                                     backgroundImage: avatarImage,
-                                    child: avatarImage == null
-                                        ? const Icon(
-                                            Icons.add_a_photo_rounded,
-                                            color: Colors.white,
-                                            size: 28,
-                                          )
-                                        : null,
+                                    child:
+                                        avatarImage == null
+                                            ? const Icon(
+                                              Icons.add_a_photo_rounded,
+                                              color: Colors.white,
+                                              size: 28,
+                                            )
+                                            : null,
                                   ),
                                 ),
                               ),
@@ -373,29 +371,30 @@ Future<void> _guardarMascota() async {
 
                               // FORM
                               Container(
-                                width: double.infinity, // 🔹 ocupa todo el ancho
+                                width:
+                                    double.infinity, // 🔹 ocupa todo el ancho
                                 decoration: BoxDecoration(
                                   color: azulSuave,
                                   borderRadius: BorderRadius.circular(18),
                                 ),
-                                padding: const EdgeInsets.all(14), // 🔹 menos padding
+                                padding: const EdgeInsets.all(
+                                  14,
+                                ), // 🔹 menos padding
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     // Nombre
                                     _buildLabel(
                                       'Nombre de la mascota:',
-                                      isError: _mostrarErrores &&
-                                          nombreController.text
-                                              .trim()
-                                              .isEmpty,
+                                      isError:
+                                          _mostrarErrores &&
+                                          nombreController.text.trim().isEmpty,
                                     ),
                                     _buildTextFieldBox(
                                       controller: nombreController,
-                                      isError: _mostrarErrores &&
-                                          nombreController.text
-                                              .trim()
-                                              .isEmpty,
+                                      isError:
+                                          _mostrarErrores &&
+                                          nombreController.text.trim().isEmpty,
                                       icon: Icons.pets_rounded,
                                     ),
                                     const SizedBox(height: 16),
@@ -412,14 +411,16 @@ Future<void> _guardarMascota() async {
                                             children: [
                                               _buildLabel(
                                                 'Especie:',
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     especie == null,
                                               ),
                                               _buildDropdownBox<String>(
                                                 value: especie,
                                                 hint: 'Seleccionar',
                                                 items: especies,
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     especie == null,
                                                 onChanged: (value) {
                                                   setState(() {
@@ -431,7 +432,9 @@ Future<void> _guardarMascota() async {
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(width: 10), // 🔹 menos espacio
+                                        const SizedBox(
+                                          width: 10,
+                                        ), // 🔹 menos espacio
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -439,7 +442,8 @@ Future<void> _guardarMascota() async {
                                             children: [
                                               _buildLabel(
                                                 'Raza:',
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     razaController.text
                                                         .trim()
                                                         .isEmpty,
@@ -465,7 +469,8 @@ Future<void> _guardarMascota() async {
                                             children: [
                                               _buildLabel(
                                                 'Edad:',
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     edadController.text
                                                         .trim()
                                                         .isEmpty,
@@ -474,7 +479,9 @@ Future<void> _guardarMascota() async {
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(width: 10), // 🔹 menos espacio
+                                        const SizedBox(
+                                          width: 10,
+                                        ), // 🔹 menos espacio
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -482,7 +489,8 @@ Future<void> _guardarMascota() async {
                                             children: [
                                               _buildLabel(
                                                 'Color:',
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     colorController.text
                                                         .trim()
                                                         .isEmpty,
@@ -490,17 +498,16 @@ Future<void> _guardarMascota() async {
                                               _buildTextFieldBox(
                                                 controller: colorController,
                                                 inputFormatters: [
-                                                  FilteringTextInputFormatter
-                                                      .deny(
+                                                  FilteringTextInputFormatter.deny(
                                                     RegExp(r'[0-9]'),
                                                   ),
                                                 ],
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     colorController.text
                                                         .trim()
                                                         .isEmpty,
-                                                icon:
-                                                    Icons.color_lens_rounded,
+                                                icon: Icons.color_lens_rounded,
                                               ),
                                             ],
                                           ),
@@ -522,7 +529,8 @@ Future<void> _guardarMascota() async {
                                             children: [
                                               _buildLabel(
                                                 'Sexo:',
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     sexo == null,
                                               ),
                                               Row(
@@ -532,19 +540,20 @@ Future<void> _guardarMascota() async {
                                                     groupValue: sexo,
                                                     activeColor:
                                                         const Color.fromARGB(
-                                                      255,
-                                                      13,
-                                                      0,
-                                                      60,
-                                                    ),
+                                                          255,
+                                                          13,
+                                                          0,
+                                                          60,
+                                                        ),
                                                     visualDensity:
                                                         const VisualDensity(
-                                                      horizontal: -4,
-                                                      vertical: -4,
-                                                    ),
-                                                    onChanged: (v) => setState(
-                                                      () => sexo = v,
-                                                    ),
+                                                          horizontal: -4,
+                                                          vertical: -4,
+                                                        ),
+                                                    onChanged:
+                                                        (v) => setState(
+                                                          () => sexo = v,
+                                                        ),
                                                   ),
                                                   const Text(
                                                     "Macho",
@@ -561,19 +570,20 @@ Future<void> _guardarMascota() async {
                                                     groupValue: sexo,
                                                     activeColor:
                                                         const Color.fromARGB(
-                                                      255,
-                                                      13,
-                                                      0,
-                                                      60,
-                                                    ),
+                                                          255,
+                                                          13,
+                                                          0,
+                                                          60,
+                                                        ),
                                                     visualDensity:
                                                         const VisualDensity(
-                                                      horizontal: -4,
-                                                      vertical: -4,
-                                                    ),
-                                                    onChanged: (v) => setState(
-                                                      () => sexo = v,
-                                                    ),
+                                                          horizontal: -4,
+                                                          vertical: -4,
+                                                        ),
+                                                    onChanged:
+                                                        (v) => setState(
+                                                          () => sexo = v,
+                                                        ),
                                                   ),
                                                   const Text(
                                                     "Hembra",
@@ -586,7 +596,9 @@ Future<void> _guardarMascota() async {
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(width: 10), // 🔹 menos espacio
+                                        const SizedBox(
+                                          width: 10,
+                                        ), // 🔹 menos espacio
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -594,7 +606,8 @@ Future<void> _guardarMascota() async {
                                             children: [
                                               _buildLabel(
                                                 'Esterilizado:',
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     esterilizado == null,
                                               ),
                                               Row(
@@ -604,20 +617,21 @@ Future<void> _guardarMascota() async {
                                                     groupValue: esterilizado,
                                                     activeColor:
                                                         const Color.fromARGB(
-                                                      255,
-                                                      13,
-                                                      0,
-                                                      60,
-                                                    ),
+                                                          255,
+                                                          13,
+                                                          0,
+                                                          60,
+                                                        ),
                                                     visualDensity:
                                                         const VisualDensity(
-                                                      horizontal: -4,
-                                                      vertical: -4,
-                                                    ),
-                                                    onChanged: (v) => setState(
-                                                      () =>
-                                                          esterilizado = v,
-                                                    ),
+                                                          horizontal: -4,
+                                                          vertical: -4,
+                                                        ),
+                                                    onChanged:
+                                                        (v) => setState(
+                                                          () =>
+                                                              esterilizado = v,
+                                                        ),
                                                   ),
                                                   const Text(
                                                     "Sí",
@@ -634,20 +648,21 @@ Future<void> _guardarMascota() async {
                                                     groupValue: esterilizado,
                                                     activeColor:
                                                         const Color.fromARGB(
-                                                      255,
-                                                      13,
-                                                      0,
-                                                      60,
-                                                    ),
+                                                          255,
+                                                          13,
+                                                          0,
+                                                          60,
+                                                        ),
                                                     visualDensity:
                                                         const VisualDensity(
-                                                      horizontal: -4,
-                                                      vertical: -4,
-                                                    ),
-                                                    onChanged: (v) => setState(
-                                                      () =>
-                                                          esterilizado = v,
-                                                    ),
+                                                          horizontal: -4,
+                                                          vertical: -4,
+                                                        ),
+                                                    onChanged:
+                                                        (v) => setState(
+                                                          () =>
+                                                              esterilizado = v,
+                                                        ),
                                                   ),
                                                   const Text(
                                                     "No",
@@ -675,7 +690,8 @@ Future<void> _guardarMascota() async {
                                             children: [
                                               _buildLabel(
                                                 'Tamaño:',
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     tamanoController.text
                                                         .trim()
                                                         .isEmpty,
@@ -688,22 +704,23 @@ Future<void> _guardarMascota() async {
                                                   fontSize: 12,
                                                 ),
                                                 inputFormatters: [
-                                                  FilteringTextInputFormatter
-                                                      .deny(
+                                                  FilteringTextInputFormatter.deny(
                                                     RegExp(r'[0-9]'),
                                                   ),
                                                 ],
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     tamanoController.text
                                                         .trim()
                                                         .isEmpty,
-                                                icon: Icons
-                                                    .straighten_rounded,
+                                                icon: Icons.straighten_rounded,
                                               ),
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(width: 10), // 🔹 menos espacio
+                                        const SizedBox(
+                                          width: 10,
+                                        ), // 🔹 menos espacio
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -711,7 +728,8 @@ Future<void> _guardarMascota() async {
                                             children: [
                                               _buildLabel(
                                                 'Peso:',
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     pesoController.text
                                                         .trim()
                                                         .isEmpty,
@@ -719,25 +737,25 @@ Future<void> _guardarMascota() async {
                                               _buildTextFieldBox(
                                                 controller: pesoController,
                                                 keyboardType:
-                                                    const TextInputType
-                                                        .numberWithOptions(
-                                                  decimal: true,
-                                                ),
+                                                    const TextInputType.numberWithOptions(
+                                                      decimal: true,
+                                                    ),
                                                 inputFormatters: [
-                                                  FilteringTextInputFormatter
-                                                      .allow(
+                                                  FilteringTextInputFormatter.allow(
                                                     RegExp(
                                                       r'^\d{0,3}(\.\d{0,2})?$',
                                                     ),
                                                   ),
                                                 ],
                                                 suffixText: 'kg',
-                                                isError: _mostrarErrores &&
+                                                isError:
+                                                    _mostrarErrores &&
                                                     pesoController.text
                                                         .trim()
                                                         .isEmpty,
-                                                icon: Icons
-                                                    .monitor_weight_outlined,
+                                                icon:
+                                                    Icons
+                                                        .monitor_weight_outlined,
                                               ),
                                             ],
                                           ),
@@ -756,11 +774,11 @@ Future<void> _guardarMascota() async {
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor:
                                                   const Color.fromARGB(
-                                                255,
-                                                13,
-                                                0,
-                                                60,
-                                              ),
+                                                    255,
+                                                    13,
+                                                    0,
+                                                    60,
+                                                  ),
                                               minimumSize:
                                                   const Size.fromHeight(48),
                                               shape: RoundedRectangleBorder(
@@ -780,8 +798,8 @@ Future<void> _guardarMascota() async {
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: ElevatedButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context),
+                                            onPressed:
+                                                () => Navigator.pop(context),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: Colors.grey,
                                               minimumSize:
@@ -861,7 +879,9 @@ Future<void> _guardarMascota() async {
         inputFormatters: inputFormatters,
         decoration: InputDecoration(
           prefixIcon:
-              icon != null ? Icon(icon, size: 20, color: Colors.grey[700]) : null,
+              icon != null
+                  ? Icon(icon, size: 20, color: Colors.grey[700])
+                  : null,
           border: InputBorder.none,
           suffixText: suffixText,
           hintText: hintText,
@@ -897,14 +917,15 @@ Future<void> _guardarMascota() async {
         hint: hint != null ? Text(hint) : null,
         decoration: const InputDecoration(border: InputBorder.none),
         icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black87),
-        items: items
-            .map(
-              (item) => DropdownMenuItem<T>(
-                value: item,
-                child: Text(item.toString()),
-              ),
-            )
-            .toList(),
+        items:
+            items
+                .map(
+                  (item) => DropdownMenuItem<T>(
+                    value: item,
+                    child: Text(item.toString()),
+                  ),
+                )
+                .toList(),
         onChanged: onChanged,
       ),
     );
