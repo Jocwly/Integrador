@@ -3,17 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+//import 'package:firebase_storage/firebase_storage.dart';
 
 class RegistrarMascota extends StatefulWidget {
   final String clienteId;
-  final String? fotoUrlInicial;
 
-  const RegistrarMascota({
-    super.key,
-    required this.clienteId,
-    this.fotoUrlInicial,
-  });
+  const RegistrarMascota({super.key, required this.clienteId});
 
   @override
   State<RegistrarMascota> createState() => _RegistrarMascotaState();
@@ -34,6 +31,8 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
   String? esterilizado;
   String _unidadEdad = 'años';
 
+  static const String cloudName = 'dsjyywplr';
+  static const String uploadPreset = 'mascots';
   bool _mostrarErrores = false;
 
   final List<String> especies = [
@@ -81,19 +80,42 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     "Azul Ruso",
   ];
 
-  @override
+  /* @override
   void initState() {
     super.initState();
     _fotoUrlRemota = widget.fotoUrlInicial;
-  }
+  }*/
 
   Future<void> _seleccionarImagen() async {
-    final ImagePicker picker = ImagePicker();
+    final picker = ImagePicker();
     final XFile? imagen = await picker.pickImage(source: ImageSource.gallery);
+
     if (imagen != null) {
       setState(() {
         _imagenSeleccionada = File(imagen.path);
       });
+    }
+  }
+
+  Future<String?> _subirImagenACloudinary(File imageFile) async {
+    final uri = Uri.parse(
+      'https://api.cloudinary.com/v1_1/$cloudName/image/upload',
+    );
+
+    final request =
+        http.MultipartRequest('POST', uri)
+          ..fields['upload_preset'] = uploadPreset
+          ..files.add(
+            await http.MultipartFile.fromPath('file', imageFile.path),
+          );
+
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(await response.stream.bytesToString());
+      return responseData['secure_url'];
+    } else {
+      return null;
     }
   }
 
@@ -134,30 +156,30 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
 
       // 🔹 Foto puede ser null o venir de inicial
       String? fotoUrl = _fotoUrlRemota;
-
-      // 🔹 Solo subimos a Storage si el usuario seleccionó una imagen nueva
       if (_imagenSeleccionada != null) {
-        try {
-          final storageRef = FirebaseStorage.instance
-              .ref()
-              .child('mascotas')
-              .child(widget.clienteId)
-              .child('${mascotaRef.id}.jpg');
+        final url = await _subirImagenACloudinary(_imagenSeleccionada!);
 
-          final snapshot = await storageRef.putFile(
-            _imagenSeleccionada!,
-            SettableMetadata(contentType: 'image/jpeg'),
-          );
-
-          fotoUrl = await snapshot.ref.getDownloadURL();
-        } on FirebaseException catch (e) {
+        if (url == null) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error al subir la imagen: ${e.message}')),
+            const SnackBar(content: Text('Error al subir la imagen')),
           );
           return;
         }
+
+        fotoUrl = url;
+        _fotoUrlRemota = url;
       }
+
+      /*await FirebaseFirestore.instance
+        .collection('clientes')
+        .doc(widget.clienteId)
+        .collection('mascotas')
+        .add({
+      'nombre': nombre,
+      'fotoUrl': fotoUrl,
+      'creado': FieldValue.serverTimestamp(),
+    });*/
 
       await mascotaRef.set({
         'nombre': nombre,
@@ -247,9 +269,9 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     final ImageProvider? avatarImage =
         _imagenSeleccionada != null
             ? FileImage(_imagenSeleccionada!)
-            : (_fotoUrlRemota != null && _fotoUrlRemota!.isNotEmpty
-                ? NetworkImage(_fotoUrlRemota!) as ImageProvider
-                : null);
+            : (_fotoUrlRemota != null && _fotoUrlRemota!.startsWith('https'))
+            ? NetworkImage(_fotoUrlRemota!)
+            : null;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
