@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-
-import 'package:login/Pantallas/veterinario.dart';
-import 'package:login/Pantallas/Clientes.dart';
+import 'package:login/Pantallas/veterinario/veterinario.dart';
+import 'package:login/Pantallas/veterinario/Clientes.dart';
 
 const fondo = Color(0xFFF5F7FB);
 const azulClaro = Color(0xFF8FA8FF);

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:login/servicios/notification_service.dart';
 
 class CitasMascota extends StatefulWidget {
   final String clienteId;

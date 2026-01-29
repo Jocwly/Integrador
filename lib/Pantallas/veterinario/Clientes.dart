@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:login/Pantallas/citas_hoy.dart';
-import 'package:login/Pantallas/perfil_cliente.dart'; // Cliente
-import 'package:login/Pantallas/veterinario.dart'; // pantalla de inicio
+import 'package:login/Pantallas/veterinario/citas_hoy.dart';
+import 'package:login/Pantallas/veterinario/perfil_cliente.dart'; // Cliente
+import 'package:login/Pantallas/veterinario/veterinario.dart'; // pantalla de inicio
 
 class Clientes extends StatelessWidget {
   const Clientes({super.key});

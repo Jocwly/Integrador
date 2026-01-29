@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:login/Pantallas/Clientes.dart';
-import 'package:login/Pantallas/citas_hoy.dart';
+import 'package:login/Pantallas/veterinario/Clientes.dart';
+import 'package:login/Pantallas/veterinario/citas_hoy.dart';
 import 'package:login/Pantallas/Login.dart';
 
 class Veterinario extends StatelessWidget {

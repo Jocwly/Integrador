@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:login/Pantallas/veterinario.dart';
+import 'package:login/Pantallas/veterinario/veterinario.dart';
 import 'package:login/Pantallas/Registrarse.dart';
-import 'package:login/Pantallas/mascotadueno.dart';
+import 'package:login/Pantallas/Dueno/Mascotadueno.dart';
 
 class Login extends StatefulWidget {
   static const routeName = '/login';
@@ -53,7 +53,12 @@ class _LoginState extends State<Login> {
       if (!mounted) return;
 
       if (query.docs.isNotEmpty) {
-        Navigator.pushReplacementNamed(context, Mascotadueno.routeName);
+        final clienteId = query.docs.first.id;
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => Mascotadueno(clienteId: clienteId)),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Correo o contraseña incorrectos')),

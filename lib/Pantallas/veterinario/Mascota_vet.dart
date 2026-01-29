@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:login/Pantallas/citas.dart';
-import 'package:login/Pantallas/consulta.dart';
-import 'package:login/Pantallas/historial_medico.dart';
-import 'package:login/Pantallas/programar_citas.dart';
-import 'package:login/Pantallas/registro_vacuna.dart';
+import 'package:login/Pantallas/veterinario/citas.dart';
+import 'package:login/Pantallas/veterinario/consulta.dart';
+import 'package:login/Pantallas/veterinario/historial_medico.dart';
+import 'package:login/Pantallas/veterinario/programar_citas.dart';
+import 'package:login/Pantallas/veterinario/registro_vacuna.dart';
 
 // =======================
 //   APPBAR PERSONALIZADO

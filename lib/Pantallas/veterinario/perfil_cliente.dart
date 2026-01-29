@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:login/Pantallas/Mascota_vet.dart'; // PerfilMascota
-import 'package:login/Pantallas/registrar_mascota.dart'; // RegistrarMascota
+import 'package:login/Pantallas/veterinario/Mascota_vet.dart'; // PerfilMascota
+import 'package:login/Pantallas/veterinario/registrar_mascota.dart'; // RegistrarMascota
 
 class Cliente extends StatelessWidget {
   final String clienteId;
