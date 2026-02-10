@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:login/Pantallas/veterinario/historial_medico.dart';
 
 class MascotaPerfil extends StatelessWidget {
   final Map<String, dynamic> mascotaData;
   final String clienteId;
+  final String mascotaId;
 
   const MascotaPerfil({
     super.key,
     required this.mascotaData,
     required this.clienteId,
+    required this.mascotaId, // ✅ agregado
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFEDEBFF),
-
-      // 🔷 APPBAR IGUAL AL DISEÑO
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
@@ -36,18 +37,20 @@ class MascotaPerfil extends StatelessWidget {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color.fromARGB(255, 70, 125, 206), Color.fromARGB(255, 18, 41, 95)],
+              colors: [
+                Color.fromARGB(255, 70, 125, 206),
+                Color.fromARGB(255, 18, 41, 95),
+              ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Color.fromARGB(167, 255, 255, 255),),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -70,7 +73,6 @@ class MascotaPerfil extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 🐶 AVATAR
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
@@ -88,8 +90,6 @@ class MascotaPerfil extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 12),
-
-                  // 🐾 NOMBRE
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 18,
@@ -110,8 +110,6 @@ class MascotaPerfil extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 6),
-
-                  // 📝 RAZA
                   Text(
                     mascotaData['raza'] ?? '',
                     style: const TextStyle(color: Colors.black54, fontSize: 13),
@@ -121,7 +119,6 @@ class MascotaPerfil extends StatelessWidget {
                   const Divider(),
                   const SizedBox(height: 22),
 
-                  // 🧩 MENÚ (ICONOS REDONDOS)
                   Column(
                     children: [
                       Row(
@@ -172,7 +169,16 @@ class MascotaPerfil extends StatelessWidget {
                         icon: Icons.assignment_outlined,
                         text: 'Historial Médico',
                         onTap: () {
-                          Navigator.pushNamed(context, '/Historial_medico');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => HistorialMedico(
+                                    clienteId: clienteId,
+                                    mascotaId: mascotaId,
+                                  ),
+                            ),
+                          );
                         },
                       ),
                     ],
@@ -186,9 +192,6 @@ class MascotaPerfil extends StatelessWidget {
     );
   }
 
-  // =========================
-  //   ITEM MENÚ REDONDO
-  // =========================
   Widget _menuItem({
     required IconData icon,
     required String text,

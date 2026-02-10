@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'MascotaPerfil.dart';
+import 'package:login/Pantallas/Dueno/MascotaPerfil.dart';
 
 class Mascotadueno extends StatelessWidget {
   static const routeName = '/Mascotadueno';
@@ -200,9 +201,10 @@ class Mascotadueno extends StatelessWidget {
                   return ListView.builder(
                     itemCount: mascotas.length,
                     itemBuilder: (context, index) {
-                      final data =
-                          mascotas[index].data() as Map<String, dynamic>;
+                      final mascotaDoc = mascotas[index];
+                      final data = mascotaDoc.data() as Map<String, dynamic>;
 
+                      final mascotaId = mascotaDoc.id;
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -212,6 +214,7 @@ class Mascotadueno extends StatelessWidget {
                                   (_) => MascotaPerfil(
                                     mascotaData: data,
                                     clienteId: clienteId,
+                                    mascotaId: mascotaId,
                                   ),
                             ),
                           );
