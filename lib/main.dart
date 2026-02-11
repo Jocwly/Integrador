@@ -33,7 +33,6 @@ class MyApp extends StatelessWidget {
         Login.routeName: (_) => const Login(),
         Registro.routeName: (_) => const Registro(),
         Veterinario.routeName: (_) => const Veterinario(),
-        Mascotadueno.routeName: (_) => const Mascotadueno(clienteId: '',),
       },
     );
   }

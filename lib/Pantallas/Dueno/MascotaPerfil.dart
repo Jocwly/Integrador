@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:login/Pantallas/veterinario/historial_medico.dart';
+import 'package:login/Pantallas/Dueno/Alimentacion.dart';
 
 class MascotaPerfil extends StatelessWidget {
   final Map<String, dynamic> mascotaData;
@@ -132,10 +133,19 @@ class MascotaPerfil extends StatelessWidget {
                             },
                           ),
                           _menuItem(
-                            icon: Icons.restaurant,
+                            icon: Icons.assignment_outlined,
                             text: 'Alimentación',
                             onTap: () {
-                              Navigator.pushNamed(context, '/Alimentacion');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => Alimentacion(
+                                        clienteId: clienteId,
+                                        mascotaId: mascotaId,
+                                      ),
+                                ),
+                              );
                             },
                           ),
                         ],
