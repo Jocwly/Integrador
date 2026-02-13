@@ -72,7 +72,6 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                     ],
                   ),
                 ),
-                // espacio para compensar el IconButton de la izquierda
                 const SizedBox(width: 48),
               ],
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:login/Pantallas/veterinario/historial_medico.dart';
 import 'package:login/Pantallas/Dueno/Alimentacion.dart';
+import 'package:login/Pantallas/veterinario/visualizar_vacunas.dart';
 
 class MascotaPerfil extends StatelessWidget {
   final Map<String, dynamic> mascotaData;
@@ -167,7 +168,16 @@ class MascotaPerfil extends StatelessWidget {
                             icon: Icons.vaccines_outlined,
                             text: 'Vacunas',
                             onTap: () {
-                              Navigator.pushNamed(context, '/Vacunas');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => VisualizarVacunas(
+                                        clienteId: clienteId,
+                                        mascotaId: mascotaId,
+                                      ),
+                                ),
+                              );
                             },
                           ),
                         ],

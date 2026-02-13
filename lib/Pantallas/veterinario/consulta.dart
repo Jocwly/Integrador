@@ -170,7 +170,6 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
 
                   child: Column(
                     children: [
-                      /// HEADER
                       Row(
                         children: [
                           CircleAvatar(
@@ -183,9 +182,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                                         )
                                         as ImageProvider,
                           ),
-
                           const SizedBox(width: 14),
-
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -333,8 +330,6 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
       ),
     );
   }
-
-  /// CAMPOS
 
   Widget _campo(
     String label,

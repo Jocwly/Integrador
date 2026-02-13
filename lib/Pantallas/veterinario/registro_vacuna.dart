@@ -304,8 +304,6 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
     );
   }
 
-  /// ===== CAMPOS =====
-
   Widget _campo(
     String label,
     TextEditingController ctrl, {
