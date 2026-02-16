@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'MascotaPerfil.dart';
-import 'package:login/Pantallas/Dueno/MascotaPerfil.dart';
 
-class Mascotadueno extends StatelessWidget {
+class Mascotadueno extends StatefulWidget {
   static const routeName = '/Mascotadueno';
 
   final String clienteId;
@@ -11,105 +10,163 @@ class Mascotadueno extends StatelessWidget {
   const Mascotadueno({super.key, required this.clienteId});
 
   @override
+  State<Mascotadueno> createState() => _MascotaduenoState();
+}
+
+class _MascotaduenoState extends State<Mascotadueno> {
+  String nombreCliente = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarNombre();
+  }
+
+  // 🔥 Obtener nombre del cliente desde Firestore
+  Future<void> _cargarNombre() async {
+    final doc =
+        await FirebaseFirestore.instance
+            .collection('clientes')
+            .doc(widget.clienteId)
+            .get();
+
+    if (doc.exists) {
+      setState(() {
+        nombreCliente = doc['nombre'];
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
 
-      // 🔷 APPBAR PERSONALIZADO
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(64),
-        child: Container(
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 80,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF3B82F6), Color(0xFF1E3A8A)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
             ),
           ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  // ❤️ Logo
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(12),
+        ),
+
+        title: Row(
+          children: [
+            /// 👤 MENÚ USUARIO
+            PopupMenuButton<int>(
+              tooltip: 'Menú',
+              offset: const Offset(0, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+
+              /// 🔥 AQUÍ VA LA FUNCIONALIDAD
+              onSelected: (value) {
+                if (value == 1) {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/login', // o Login.routeName si lo usas
+                    (route) => false,
+                  );
+                }
+              },
+
+              itemBuilder:
+                  (context) => [
+                    PopupMenuItem<int>(
+                      enabled: false,
+                      child: Row(
+                        children: [
+                          Icon(Icons.person, color: Colors.black),
+                          SizedBox(width: 8),
+                          Text(
+                            nombreCliente,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.favorite,
-                      color: Colors.white,
-                      size: 22,
+
+                    PopupMenuDivider(),
+                    PopupMenuItem<int>(
+                      value: 1,
+                      child: Row(
+                        children: [
+                          Icon(Icons.exit_to_app, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text(
+                            'Cerrar Sesión',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
                     ),
+                  ],
+
+              child: const CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.transparent,
+                child: Icon(Icons.person_outline, color: Colors.white),
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            /// ❤️ LOGO PETCARE CENTRADO
+            Expanded(
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
                   ),
-
-                  const SizedBox(width: 10),
-
-                  // 🐾 Título
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    color: Colors.white.withOpacity(0.15),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.favorite_border,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      SizedBox(width: 8),
                       Text(
                         'PetCare',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
-                          fontSize: 16,
+                          fontSize: 18,
                         ),
-                      ),
-                      Text(
-                        'Cuidado de Mascotas',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                     ],
                   ),
-
-                  const Spacer(),
-
-                  // 🔔 Notificaciones
-                  IconButton(
-                    icon: const Icon(
-                      Icons.notifications_none,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {},
-                  ),
-
-                  // 👤 USUARIO
-                  PopupMenuButton<int>(
-                    icon: const Icon(Icons.person_outline, color: Colors.white),
-                    itemBuilder:
-                        (context) => [
-                          const PopupMenuItem(
-                            enabled: false,
-                            child: Text(
-                              'María López',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          const PopupMenuDivider(),
-                          PopupMenuItem(
-                            child: const Text(
-                              'Cerrar sesión',
-                              style: TextStyle(color: Colors.red),
-                            ),
-                            onTap: () {
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                '/login',
-                                (route) => false,
-                              );
-                            },
-                          ),
-                        ],
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+
+            const SizedBox(width: 12),
+
+            /// 🔔 NOTIFICACIONES
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.notifications_none_rounded,
+                color: Colors.white,
+                size: 26,
+              ),
+              tooltip: 'Notificaciones',
+            ),
+          ],
         ),
       ),
 
@@ -119,7 +176,7 @@ class Mascotadueno extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🔷 BANNER
+            // 🔷 BANNER CON NOMBRE
             Container(
               height: 120,
               decoration: BoxDecoration(
@@ -137,17 +194,17 @@ class Mascotadueno extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
-                          '¡Hola, María!',
-                          style: TextStyle(
+                          '¡Hola, $nombreCliente!',
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 6),
-                        Text(
+                        const SizedBox(height: 6),
+                        const Text(
                           'Cuida de tus mascotas',
                           style: TextStyle(color: Colors.white70),
                         ),
@@ -176,13 +233,13 @@ class Mascotadueno extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // 📦 LISTA
+            // 📦 LISTA DE MASCOTAS
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream:
                     FirebaseFirestore.instance
                         .collection('clientes')
-                        .doc(clienteId)
+                        .doc(widget.clienteId)
                         .collection('mascotas')
                         .snapshots(),
                 builder: (context, snapshot) {
@@ -205,6 +262,7 @@ class Mascotadueno extends StatelessWidget {
                       final data = mascotaDoc.data() as Map<String, dynamic>;
 
                       final mascotaId = mascotaDoc.id;
+
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -213,7 +271,7 @@ class Mascotadueno extends StatelessWidget {
                               builder:
                                   (_) => MascotaPerfil(
                                     mascotaData: data,
-                                    clienteId: clienteId,
+                                    clienteId: widget.clienteId,
                                     mascotaId: mascotaId,
                                   ),
                             ),
@@ -232,7 +290,7 @@ class Mascotadueno extends StatelessWidget {
     );
   }
 
-  // 🐶 CARD MASCOTA
+  // 🐶 TARJETA DE MASCOTA
   Widget _mascotaCard(Map<String, dynamic> data) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -246,13 +304,11 @@ class Mascotadueno extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 28,
-            backgroundColor: Colors.blue,
             backgroundImage:
-                data['fotoUrl'] != null ? NetworkImage(data['fotoUrl']) : null,
-            child:
-                data['fotoUrl'] == null
-                    ? const Icon(Icons.pets, color: Colors.white)
-                    : null,
+                data['fotoUrl'] != null
+                    ? NetworkImage(data['fotoUrl'])
+                    : const AssetImage("assets/images/perro.jpg")
+                        as ImageProvider,
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -280,19 +336,6 @@ class Mascotadueno extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _item(
-    BuildContext context,
-    IconData icon,
-    String text,
-    VoidCallback onTap,
-  ) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
-      onTap: onTap,
     );
   }
 }

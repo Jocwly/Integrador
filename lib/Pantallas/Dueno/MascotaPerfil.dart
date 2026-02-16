@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:login/Pantallas/veterinario/historial_medico.dart';
 import 'package:login/Pantallas/Dueno/Alimentacion.dart';
 import 'package:login/Pantallas/veterinario/visualizar_vacunas.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MascotaPerfil extends StatelessWidget {
   final Map<String, dynamic> mascotaData;
@@ -82,12 +83,12 @@ class MascotaPerfil extends StatelessWidget {
                       border: Border.all(color: Colors.blue, width: 3),
                     ),
                     child: CircleAvatar(
-                      radius: 46,
+                      radius: 28,
                       backgroundImage:
                           mascotaData['fotoUrl'] != null
                               ? NetworkImage(mascotaData['fotoUrl'])
-                              : null,
-                      backgroundColor: Colors.blue,
+                              : const AssetImage("assets/images/perro.jpg")
+                                  as ImageProvider,
                     ),
                   ),
 
