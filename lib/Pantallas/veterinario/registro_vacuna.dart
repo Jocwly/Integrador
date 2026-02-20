@@ -164,7 +164,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                                 fotoUrl != null
                                     ? NetworkImage(fotoUrl)
                                     : const AssetImage(
-                                          'assets/images/perro.jpg',
+                                          'assets/images/icono.png',
                                         )
                                         as ImageProvider,
                           ),

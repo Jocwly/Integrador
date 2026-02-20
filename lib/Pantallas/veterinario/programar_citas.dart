@@ -192,7 +192,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                                 fotoUrl != null
                                     ? NetworkImage(fotoUrl)
                                     : const AssetImage(
-                                          'assets/images/perro.jpg',
+                                          'assets/images/icono.png',
                                         )
                                         as ImageProvider,
                           ),

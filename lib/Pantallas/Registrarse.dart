@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login/Pantallas/Login.dart';
 import 'package:flutter/services.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class Registro extends StatefulWidget {
   static const routeName = '/registro';
@@ -22,6 +24,7 @@ class _RegistroState extends State<Registro> {
   bool _obscure = true;
 
   // Errores
+  String? _nameError;
   String? _phoneError;
   String? _emailError;
   String? _passError;
@@ -36,6 +39,23 @@ class _RegistroState extends State<Registro> {
     _passCtrl.dispose();
     _confirmPassCtrl.dispose();
     super.dispose();
+  }
+
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  String? _validateNombre(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'Este campo es requerido';
+
+    if (!RegExp(r'^[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]+$').hasMatch(v)) {
+      return 'Solo se permiten letras';
+    }
+
+    return null;
   }
 
   OutlineInputBorder _outlineBlue(double w) => OutlineInputBorder(
@@ -118,7 +138,8 @@ class _RegistroState extends State<Registro> {
     final telefono = _phoneCtrl.text.trim();
     final correo = _emailCtrl.text.trim();
     final direccion = _addressCtrl.text.trim();
-    final password = _passCtrl.text.trim();
+    final passwordPlano = _passCtrl.text.trim();
+    final passwordHash = _hashPassword(passwordPlano);
 
     try {
       await FirebaseFirestore.instance.collection('clientes').add({
@@ -126,7 +147,7 @@ class _RegistroState extends State<Registro> {
         'telefono': telefono,
         'correo': correo,
         'direccion': direccion,
-        'password': password, // Solo para prueba escolar
+        'password': passwordHash,
         'mascotas': 0,
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -148,13 +169,15 @@ class _RegistroState extends State<Registro> {
   // Validaciones + Confirmación
   Future<void> _confirmarRegistro() async {
     setState(() {
+      _nameError = _validateNombre(_nameCtrl.text);
       _phoneError = _validateTelefono(_phoneCtrl.text);
       _emailError = _validateEmail(_emailCtrl.text);
       _passError = _validatePass(_passCtrl.text);
       _confirmPassError = _validateConfirmPass(_confirmPassCtrl.text);
     });
 
-    if (_phoneError != null ||
+    if (_nameError != null ||
+        _phoneError != null ||
         _emailError != null ||
         _passError != null ||
         _confirmPassError != null) {
@@ -305,6 +328,21 @@ class _RegistroState extends State<Registro> {
                         label: 'Nombre',
                         controller: _nameCtrl,
                         icon: Icons.person_outline,
+                        errorText: _nameError,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _nameError =
+                                _validateNombre(value) == null &&
+                                        value.trim().isNotEmpty
+                                    ? null
+                                    : _validateNombre(value);
+                          });
+                        },
                       ),
                       const SizedBox(height: 14),
 
@@ -518,7 +556,6 @@ class _RegistroState extends State<Registro> {
   }
 }
 
-// ---------- Campo reutilizable con estilo del mockup ----------
 class _LabeledField extends StatelessWidget {
   final String label;
   final TextEditingController controller;

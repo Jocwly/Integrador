@@ -127,7 +127,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     final peso = pesoController.text.trim();
     final color = colorController.text.trim();
 
-    // 👀 Ya NO validamos que haya foto
     if (nombre.isEmpty ||
         especie == null ||
         sexo == null ||
@@ -414,6 +413,11 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                     ),
                                     _buildTextFieldBox(
                                       controller: nombreController,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(
+                                          RegExp(r'[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]'),
+                                        ),
+                                      ],
                                       isError:
                                           _mostrarErrores &&
                                           nombreController.text.trim().isEmpty,
@@ -701,8 +705,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                     ),
 
                                     const SizedBox(height: 16),
-
-                                    // Tamaño y peso
                                     Row(
                                       children: [
                                         Expanded(
@@ -859,8 +861,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
       ),
     );
   }
-
-  // ---------- Helpers de UI ----------
 
   Widget _buildLabel(String text, {bool isError = false}) {
     return Padding(

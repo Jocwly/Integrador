@@ -87,7 +87,7 @@ class MascotaPerfil extends StatelessWidget {
                       backgroundImage:
                           mascotaData['fotoUrl'] != null
                               ? NetworkImage(mascotaData['fotoUrl'])
-                              : const AssetImage("assets/images/perro.jpg")
+                              : const AssetImage("assets/images/icono.png")
                                   as ImageProvider,
                     ),
                   ),

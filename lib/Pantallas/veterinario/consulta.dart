@@ -178,7 +178,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                                 fotoUrl != null
                                     ? NetworkImage(fotoUrl)
                                     : const AssetImage(
-                                          'assets/images/perro.jpg',
+                                          'assets/images/icono.png',
                                         )
                                         as ImageProvider,
                           ),

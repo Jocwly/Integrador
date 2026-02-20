@@ -291,7 +291,14 @@ class _MascotaduenoState extends State<Mascotadueno> {
   }
 
   // 🐶 TARJETA DE MASCOTA
+  // 🐶 TARJETA DE MASCOTA
   Widget _mascotaCard(Map<String, dynamic> data) {
+    // 🔹 MISMA LÓGICA QUE EN CLIENTE (vet)
+    final String? fotoUrl =
+        (data['fotoUrl'] ?? data['foto']) is String
+            ? (data['fotoUrl'] ?? data['foto']) as String
+            : null;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
@@ -304,13 +311,16 @@ class _MascotaduenoState extends State<Mascotadueno> {
         children: [
           CircleAvatar(
             radius: 28,
+            backgroundColor: const Color(0xFFEDEFF3),
             backgroundImage:
-                data['fotoUrl'] != null
-                    ? NetworkImage(data['fotoUrl'])
-                    : const AssetImage("assets/images/perro.jpg")
+                (fotoUrl != null && fotoUrl.isNotEmpty)
+                    ? NetworkImage(fotoUrl)
+                    : const AssetImage("assets/images/icono.png")
                         as ImageProvider,
           ),
+
           const SizedBox(width: 14),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

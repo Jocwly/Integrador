@@ -225,7 +225,7 @@ class _CardMascota extends StatelessWidget {
             backgroundImage:
                 fotoUrl != null
                     ? NetworkImage(fotoUrl!)
-                    : const AssetImage("assets/images/perro.jpg")
+                    : const AssetImage("assets/images/icono.png")
                         as ImageProvider,
           ),
 

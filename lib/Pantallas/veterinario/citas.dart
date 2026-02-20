@@ -159,7 +159,7 @@ class _CitasMascotaState extends State<CitasMascota> {
                                     fotoUrl != null
                                         ? NetworkImage(fotoUrl)
                                         : const AssetImage(
-                                              'assets/images/perro.jpg',
+                                              'assets/images/icono.png',
                                             )
                                             as ImageProvider,
                               ),
@@ -508,7 +508,7 @@ class _CitasMascotaState extends State<CitasMascota> {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: () => _cancelarCita(context, citasRef, citaId),
-                 // onPressed: () => NotificationService().showTestNotification(),
+                  // onPressed: () => NotificationService().showTestNotification(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(

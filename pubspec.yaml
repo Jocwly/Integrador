@@ -40,6 +40,7 @@ dependencies:
   timezone: ^0.9.4
   firebase_messaging: ^15.2.10
   http: ^1.2.0
+  crypto: ^3.0.3
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -74,7 +75,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/perro.jpg
+    - assets/images/icono.png
     - assets/images/petcare_logo.jpg
     - assets/images/animales.png
   # An image asset can refer to one or more resolution-specific "variants", see

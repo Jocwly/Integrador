@@ -367,7 +367,7 @@ class _CardContenido extends StatelessWidget {
                                       (fotoUrl != null && fotoUrl.isNotEmpty)
                                           ? NetworkImage(fotoUrl)
                                           : const AssetImage(
-                                                'assets/images/perro.jpg',
+                                                'assets/images/icono.png',
                                               )
                                               as ImageProvider,
                                 ),

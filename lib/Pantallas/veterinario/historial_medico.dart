@@ -96,11 +96,9 @@ class _HistorialMedicoState extends State<HistorialMedico> {
           final nombre = mascotaData['nombre'] ?? 'Sin nombre';
           final especie = mascotaData['especie'] ?? '---';
           final raza = mascotaData['raza'] ?? '---';
-          final edad =
-              mascotaData['edad'] ?? '---'; // ya incluye "años"/"meses"
+          final edad = mascotaData['edad'] ?? '---';
           final sexo = mascotaData['sexo'] ?? '---';
 
-          // 👇 Soporte para fotoUrl nuevo y foto antiguo
           final dynamic fotoDynamic =
               mascotaData['fotoUrl'] ?? mascotaData['foto'];
           final String? fotoUrl =
@@ -138,7 +136,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                   fit: BoxFit.cover,
                                 )
                                 : Image.asset(
-                                  'assets/images/perro.jpg',
+                                  'assets/images/icono.png',
                                   width: 70,
                                   height: 70,
                                   fit: BoxFit.cover,
@@ -155,10 +153,24 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text("Especie: $especie"),
-                            Text("Raza: $raza"),
-                            Text("Edad: $edad"), // 👈 sin duplicar "años"
-                            Text("Sexo: $sexo"),
+
+                            const SizedBox(height: 4),
+
+                            Row(
+                              children: [
+                                Expanded(child: Text("Especie: $especie")),
+                                Expanded(child: Text("Raza: $raza")),
+                              ],
+                            ),
+
+                            const SizedBox(height: 4),
+
+                            Row(
+                              children: [
+                                Expanded(child: Text("Edad: $edad")),
+                                Expanded(child: Text("Sexo: $sexo")),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -260,18 +272,28 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                           ).format(fecha);
 
                           return Container(
-                            margin: const EdgeInsets.only(bottom: 15),
-                            padding: const EdgeInsets.all(14),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(16),
+
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2A74D9).withOpacity(0.2),
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFE7F0FF), Color(0xFFD6E6FF)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                               borderRadius: BorderRadius.circular(18),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
+                                  color: Colors.black.withOpacity(0.08),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
                               ],
+                              border: Border.all(
+                                color: const Color(
+                                  0xFF2A74D9,
+                                ).withOpacity(0.25),
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,68 +305,38 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                   ),
                                 ),
                                 const SizedBox(height: 5),
-                                RichText(
-                                  text: TextSpan(
-                                    style: const TextStyle(
-                                      color: Color.fromARGB(255, 34, 34, 34),
-                                      fontSize: 16,
-                                    ),
-                                    children: [
-                                      const TextSpan(
-                                        text: '📌 Motivo: ',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: consulta['motivo'] ?? '---',
-                                      ),
-                                    ],
-                                  ),
+                                _chipConsulta(
+                                  Icons.description,
+                                  "Motivo",
+                                  consulta['motivo'] ?? "---",
                                 ),
-                                const SizedBox(height: 2),
-                                RichText(
-                                  text: TextSpan(
-                                    style: const TextStyle(
-                                      color: Color.fromARGB(255, 34, 34, 34),
-                                      fontSize: 16,
-                                    ),
-                                    children: [
-                                      const TextSpan(
-                                        text: '🩺 Diagnóstico: ',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: consulta['diagnostico'] ?? '---',
-                                      ),
-                                    ],
-                                  ),
+
+                                _chipConsulta(
+                                  Icons.monitor_heart,
+                                  "Diagnóstico",
+                                  consulta['diagnostico'] ?? "---",
                                 ),
 
                                 const SizedBox(height: 6),
-                                if (consulta['medicaciones'] != null &&
-                                    consulta['medicaciones'] is List) ...[
-                                  const Text(
-                                    "💊 Medicaciones:",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                if (consulta['medicaciones'] is List &&
+                                    (consulta['medicaciones'] as List)
+                                        .isNotEmpty) ...[
+                                  _chipConsulta(
+                                    Icons.medication,
+                                    "Medicación",
+                                    (consulta['medicaciones'] as List)
+                                        .whereType<
+                                          Map<String, dynamic>
+                                        >() // seguridad
+                                        .map(
+                                          (med) =>
+                                              med['nombre'] ?? "Medicamento",
+                                        )
+                                        .join(", "),
                                   ),
-                                  ...List<Widget>.from(
-                                    (consulta['medicaciones'] as List).map((
-                                      med,
-                                    ) {
-                                      return Text(
-                                        "• ${med['nombre']} — ${med['dosis']} — ${med['frecuencia']} — ${med['duracion']}",
-                                        style: const TextStyle(fontSize: 16),
-                                      );
-                                    }),
-                                  ),
-                                ] else
-                                  const Text("💊 Medicaciones: ---"),
+                                ] else ...[
+                                  const Text("💊 Medicación: ---"),
+                                ],
 
                                 const SizedBox(height: 10),
                                 Align(
@@ -356,7 +348,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                                         consulta,
                                         fechaFormateada,
                                         consultaId,
-                                        fecha, // DateTime real
+                                        fecha,
                                       );
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -421,7 +413,6 @@ class _HistorialMedicoState extends State<HistorialMedico> {
     showDialog(
       context: context,
       builder: (_) {
-        // ⭐ ANCHOS AJUSTADOS
         final double maxWidth = MediaQuery.of(context).size.width * 0.92;
         final double maxHeight = MediaQuery.of(context).size.height * 0.85;
 
@@ -442,7 +433,6 @@ class _HistorialMedicoState extends State<HistorialMedico> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ⭐ HEADER ANCHO Y ELEGANTE
                   Row(
                     children: [
                       Icon(
@@ -477,7 +467,6 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                   const SizedBox(height: 14),
                   Divider(color: Colors.grey.shade300),
 
-                  // ⭐ DATOS PRINCIPALES
                   _seccionTitulo(
                     icon: Icons.info_outline,
                     titulo: "Datos de la consulta",
@@ -798,6 +787,39 @@ class _HistorialMedicoState extends State<HistorialMedico> {
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           TextSpan(text: value),
+        ],
+      ),
+    );
+  }
+
+  Widget _chipConsulta(IconData icon, String label, String value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.75),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF2A74D9).withOpacity(0.2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFF2A74D9)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
+                children: [
+                  TextSpan(
+                    text: "$label: ",
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(text: value),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
