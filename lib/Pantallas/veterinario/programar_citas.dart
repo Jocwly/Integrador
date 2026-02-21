@@ -26,6 +26,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   String? tipoCita;
   String? personal;
   String? nombreMascota;
+  bool _mostrarErrores = false;
 
   final List<String> tiposCita = [
     'Cita estética',
@@ -72,9 +73,17 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   }
 
   Future<void> guardarCita() async {
-    if (fechaSeleccionada == null || horaSeleccionada == null) return;
-    if (tipoCita == null) return;
-    if (personal == null) return;
+    setState(() {
+      _mostrarErrores = true;
+    });
+
+    if (fechaSeleccionada == null ||
+        horaSeleccionada == null ||
+        tipoCita == null ||
+        personal == null ||
+        motivoController.text.trim().isEmpty) {
+      return;
+    }
 
     final fechaCompleta = DateTime(
       fechaSeleccionada!.year,
@@ -183,7 +192,6 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ===== HEADER PACIENTE =====
                       Row(
                         children: [
                           CircleAvatar(
@@ -231,13 +239,17 @@ class _ProgramarCitaState extends State<ProgramarCita> {
 
                       FormStyles.spaceLarge,
 
-                      // ===== TIPO CITA =====
                       Text("Tipo de cita", style: FormStyles.labelStyle),
                       FormStyles.spaceSmall,
 
                       DropdownButtonFormField<String>(
                         decoration: FormStyles.inputDecoration(
                           hint: "Seleccionar",
+                        ).copyWith(
+                          errorText:
+                              _mostrarErrores && tipoCita == null
+                                  ? "Campo obligatorio"
+                                  : null,
                         ),
                         value: tipoCita,
                         items:
@@ -253,9 +265,6 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                       ),
 
                       FormStyles.spaceMedium,
-
-                      // ===== FECHA =====
-                      // ===== FECHA Y HORA =====
                       Row(
                         children: [
                           Expanded(
@@ -275,6 +284,12 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                                             ).format(fechaSeleccionada!)
                                             : "Seleccionar",
                                     icon: Icons.calendar_today,
+                                  ).copyWith(
+                                    errorText:
+                                        _mostrarErrores &&
+                                                fechaSeleccionada == null
+                                            ? "Selecciona una fecha"
+                                            : null,
                                   ),
                                   onTap: () => _seleccionarFecha(context),
                                 ),
@@ -299,6 +314,12 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                                             ? horaSeleccionada!.format(context)
                                             : "Seleccionar",
                                     icon: Icons.access_time,
+                                  ).copyWith(
+                                    errorText:
+                                        _mostrarErrores &&
+                                                horaSeleccionada == null
+                                            ? "Selecciona una hora"
+                                            : null,
                                   ),
                                   onTap: () => _seleccionarHora(context),
                                 ),
@@ -309,20 +330,23 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                       ),
 
                       FormStyles.spaceMedium,
-
-                      // ===== MOTIVO =====
                       Text("Motivo", style: FormStyles.labelStyle),
                       FormStyles.spaceSmall,
 
                       TextField(
                         controller: motivoController,
                         maxLines: 3,
-                        decoration: FormStyles.inputDecoration(hint: "Motivo"),
+                        decoration: FormStyles.inputDecoration(
+                          hint: "Motivo",
+                        ).copyWith(
+                          errorText:
+                              _mostrarErrores &&
+                                      motivoController.text.trim().isEmpty
+                                  ? "Escribe el motivo"
+                                  : null,
+                        ),
                       ),
 
-                      FormStyles.spaceMedium,
-
-                      // ===== PERSONAL =====
                       Text("Personal asignado", style: FormStyles.labelStyle),
                       FormStyles.spaceSmall,
 
@@ -330,6 +354,11 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                         decoration: FormStyles.inputDecoration(
                           hint: "Seleccionar",
                           icon: Icons.person,
+                        ).copyWith(
+                          errorText:
+                              _mostrarErrores && personal == null
+                                  ? "Selecciona personal"
+                                  : null,
                         ),
                         value: personal,
                         items:

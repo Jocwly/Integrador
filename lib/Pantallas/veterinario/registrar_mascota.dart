@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-//import 'package:firebase_storage/firebase_storage.dart';
 
 class RegistrarMascota extends StatefulWidget {
   final String clienteId;
@@ -79,12 +78,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
     "Bombay",
     "Azul Ruso",
   ];
-
-  /* @override
-  void initState() {
-    super.initState();
-    _fotoUrlRemota = widget.fotoUrlInicial;
-  }*/
 
   Future<void> _seleccionarImagen() async {
     final picker = ImagePicker();
@@ -169,16 +162,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
         fotoUrl = url;
         _fotoUrlRemota = url;
       }
-
-      /*await FirebaseFirestore.instance
-        .collection('clientes')
-        .doc(widget.clienteId)
-        .collection('mascotas')
-        .add({
-      'nombre': nombre,
-      'fotoUrl': fotoUrl,
-      'creado': FieldValue.serverTimestamp(),
-    });*/
 
       await mascotaRef.set({
         'nombre': nombre,
@@ -285,15 +268,12 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              // 🔹 menos padding lateral para ganar ancho
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
               child: ConstrainedBox(
-                // 🔹 más ancho máximo
                 constraints: const BoxConstraints(maxWidth: 560),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // 🔹 Barra superior personalizada
                     Container(
                       height: 52,
                       alignment: Alignment.centerLeft,
@@ -325,8 +305,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                       ),
                     ),
                     const SizedBox(height: 10),
-
-                    // 🔹 Tarjeta principal más ancha
                     SizedBox(
                       width: double.infinity,
                       child: Card(
@@ -335,7 +313,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: Padding(
-                          // un poquito menos de padding horizontal
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 22,
@@ -389,22 +366,16 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                 ),
                               ),
                               const SizedBox(height: 18),
-
-                              // FORM
                               Container(
-                                width:
-                                    double.infinity, // 🔹 ocupa todo el ancho
+                                width: double.infinity,
                                 decoration: BoxDecoration(
                                   color: azulSuave,
                                   borderRadius: BorderRadius.circular(18),
                                 ),
-                                padding: const EdgeInsets.all(
-                                  14,
-                                ), // 🔹 menos padding
+                                padding: const EdgeInsets.all(14),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Nombre
                                     _buildLabel(
                                       'Nombre de la mascota:',
                                       isError:
@@ -424,8 +395,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                       icon: Icons.pets_rounded,
                                     ),
                                     const SizedBox(height: 16),
-
-                                    // Especie y raza
                                     Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -458,9 +427,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ), // 🔹 menos espacio
+                                        const SizedBox(width: 10),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -482,8 +449,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                     ),
 
                                     const SizedBox(height: 16),
-
-                                    // Edad y color
                                     Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -505,9 +470,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ), // 🔹 menos espacio
+                                        const SizedBox(width: 10),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -542,8 +505,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                     ),
 
                                     const SizedBox(height: 16),
-
-                                    // Sexo y esterilizado
                                     Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -622,9 +583,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ), // 🔹 menos espacio
+                                        const SizedBox(width: 10),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -742,9 +701,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ), // 🔹 menos espacio
+                                        const SizedBox(width: 10),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -788,8 +745,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                     ),
 
                                     const SizedBox(height: 24),
-
-                                    // Botones
                                     Row(
                                       children: [
                                         Expanded(

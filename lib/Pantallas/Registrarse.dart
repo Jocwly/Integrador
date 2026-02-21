@@ -132,16 +132,35 @@ class _RegistroState extends State<Registro> {
     );
   }
 
-  // Guarda el cliente en Firestore
   Future<void> _registrarCliente() async {
     final nombre = _nameCtrl.text.trim();
     final telefono = _phoneCtrl.text.trim();
-    final correo = _emailCtrl.text.trim();
+    final correo = _emailCtrl.text.trim().toLowerCase();
     final direccion = _addressCtrl.text.trim();
     final passwordPlano = _passCtrl.text.trim();
     final passwordHash = _hashPassword(passwordPlano);
 
     try {
+      // 🔎 1️⃣ Verificar si ya existe el correo
+      final query =
+          await FirebaseFirestore.instance
+              .collection('clientes')
+              .where('correo', isEqualTo: correo)
+              .limit(1)
+              .get();
+
+      if (query.docs.isNotEmpty) {
+        if (!mounted) return;
+
+        setState(() {
+          _emailError = 'Este correo ya está registrado';
+        });
+
+        _showStyledSnackBar('El correo ya está registrado', success: false);
+        return;
+      }
+
+      // ✅ 2️⃣ Si no existe, registrar
       await FirebaseFirestore.instance.collection('clientes').add({
         'nombre': nombre,
         'telefono': telefono,
@@ -166,7 +185,6 @@ class _RegistroState extends State<Registro> {
     }
   }
 
-  // Validaciones + Confirmación
   Future<void> _confirmarRegistro() async {
     setState(() {
       _nameError = _validateNombre(_nameCtrl.text);
@@ -270,7 +288,6 @@ class _RegistroState extends State<Registro> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Flecha atrás sobre el degradado azul
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -290,9 +307,7 @@ class _RegistroState extends State<Registro> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 460,
-                ), // 👈 más ancho
+                constraints: const BoxConstraints(maxWidth: 460),
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.symmetric(
@@ -392,8 +407,6 @@ class _RegistroState extends State<Registro> {
                         icon: Icons.location_on_outlined,
                       ),
                       const SizedBox(height: 14),
-
-                      // Contraseña
                       const Text(
                         'Contraseña',
                         style: TextStyle(
@@ -450,8 +463,6 @@ class _RegistroState extends State<Registro> {
                         ),
                       ),
                       const SizedBox(height: 14),
-
-                      // Confirmar contraseña
                       const Text(
                         'Confirmar contraseña',
                         style: TextStyle(

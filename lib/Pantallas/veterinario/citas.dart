@@ -378,6 +378,8 @@ class _CitasMascotaState extends State<CitasMascota> {
     final personal = data['personal'] ?? '';
     final fechaTs = data['fecha'] as Timestamp?;
     final fecha = fechaTs?.toDate();
+    final ahora = DateTime.now();
+    final bool vencida = !completada && fecha != null && fecha.isBefore(ahora);
 
     final fechaStr =
         fecha != null ? DateFormat('dd/MM/yyyy').format(fecha) : 'Sin fecha';
@@ -418,9 +420,18 @@ class _CitasMascotaState extends State<CitasMascota> {
               ),
               const SizedBox(width: 6),
               _chip(
-                completada ? 'Completada' : 'Programada',
+                completada
+                    ? 'Completada'
+                    : vencida
+                    ? 'Vencida'
+                    : 'Programada',
                 colorFondo: Colors.white,
-                colorTexto: completada ? Colors.green : Colors.black87,
+                colorTexto:
+                    completada
+                        ? Colors.green
+                        : vencida
+                        ? Colors.red
+                        : Colors.black87,
               ),
               const Spacer(),
               Switch(
@@ -500,9 +511,9 @@ class _CitasMascotaState extends State<CitasMascota> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: const Text(
-                    'Editar',
-                    style: TextStyle(color: Colors.white, fontSize: 13),
+                  child: Text(
+                    vencida ? 'Reprogramar' : 'Editar',
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
                   ),
                 ),
                 const SizedBox(width: 8),
