@@ -22,7 +22,9 @@ class _AlimentacionState extends State<Alimentacion>
 
   late AnimationController _controller;
   late Animation<double> _fade;
+  late Animation<Offset> _slide;
 
+  DateTime fechaSeleccionada = DateTime.now();
   final DateFormat fechaFormat = DateFormat('dd/MM/yyyy');
 
   @override
@@ -30,9 +32,15 @@ class _AlimentacionState extends State<Alimentacion>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 400),
     );
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.2),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
+    _controller.forward();
   }
 
   @override
@@ -60,20 +68,9 @@ class _AlimentacionState extends State<Alimentacion>
     );
   }
 
-  // ===================== ADMINISTRAR =====================
-  Future<void> administrar(String id) async {
-    final hora = DateFormat('hh:mm a').format(DateTime.now());
-
-    await _db
-        .collection('mascotas')
-        .doc(widget.mascotaId)
-        .collection('alimentacion')
-        .doc(id)
-        .update({'administrado': true, 'horaAdministrado': hora});
-  }
-
   // ===================== FORMULARIO =====================
   void mostrarFormulario() {
+    _controller.reset();
     _controller.forward();
 
     String tipo = 'Desayuno';
@@ -102,13 +99,29 @@ class _AlimentacionState extends State<Alimentacion>
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Agregar comidas',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        const Center(
+                          child: Text(
+                            'Agregar comida',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Divider(),
 
                         FormStyles.spaceMedium,
 
@@ -122,7 +135,13 @@ class _AlimentacionState extends State<Alimentacion>
                           value: tipo,
                           decoration: FormStyles.inputDecoration(),
                           items:
-                              ['Desayuno', 'Comida', 'Cena']
+                              [
+                                    'Desayuno',
+                                    'Comida',
+                                    'Cena',
+                                    'Merienda',
+                                    'Colación',
+                                  ]
                                   .map(
                                     (e) => DropdownMenuItem(
                                       value: e,
@@ -193,8 +212,14 @@ class _AlimentacionState extends State<Alimentacion>
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(hora.format(context)),
-                                const Icon(Icons.access_time),
+                                Text(
+                                  hora.format(context),
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                                const Icon(
+                                  Icons.access_time,
+                                  color: FormStyles.azulFuerte,
+                                ),
                               ],
                             ),
                           ),
@@ -217,6 +242,10 @@ class _AlimentacionState extends State<Alimentacion>
                               child: ElevatedButton(
                                 style: FormStyles.primaryButton,
                                 onPressed: () async {
+                                  final horaActual = DateFormat(
+                                    'hh:mm a',
+                                  ).format(DateTime.now());
+
                                   await _db
                                       .collection('mascotas')
                                       .doc(widget.mascotaId)
@@ -226,12 +255,27 @@ class _AlimentacionState extends State<Alimentacion>
                                         'alimento': alimentoCtrl.text,
                                         'cantidad': cantidadCtrl.text,
                                         'hora': hora.format(context),
-                                        'administrado': false,
-                                        'horaAdministrado': '',
+                                        'administrado':
+                                            true, // Automáticamente administrado
+                                        'horaAdministrado': horaActual,
                                         'fecha': Timestamp.now(),
                                       });
 
                                   Navigator.pop(context);
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        '$tipo registrado correctamente',
+                                      ),
+                                      backgroundColor: Colors.green,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
                                 },
                                 child: const Text("Agregar"),
                               ),
@@ -248,15 +292,57 @@ class _AlimentacionState extends State<Alimentacion>
         );
       },
       transitionBuilder: (_, anim, __, child) {
-        return Transform.scale(scale: anim.value, child: child);
+        return ScaleTransition(scale: anim, child: child);
       },
     );
   }
 
-  // ===================== UI PRINCIPAL =====================
+  // ===================== SELECCIONAR FECHA =====================
+  Future<void> _seleccionarFecha() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: fechaSeleccionada,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: FormStyles.azulFuerte,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black87,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != fechaSeleccionada) {
+      setState(() {
+        fechaSeleccionada = picked;
+        _controller.reset();
+        _controller.forward();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final fechaHoy = fechaFormat.format(DateTime.now());
+    final fechaInicio = DateTime(
+      fechaSeleccionada.year,
+      fechaSeleccionada.month,
+      fechaSeleccionada.day,
+    );
+    final fechaFin = DateTime(
+      fechaSeleccionada.year,
+      fechaSeleccionada.month,
+      fechaSeleccionada.day,
+      23,
+      59,
+      59,
+    );
 
     return Scaffold(
       appBar: _appBar(),
@@ -268,44 +354,119 @@ class _AlimentacionState extends State<Alimentacion>
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // ===== FECHA DE SEGUIMIENTO =====
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: FormStyles.cardDecoration,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Fecha de seguimiento",
-                      style: FormStyles.labelStyle,
+              SlideTransition(
+                position: _slide,
+                child: FadeTransition(
+                  opacity: _fade,
+                  child: GestureDetector(
+                    onTap: _seleccionarFecha,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            FormStyles.azulFuerte.withOpacity(0.9),
+                            FormStyles.azulFuerte,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: FormStyles.azulFuerte.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Fecha de seguimiento",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                fechaFormat.format(fechaSeleccionada),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.calendar_today,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    FormStyles.spaceSmall,
-                    Text(
-                      fechaHoy,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
+                  ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
               // ===== BOTÓN AGREGAR =====
-              GestureDetector(
-                onTap: mostrarFormulario,
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: const BoxDecoration(
-                    gradient: FormStyles.appBarGradient,
-                    borderRadius: BorderRadius.all(Radius.circular(18)),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "+ Agregar comidas",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+              SlideTransition(
+                position: _slide,
+                child: FadeTransition(
+                  opacity: _fade,
+                  child: GestureDetector(
+                    onTap: mostrarFormulario,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF00B4DB), Color(0xFF0083B0)],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF0083B0).withOpacity(0.4),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_circle_outline, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text(
+                              "Agregar comida",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -322,73 +483,205 @@ class _AlimentacionState extends State<Alimentacion>
                           .collection('mascotas')
                           .doc(widget.mascotaId)
                           .collection('alimentacion')
+                          .where(
+                            'fecha',
+                            isGreaterThanOrEqualTo: Timestamp.fromDate(
+                              fechaInicio,
+                            ),
+                          )
+                          .where(
+                            'fecha',
+                            isLessThanOrEqualTo: Timestamp.fromDate(fechaFin),
+                          )
                           .orderBy('fecha', descending: true)
                           .snapshots(),
-                  builder: (_, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 48,
+                              color: Colors.red.shade300,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Error al cargar los datos',
+                              style: TextStyle(color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                      );
                     }
 
-                    return ListView(
-                      children:
-                          snapshot.data!.docs.map((doc) {
-                            final d = doc.data() as Map<String, dynamic>;
-                            final administrado = d['administrado'] ?? false;
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            FormStyles.azulFuerte,
+                          ),
+                        ),
+                      );
+                    }
 
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 400),
-                              margin: const EdgeInsets.only(bottom: 12),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color:
-                                    administrado
-                                        ? Colors.green.shade50
-                                        : Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 6,
-                                  ),
-                                ],
+                    final docs = snapshot.data!.docs;
+
+                    if (docs.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.restaurant_menu,
+                              size: 64,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No hay comidas registradas\npara esta fecha',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 16,
                               ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          d['tipo'],
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(d['alimento']),
-                                        Text("Cantidad: ${d['cantidad']} gr"),
-                                        if (administrado)
-                                          Text(
-                                            "Administrado a las ${d['horaAdministrado']}",
-                                            style: const TextStyle(
-                                              color: Colors.green,
-                                              fontSize: 12,
-                                            ),
-                                          ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      itemCount: docs.length,
+                      itemBuilder: (context, index) {
+                        final doc = docs[index];
+                        final d = doc.data() as Map<String, dynamic>;
+
+                        return TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: Duration(milliseconds: 300 + (index * 100)),
+                          curve: Curves.easeOutBack,
+                          builder: (context, double value, child) {
+                            return Transform.scale(scale: value, child: child);
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.white, Colors.green.shade50],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                              border: Border.all(
+                                color: Colors.green.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF00B4DB),
+                                        Color(0xFF0083B0),
                                       ],
                                     ),
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
-                                  Switch(
-                                    value: administrado,
-                                    onChanged:
-                                        administrado
-                                            ? null
-                                            : (_) => administrar(doc.id),
+                                  child: Center(
+                                    child: Text(
+                                      d['tipo'].substring(0, 1),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        d['tipo'],
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        d['alimento'],
+                                        style: TextStyle(
+                                          color: Colors.grey.shade700,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        "Cantidad: ${d['cantidad']} gr  •  ${d['hora']}",
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "✓ Administrado a las ${d['horaAdministrado'] ?? d['hora']}",
+                                          style: const TextStyle(
+                                            color: Colors.green,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                    size: 20,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
