@@ -277,7 +277,12 @@ class _HistorialMedicoState extends State<HistorialMedico> {
 
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFFE7F0FF), Color(0xFFD6E6FF)],
+                                colors: [
+                                  /*Color(0xFFE7F0FF),Color(0xFFD6E6FF),*/ Color(
+                                    0xffe6e8ff,
+                                  ),
+                                  Color(0xffe6e8ff),
+                                ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),

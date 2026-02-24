@@ -27,7 +27,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
   String? _fotoUrlRemota;
   String? especie;
   String? sexo;
-  String? esterilizado;
+  bool? esterilizado;
   String _unidadEdad = 'años';
 
   static const String cloudName = 'dsjyywplr';
@@ -597,8 +597,8 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                               ),
                                               Row(
                                                 children: [
-                                                  Radio(
-                                                    value: "Sí",
+                                                  Radio<bool>(
+                                                    value: true,
                                                     groupValue: esterilizado,
                                                     activeColor:
                                                         const Color.fromARGB(
@@ -628,8 +628,8 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                                               ),
                                               Row(
                                                 children: [
-                                                  Radio(
-                                                    value: "No",
+                                                  Radio<bool>(
+                                                    value: false,
                                                     groupValue: esterilizado,
                                                     activeColor:
                                                         const Color.fromARGB(

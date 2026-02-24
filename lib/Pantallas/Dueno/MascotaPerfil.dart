@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:login/Pantallas/Dueno/editar_mascota.dart';
 import 'package:login/Pantallas/veterinario/historial_medico.dart';
 import 'package:login/Pantallas/Dueno/Alimentacion.dart';
 import 'package:login/Pantallas/veterinario/visualizar_vacunas.dart';
@@ -76,19 +77,62 @@ class MascotaPerfil extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.blue, width: 3),
-                    ),
-                    child: CircleAvatar(
-                      radius: 28,
-                      backgroundImage:
-                          mascotaData['fotoUrl'] != null
-                              ? NetworkImage(mascotaData['fotoUrl'])
-                              : const AssetImage("assets/images/icono.png")
-                                  as ImageProvider,
+                  SizedBox(
+                    width: 70,
+                    height: 70,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.blue, width: 3),
+                          ),
+                          child: CircleAvatar(
+                            radius: 28,
+                            backgroundImage:
+                                mascotaData['fotoUrl'] != null
+                                    ? NetworkImage(mascotaData['fotoUrl'])
+                                    : const AssetImage(
+                                          "assets/images/icono.png",
+                                        )
+                                        as ImageProvider,
+                          ),
+                        ),
+
+                        Positioned(
+                          bottom: -4,
+                          right: -4,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => EditarMascota(
+                                        clienteId: clienteId,
+                                        mascotaId: mascotaId,
+                                        mascotaData: mascotaData,
+                                      ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFF0B1446),
+                              ),
+                              child: const Icon(
+                                Icons.edit,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 

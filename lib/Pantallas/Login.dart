@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login/Pantallas/veterinario/veterinario.dart';
 import 'package:login/Pantallas/Registrarse.dart';
 import 'package:login/Pantallas/Dueno/Mascotadueno.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class Login extends StatefulWidget {
   static const routeName = '/login';
@@ -23,6 +25,12 @@ class _LoginState extends State<Login> {
   static const String _vetEmail = 'veterinario@gmail.com';
   static const String _vetPass = 'vet123456';
 
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
   @override
   void dispose() {
     _emailCtrl.dispose();
@@ -32,16 +40,18 @@ class _LoginState extends State<Login> {
 
   Future<void> _handleLogin() async {
     final email = _emailCtrl.text.trim();
-    final pass = _passCtrl.text.trim();
+    final passPlano = _passCtrl.text.trim();
+    final pass = _hashPassword(passPlano);
 
     setState(() => _isLoading = true);
 
     try {
-      if (email == _vetEmail && pass == _vetPass) {
+      if (email == _vetEmail && passPlano == _vetPass) {
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, Veterinario.routeName);
         return;
       }
+      final pass = _hashPassword(passPlano);
       final query =
           await FirebaseFirestore.instance
               .collection('clientes')
