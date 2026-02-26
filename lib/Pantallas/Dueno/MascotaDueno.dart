@@ -382,7 +382,7 @@ class _MascotaduenoState extends State<Mascotadueno> {
   }
 
   Widget _pillInfo(IconData icon, String label, String text) {
-    const azulChip = Color(0xFF5F79FF);
+    const azulChip = Color(0xFF2A74D9);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -435,7 +435,7 @@ class _MascotaduenoState extends State<Mascotadueno> {
     required IconData icon,
     TextInputType keyboard = TextInputType.text,
   }) {
-    const azul = Color(0xFF5F79FF);
+    const azul = Color(0xFF2A74D9);
 
     return TextField(
       controller: controller,

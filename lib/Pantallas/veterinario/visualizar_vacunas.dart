@@ -91,15 +91,21 @@ class VisualizarVacunas extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              CircleAvatar(
-                                radius: 32,
-                                backgroundImage:
-                                    fotoUrl != null
-                                        ? NetworkImage(fotoUrl)
-                                        : const AssetImage(
-                                              'assets/images/icono.png',
-                                            )
-                                            as ImageProvider,
+                              Container(
+                                decoration: FormStyles.avatarBorderDecoration,
+                                padding: const EdgeInsets.all(
+                                  FormStyles.avatarPadding,
+                                ),
+                                child: CircleAvatar(
+                                  radius: 32,
+                                  backgroundImage:
+                                      fotoUrl != null
+                                          ? NetworkImage(fotoUrl)
+                                          : const AssetImage(
+                                                'assets/images/icono.png',
+                                              )
+                                              as ImageProvider,
+                                ),
                               ),
 
                               const SizedBox(width: 14),
@@ -169,8 +175,8 @@ class VisualizarVacunas extends StatelessWidget {
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
-                                    Color(0xffe6e8ff),
-                                    Color(0xffe6e8ff),
+                                    Color(0xFFE7F0FF),
+                                    Color(0xFFD6E6FF),
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,

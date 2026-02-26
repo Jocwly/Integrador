@@ -172,15 +172,21 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                     children: [
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 32,
-                            backgroundImage:
-                                fotoUrl != null
-                                    ? NetworkImage(fotoUrl)
-                                    : const AssetImage(
-                                          'assets/images/icono.png',
-                                        )
-                                        as ImageProvider,
+                          Container(
+                            decoration: FormStyles.avatarBorderDecoration,
+                            padding: const EdgeInsets.all(
+                              FormStyles.avatarPadding,
+                            ),
+                            child: CircleAvatar(
+                              radius: 32,
+                              backgroundImage:
+                                  fotoUrl != null
+                                      ? NetworkImage(fotoUrl)
+                                      : const AssetImage(
+                                            'assets/images/icono.png',
+                                          )
+                                          as ImageProvider,
+                            ),
                           ),
                           const SizedBox(width: 14),
                           Column(
@@ -388,7 +394,10 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
               setState(() => _medicaciones.add(_MedicationFields()));
             },
             icon: const Icon(Icons.add),
-            label: const Text('Agregar medicación'),
+            label: const Text(
+              'Agregar medicación',
+              style: TextStyle(color: Color(0xFF2A74D9)),
+            ),
           ),
         ),
       ],

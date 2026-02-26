@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 
 class FormStyles {
   // ===== COLORES =====
-  static const Color azulSuave = Color(0xFFF4F6FF);
-  static const Color azulFuerte = Color(0xFF5F79FF);
+
+  static const Color azulSuave = /*Color(0xFFF4F6FF); Color(0xFFE7F0FF);*/
+      Color(0xFFD6E6FF);
+
+  static const Color azulFuerte = Color(0xFF2A74D9);
   static const Color azulOscuro = Color(0xFF0B1446);
+  //static const Color azulBoton = Color(0xFF2A74D9);
   static const Color fondoGradientTop = Color(0xFFD7D2FF);
   static const Color fondoGradientBottom = Color(0xFFF1EEFF);
 
@@ -58,7 +62,7 @@ class FormStyles {
 
       hintText: hint,
       filled: true,
-      fillColor: azulSuave,
+      fillColor: azulSuave.withOpacity(0.30),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       enabledBorder: border,
       focusedBorder: border,
@@ -87,6 +91,14 @@ class FormStyles {
     fontSize: 22,
     color: azulOscuro,
   );
+  // ===== AVATAR MASCOTA =====
+  static BoxDecoration avatarBorderDecoration = BoxDecoration(
+    shape: BoxShape.circle,
+    border: Border.all(color: azulFuerte, width: 3),
+  );
+
+  static const double avatarPadding = 4;
+  static const double avatarRadius = 46;
 
   // ===== CHIP "PACIENTE" =====
   static BoxDecoration pacienteChipDecoration = BoxDecoration(
@@ -111,7 +123,7 @@ class FormStyles {
 
   // ===== BOTÓN PRINCIPAL =====
   static ButtonStyle primaryButton = ElevatedButton.styleFrom(
-    backgroundColor: azulOscuro,
+    backgroundColor: azulFuerte,
     foregroundColor: Colors.white,
     minimumSize: const Size.fromHeight(52),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -121,6 +133,7 @@ class FormStyles {
   static ButtonStyle outlineButton = OutlinedButton.styleFrom(
     minimumSize: const Size.fromHeight(52),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+    foregroundColor: const Color(0xFF2A74D9),
   );
 
   static const Divider formDivider = Divider(

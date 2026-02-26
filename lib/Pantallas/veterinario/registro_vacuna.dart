@@ -158,15 +158,21 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
                       /// ===== HEADER =====
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 32,
-                            backgroundImage:
-                                fotoUrl != null
-                                    ? NetworkImage(fotoUrl)
-                                    : const AssetImage(
-                                          'assets/images/icono.png',
-                                        )
-                                        as ImageProvider,
+                          Container(
+                            decoration: FormStyles.avatarBorderDecoration,
+                            padding: const EdgeInsets.all(
+                              FormStyles.avatarPadding,
+                            ),
+                            child: CircleAvatar(
+                              radius: 32,
+                              backgroundImage:
+                                  fotoUrl != null
+                                      ? NetworkImage(fotoUrl)
+                                      : const AssetImage(
+                                            'assets/images/icono.png',
+                                          )
+                                          as ImageProvider,
+                            ),
                           ),
                           const SizedBox(width: 14),
                           Column(

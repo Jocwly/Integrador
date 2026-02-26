@@ -14,7 +14,7 @@ class Veterinario extends StatelessWidget {
     // Colores base
     const fondo = Color(0xFFF5F7FB);
     const azulClaro = Color(0xFF8FA8FF);
-    const azulOscuro = Color(0xFF2965C7);
+    const azulOscuro = Color(0xFF2A74D9);
 
     final size = MediaQuery.of(context).size;
     final cardMinHeight = size.height * 0.18;
@@ -186,10 +186,7 @@ class Veterinario extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: const [
-                            _SquareIcon(
-                              icon: Icons.person,
-                              color: Color.fromARGB(47, 255, 254, 254),
-                            ),
+                            _SquareIcon(icon: Icons.person),
                             SizedBox(height: 6),
                             Text(
                               '¡Bienvenido, Dr.!',
@@ -402,7 +399,7 @@ class Veterinario extends StatelessWidget {
 class _SquareIcon extends StatelessWidget {
   final IconData icon;
 
-  const _SquareIcon({required this.icon, required Color color});
+  const _SquareIcon({required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -480,8 +477,8 @@ class _InfoCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             titulo,
-            style: const TextStyle(
-              color: Color(0xFF7C93FF),
+            style: TextStyle(
+              color: Color(0xFF2A74D9).withOpacity(0.60),
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -502,8 +499,8 @@ class _InfoCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 subtitulo,
-                style: const TextStyle(
-                  color: Color(0xFF7C93FF),
+                style: TextStyle(
+                  color: Color(0xFF2A74D9).withOpacity(0.60),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),

@@ -134,7 +134,7 @@ class _CardContenido extends StatelessWidget {
         .collection('mascotas');
 
     const moradoOscuro = Color(0xFF0B1446);
-    const azulChip = Color(0xFF5F79FF);
+    const azulChip = Color(0xFF2A74D9);
 
     final width = MediaQuery.of(context).size.width;
     final double cardRadius = width < 360 ? 22 : 28;
@@ -415,7 +415,7 @@ class _PillInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const azulChip = Color(0xFF5F79FF);
+    const azulChip = Color(0xFF2A74D9);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

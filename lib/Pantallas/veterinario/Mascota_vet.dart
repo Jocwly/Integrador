@@ -202,7 +202,6 @@ class _CardMascota extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const azulChip = Color(0xFF5F79FF);
     const moradoOscuro = Color(0xFF0B1446);
 
     return Container(
@@ -220,13 +219,20 @@ class _CardMascota extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 46,
-            backgroundImage:
-                fotoUrl != null
-                    ? NetworkImage(fotoUrl!)
-                    : const AssetImage("assets/images/icono.png")
-                        as ImageProvider,
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Color(0xFF2A74D9), width: 3),
+              shape: BoxShape.circle,
+            ),
+            padding: const EdgeInsets.all(4),
+            child: CircleAvatar(
+              radius: 46,
+              backgroundImage:
+                  fotoUrl != null
+                      ? NetworkImage(fotoUrl!)
+                      : const AssetImage("assets/images/icono.png")
+                          as ImageProvider,
+            ),
           ),
 
           const SizedBox(height: 10),
@@ -352,7 +358,7 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const azulChip = Color(0xFF5F79FF);
+    const azulChip = Color(0xFF2A74D9);
 
     return GestureDetector(
       onTap: onTap,

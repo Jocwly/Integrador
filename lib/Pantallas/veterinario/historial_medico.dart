@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:login/form_styles.dart';
 
 class HistorialMedico extends StatefulWidget {
   final String clienteId;
@@ -30,7 +31,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
 
     final consultasRef = mascotaRef.collection('consultas');
 
-    final azulClaro = const Color(0xffe6e8ff);
+    final azulClaro = const Color(0xFFD6E6FF);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -113,7 +114,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: azulClaro,
+                    color: azulClaro.withOpacity(0.75),
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
@@ -125,22 +126,26 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                   ),
                   child: Row(
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(50),
-                        child:
-                            fotoUrl != null
-                                ? Image.network(
-                                  fotoUrl,
-                                  width: 70,
-                                  height: 70,
-                                  fit: BoxFit.cover,
-                                )
-                                : Image.asset(
-                                  'assets/images/icono.png',
-                                  width: 70,
-                                  height: 70,
-                                  fit: BoxFit.cover,
-                                ),
+                      Container(
+                        decoration: FormStyles.avatarBorderDecoration,
+                        padding: const EdgeInsets.all(FormStyles.avatarPadding),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(50),
+                          child:
+                              fotoUrl != null
+                                  ? Image.network(
+                                    fotoUrl,
+                                    width: 70,
+                                    height: 70,
+                                    fit: BoxFit.cover,
+                                  )
+                                  : Image.asset(
+                                    'assets/images/icono.png',
+                                    width: 70,
+                                    height: 70,
+                                    fit: BoxFit.cover,
+                                  ),
+                        ),
                       ),
                       const SizedBox(width: 15),
                       Expanded(
@@ -278,10 +283,11 @@ class _HistorialMedicoState extends State<HistorialMedico> {
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [
-                                  /*Color(0xFFE7F0FF),Color(0xFFD6E6FF),*/ Color(
+                                  Color(0xFFE7F0FF),
+                                  Color(0xFFD6E6FF) /* Color(
                                     0xffe6e8ff,
                                   ),
-                                  Color(0xffe6e8ff),
+                                  Color(0xffe6e8ff),*/,
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,

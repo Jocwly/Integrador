@@ -1,11 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:login/Pantallas/Dueno/editar_mascota.dart';
+import 'package:login/Pantallas/veterinario/citas.dart';
 import 'package:login/Pantallas/veterinario/historial_medico.dart';
 import 'package:login/Pantallas/Dueno/Alimentacion.dart';
 import 'package:login/Pantallas/veterinario/visualizar_vacunas.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
-class MascotaPerfil extends StatelessWidget {
+class MascotaPerfil extends StatefulWidget {
   final Map<String, dynamic> mascotaData;
   final String clienteId;
   final String mascotaId;
@@ -14,8 +17,66 @@ class MascotaPerfil extends StatelessWidget {
     super.key,
     required this.mascotaData,
     required this.clienteId,
-    required this.mascotaId, // ✅ agregado
+    required this.mascotaId,
   });
+
+  @override
+  State<MascotaPerfil> createState() => _MascotaPerfilState();
+}
+
+class _MascotaPerfilState extends State<MascotaPerfil> {
+  String? fotoUrl;
+  File? _imagen;
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    fotoUrl = widget.mascotaData['fotoUrl'];
+  }
+
+  Future<void> _cambiarFoto() async {
+    final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (picked == null) return;
+
+    setState(() {
+      _imagen = File(picked.path);
+    });
+
+    try {
+      // 🔥 Ruta en Firebase Storage
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('mascotas')
+          .child(widget.clienteId)
+          .child('${widget.mascotaId}.jpg');
+
+      await ref.putFile(_imagen!);
+
+      final nuevaUrl = await ref.getDownloadURL();
+
+      // 🔥 Actualizar Firestore
+      await FirebaseFirestore.instance
+          .collection('clientes')
+          .doc(widget.clienteId)
+          .collection('mascotas')
+          .doc(widget.mascotaId)
+          .update({'fotoUrl': nuevaUrl});
+
+      setState(() {
+        fotoUrl = nuevaUrl;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Foto actualizada correctamente")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Error al subir la imagen")));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +133,6 @@ class MascotaPerfil extends StatelessWidget {
                 ),
               ],
             ),
-
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -92,32 +152,21 @@ class MascotaPerfil extends StatelessWidget {
                           child: CircleAvatar(
                             radius: 28,
                             backgroundImage:
-                                mascotaData['fotoUrl'] != null
-                                    ? NetworkImage(mascotaData['fotoUrl'])
+                                _imagen != null
+                                    ? FileImage(_imagen!)
+                                    : fotoUrl != null
+                                    ? NetworkImage(fotoUrl!)
                                     : const AssetImage(
                                           "assets/images/icono.png",
                                         )
                                         as ImageProvider,
                           ),
                         ),
-
                         Positioned(
                           bottom: -4,
                           right: -4,
                           child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (_) => EditarMascota(
-                                        clienteId: clienteId,
-                                        mascotaId: mascotaId,
-                                        mascotaData: mascotaData,
-                                      ),
-                                ),
-                              );
-                            },
+                            onTap: _cambiarFoto,
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: const BoxDecoration(
@@ -137,6 +186,7 @@ class MascotaPerfil extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 12),
+
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 18,
@@ -147,7 +197,7 @@ class MascotaPerfil extends StatelessWidget {
                       borderRadius: BorderRadius.circular(22),
                     ),
                     child: Text(
-                      mascotaData['nombre'] ?? '',
+                      widget.mascotaData['nombre'] ?? '',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -157,8 +207,9 @@ class MascotaPerfil extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 6),
+
                   Text(
-                    mascotaData['raza'] ?? '',
+                    widget.mascotaData['raza'] ?? '',
                     style: const TextStyle(color: Colors.black54, fontSize: 13),
                   ),
 
@@ -175,7 +226,17 @@ class MascotaPerfil extends StatelessWidget {
                             icon: Icons.pets,
                             text: 'Citas',
                             onTap: () {
-                              Navigator.pushNamed(context, '/citas_dueno');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => CitasMascota(
+                                        clienteId: widget.clienteId,
+                                        mascotaId: widget.mascotaId,
+                                        soloLectura: true,
+                                      ),
+                                ),
+                              );
                             },
                           ),
                           _menuItem(
@@ -187,8 +248,8 @@ class MascotaPerfil extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder:
                                       (_) => Alimentacion(
-                                        clienteId: clienteId,
-                                        mascotaId: mascotaId,
+                                        clienteId: widget.clienteId,
+                                        mascotaId: widget.mascotaId,
                                       ),
                                 ),
                               );
@@ -196,9 +257,7 @@ class MascotaPerfil extends StatelessWidget {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 28),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
@@ -218,8 +277,8 @@ class MascotaPerfil extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder:
                                       (_) => VisualizarVacunas(
-                                        clienteId: clienteId,
-                                        mascotaId: mascotaId,
+                                        clienteId: widget.clienteId,
+                                        mascotaId: widget.mascotaId,
                                       ),
                                 ),
                               );
@@ -227,9 +286,7 @@ class MascotaPerfil extends StatelessWidget {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 28),
-
                       _menuItem(
                         icon: Icons.assignment_outlined,
                         text: 'Historial Médico',
@@ -239,8 +296,8 @@ class MascotaPerfil extends StatelessWidget {
                             MaterialPageRoute(
                               builder:
                                   (_) => HistorialMedico(
-                                    clienteId: clienteId,
-                                    mascotaId: mascotaId,
+                                    clienteId: widget.clienteId,
+                                    mascotaId: widget.mascotaId,
                                   ),
                             ),
                           );
