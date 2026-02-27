@@ -25,7 +25,7 @@ class _AlimentacionState extends State<Alimentacion>
   late Animation<Offset> _slide;
 
   DateTime fechaSeleccionada = DateTime.now();
-  final DateFormat fechaFormat = DateFormat('dd/MM/yyyy');
+  final DateFormat fechaFormat = DateFormat('dd/MM/yyyy', 'es');
 
   @override
   void initState() {
@@ -61,7 +61,7 @@ class _AlimentacionState extends State<Alimentacion>
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text(
-        'Seguimiento de Alimentación',
+        'Alimentación',
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
       centerTitle: true,
@@ -76,7 +76,6 @@ class _AlimentacionState extends State<Alimentacion>
     String tipo = 'Desayuno';
     final alimentoCtrl = TextEditingController();
     final cantidadCtrl = TextEditingController();
-    TimeOfDay hora = TimeOfDay.now();
 
     showGeneralDialog(
       context: context,
@@ -135,13 +134,7 @@ class _AlimentacionState extends State<Alimentacion>
                           value: tipo,
                           decoration: FormStyles.inputDecoration(),
                           items:
-                              [
-                                    'Desayuno',
-                                    'Comida',
-                                    'Cena',
-                                    'Merienda',
-                                    'Colación',
-                                  ]
+                              ['Desayuno', 'Comida', 'Cena']
                                   .map(
                                     (e) => DropdownMenuItem(
                                       value: e,
@@ -163,7 +156,7 @@ class _AlimentacionState extends State<Alimentacion>
                         TextField(
                           controller: alimentoCtrl,
                           decoration: FormStyles.inputDecoration(
-                            hint: "Ej. Croquetas Premium",
+                            hint: "Ej. Croquetas",
                           ),
                         ),
 
@@ -180,51 +173,6 @@ class _AlimentacionState extends State<Alimentacion>
                             suffixText: "gr",
                           ),
                         ),
-
-                        FormStyles.spaceMedium,
-
-                        const Text('Hora', style: FormStyles.labelStyle),
-                        FormStyles.spaceSmall,
-
-                        GestureDetector(
-                          onTap: () async {
-                            final h = await showTimePicker(
-                              context: context,
-                              initialTime: hora,
-                            );
-                            if (h != null) {
-                              setModalState(() => hora = h);
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              color: FormStyles.azulSuave,
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: FormStyles.azulFuerte.withOpacity(0.5),
-                                width: 1.3,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  hora.format(context),
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const Icon(
-                                  Icons.access_time,
-                                  color: FormStyles.azulFuerte,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
                         FormStyles.spaceLarge,
 
                         // BOTONES
@@ -254,7 +202,6 @@ class _AlimentacionState extends State<Alimentacion>
                                         'tipo': tipo,
                                         'alimento': alimentoCtrl.text,
                                         'cantidad': cantidadCtrl.text,
-                                        'hora': hora.format(context),
                                         'administrado':
                                             true, // Automáticamente administrado
                                         'horaAdministrado': horaActual,
@@ -367,14 +314,7 @@ class _AlimentacionState extends State<Alimentacion>
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            FormStyles.azulFuerte.withOpacity(0.9),
-                            FormStyles.azulFuerte,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        gradient: FormStyles.appBarGradient,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
@@ -439,9 +379,7 @@ class _AlimentacionState extends State<Alimentacion>
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF00B4DB), Color(0xFF0083B0)],
-                        ),
+                        gradient: FormStyles.appBarGradient,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
@@ -635,7 +573,7 @@ class _AlimentacionState extends State<Alimentacion>
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        "Cantidad: ${d['cantidad']} gr  •  ${d['hora']}",
+                                        "Cantidad: ${d['cantidad']} gr",
                                         style: TextStyle(
                                           color: Colors.grey.shade600,
                                           fontSize: 12,

@@ -220,7 +220,7 @@ class _MascotaduenoState extends State<Mascotadueno> {
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
-                    fontSize: 18,
+                    fontSize: 20,
                   ),
                 ),
               ),

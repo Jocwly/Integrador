@@ -197,7 +197,7 @@ class _FechaSeguimientoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fechaStr = DateFormat('dd/MM/yyyy').format(fecha);
+    final fechaStr = DateFormat('dd/MM/yyyy', 'es').format(fecha);
 
     return Container(
       width: double.infinity,
