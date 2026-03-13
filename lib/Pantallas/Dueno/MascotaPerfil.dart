@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:login/Pantallas/Dueno/Medicamentos.dart';
 import 'package:login/Pantallas/veterinario/citas.dart';
 import 'package:login/Pantallas/veterinario/historial_medico.dart';
 import 'package:login/Pantallas/Dueno/Alimentacion.dart';
@@ -310,11 +311,20 @@ class _MascotaPerfilState extends State<MascotaPerfil>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _menuItem(
-              icon: Icons.medication,
-              text: 'Medicamentos',
+           _menuItem(
+              icon: Icons.assignment_outlined,
+              text: 'Medicación',
               onTap: () {
-                Navigator.pushNamed(context, '/Medicamentos');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (_) => MedicamentosMascota(
+                          clienteId: widget.clienteId,
+                          mascotaId: widget.mascotaId,
+                        ),
+                  ),
+                );
               },
             ),
             _menuItem(
