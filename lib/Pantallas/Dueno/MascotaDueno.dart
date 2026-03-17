@@ -145,90 +145,6 @@ class _MascotaduenoState extends State<Mascotadueno> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
 
-      appBar: AppBar(
-        elevation: 0,
-        toolbarHeight: 80,
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
-            ),
-          ),
-        ),
-        title: Row(
-          children: [
-            PopupMenuButton<int>(
-              tooltip: 'Menú',
-              offset: const Offset(0, 50),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              onSelected: (value) {
-                if (value == 1) {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/login',
-                    (route) => false,
-                  );
-                }
-              },
-              itemBuilder:
-                  (context) => [
-                    const PopupMenuItem<int>(
-                      enabled: false,
-                      child: Row(
-                        children: [
-                          Icon(Icons.person, color: Colors.black),
-                          SizedBox(width: 8),
-                          Text(
-                            'Cuenta',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuDivider(),
-                    const PopupMenuItem<int>(
-                      value: 1,
-                      child: Row(
-                        children: [
-                          Icon(Icons.exit_to_app, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text(
-                            'Cerrar Sesión',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-              child: const CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.transparent,
-                child: Icon(Icons.person_outline, color: Colors.white),
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Center(
-                child: Text(
-                  'PetCare',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-
       body: SafeArea(
         child: StreamBuilder<DocumentSnapshot>(
           stream: clienteRef.snapshots(),
@@ -244,56 +160,139 @@ class _MascotaduenoState extends State<Mascotadueno> {
             final data = snapshot.data!.data() as Map<String, dynamic>;
 
             final nombre = data['nombre'] ?? 'Cliente';
-            final direccion = data['direccion'] ?? 'Sin dirección';
-            final telefono = data['telefono'] ?? 'Sin teléfono';
-            final correo = data['correo'] ?? 'Sin correo';
+            final direccion = data['direccion'] ?? '';
+            final telefono = data['telefono'] ?? '';
+            final correo = data['correo'] ?? '';
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _banner(nombre),
-
-                  const SizedBox(height: 20),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return Column(
+              children: [
+                // 🔵 APPBAR CORREGIDO
+                Container(
+                  height: 100,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                  child: Row(
                     children: [
-                      const Text(
-                        'Información de Contacto',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
+                      PopupMenuButton<int>(
+                        tooltip: 'Menú',
+                        offset: const Offset(0, 50),
+                        onSelected: (value) {
+                          if (value == 1) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              '/login',
+                              (route) => false,
+                            );
+                          } else if (value == 2) {
+                            _mostrarDialogoEditar(direccion, telefono, correo);
+                          }
+                        },
+                        itemBuilder:
+                            (context) => [
+                              PopupMenuItem<int>(
+                                enabled: false,
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.person),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      nombre, // ✅ YA FUNCIONA
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuDivider(),
+
+                              const PopupMenuItem<int>(
+                                value: 2,
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit, color: Colors.blue),
+                                    SizedBox(width: 8),
+                                    Text('Editar información'),
+                                  ],
+                                ),
+                              ),
+
+                              const PopupMenuItem<int>(
+                                value: 1,
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.exit_to_app, color: Colors.red),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Cerrar Sesión',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                        child: const CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.transparent,
+                          child: Icon(
+                            Icons.person_outline,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () {
-                          _mostrarDialogoEditar(direccion, telefono, correo);
-                        },
+
+                      const SizedBox(width: 12),
+
+                      const Expanded(
+                        child: Center(
+                          child: Text(
+                            'PetCare',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
+                ),
 
-                  _cardContacto(
-                    direccion: direccion,
-                    telefono: telefono,
-                    correo: correo,
+                // 🔽 CONTENIDO
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _banner(nombre),
+
+
+                        const SizedBox(height: 24),
+
+                        const Text(
+                          'Mis Mascotas',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        _listaMascotas(),
+                      ],
+                    ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  const Text(
-                    'Mis Mascotas',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  _listaMascotas(),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),

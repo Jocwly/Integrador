@@ -354,19 +354,23 @@ class _MedicamentosMascotaState extends State<MedicamentosMascota> {
                         ),
 
                         onPressed: () async {
-                          await FirebaseFirestore.instance
+                          final docRef = FirebaseFirestore.instance
                               .collection('clientes')
                               .doc(widget.clienteId)
                               .collection('mascotas')
                               .doc(widget.mascotaId)
                               .collection('consultas')
-                              .doc(med["consultaId"])
-                              .update({
-                                'medicaciones.${med["index"]}.administrado':
-                                    true,
-                                'medicaciones.${med["index"]}.horaAdministrado':
-                                    FieldValue.serverTimestamp(),
-                              });
+                              .doc(med["consultaId"]);
+
+                          final doc = await docRef.get();
+
+                          List meds = doc['medicaciones'];
+
+                          meds[med["index"]]['administrado'] = true;
+                          meds[med["index"]]['horaAdministrado'] =
+                              Timestamp.now();
+
+                          await docRef.update({'medicaciones': meds});
                         },
 
                         label: const Text(
