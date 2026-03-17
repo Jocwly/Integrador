@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:login/Pantallas/veterinario/Agregar_personal.dart';
 import 'package:login/Pantallas/veterinario/Clientes.dart';
 import 'package:login/Pantallas/veterinario/citas_hoy.dart';
 import 'package:login/Pantallas/Login.dart';
@@ -66,17 +67,36 @@ class Veterinario extends StatelessWidget {
                     Login.routeName,
                     (route) => false,
                   );
+                } else if (value == 2) {
+                  // 🔹 Aquí mandas a la pantalla de agregar personal
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AgregarPersonal()),
+                  );
                 }
               },
               itemBuilder:
-                  (context) => const [
-                    PopupMenuItem<int>(
+                  (context) => [
+                    const PopupMenuItem<int>(
                       enabled: false,
                       child: Row(
                         children: [
                           Icon(Icons.person, color: Colors.black),
                           SizedBox(width: 8),
                           Text('Dr. José'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+
+                    // 🔹 NUEVA OPCIÓN
+                    const PopupMenuItem<int>(
+                      value: 2,
+                      child: Row(
+                        children: [
+                          Icon(Icons.person_add, color: Colors.blue),
+                          SizedBox(width: 8),
+                          Text('Agregar personal'),
                         ],
                       ),
                     ),

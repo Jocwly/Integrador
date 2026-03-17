@@ -199,7 +199,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                   backgroundColor: Color(0xFFD6E1F7),
                   child: Icon(
                     Icons.pets_rounded,
-                    color: Color(0xFF0B1446),
+                    color: Color(0xFF2A74D9),
                     size: 20,
                   ),
                 ),
@@ -256,559 +256,545 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
             : null;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+      backgroundColor: const Color(0xFFF5F7FB),
+
+      // 🔥 APPBAR BIEN PUESTO
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 70,
+        automaticallyImplyLeading: false,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF4E78FF), Color(0xFF0B1446)],
+            ),
           ),
         ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 560),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      height: 52,
-                      alignment: Alignment.centerLeft,
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              color: Colors.white,
-                            ),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.pets_rounded,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 6),
-                          const Text(
-                            'Registrar mascota',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ],
+        title: Row(
+          children: [
+            IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            const Icon(Icons.pets_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            const Text(
+              'Registrar mascota',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      // 🔽 BODY
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 10),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Card(
-                        elevation: 10,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 22,
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 22,
-                          ),
-                          child: Column(
-                            children: [
-                              // FOTO
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: const Color.fromARGB(255, 0, 20, 66),
-                                    width: 3,
-                                  ),
-                                  shape: BoxShape.circle,
+                        child: Column(
+                          children: [
+                            // FOTO
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(0xFF2A74D9),
+                                  width: 3,
                                 ),
-                                padding: const EdgeInsets.all(4),
-                                child: GestureDetector(
-                                  onTap: _seleccionarImagen,
-                                  child: CircleAvatar(
-                                    radius: 52,
-                                    backgroundColor: Colors.grey[300],
-                                    backgroundImage: avatarImage,
-                                    child:
-                                        avatarImage == null
-                                            ? const Icon(
-                                              Icons.add_a_photo_rounded,
-                                              color: Colors.white,
-                                              size: 28,
-                                            )
-                                            : null,
-                                  ),
+                                shape: BoxShape.circle,
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              child: GestureDetector(
+                                onTap: _seleccionarImagen,
+                                child: CircleAvatar(
+                                  radius: 52,
+                                  backgroundColor: Colors.grey[300],
+                                  backgroundImage: avatarImage,
+                                  child:
+                                      avatarImage == null
+                                          ? const Icon(
+                                            Icons.add_a_photo_rounded,
+                                            color: Colors.white,
+                                            size: 28,
+                                          )
+                                          : null,
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(255, 13, 0, 60),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 6,
-                                ),
-                                child: const Text(
-                                  'Nueva mascota',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2A74D9),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 6,
+                              ),
+                              child: const Text(
+                                'Nueva mascota',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              const SizedBox(height: 18),
-                              Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: azulSuave,
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                                padding: const EdgeInsets.all(14),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildLabel(
-                                      'Nombre de la mascota:',
-                                      isError:
-                                          _mostrarErrores &&
-                                          nombreController.text.trim().isEmpty,
-                                    ),
-                                    _buildTextFieldBox(
-                                      controller: nombreController,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(
-                                          RegExp(r'[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]'),
-                                        ),
-                                      ],
-                                      isError:
-                                          _mostrarErrores &&
-                                          nombreController.text.trim().isEmpty,
-                                      icon: Icons.pets_rounded,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              _buildLabel(
-                                                'Especie:',
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    especie == null,
-                                              ),
-                                              _buildDropdownBox<String>(
-                                                value: especie,
-                                                hint: 'Seleccionar',
-                                                items: especies,
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    especie == null,
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    especie = value;
-                                                    razaController.clear();
-                                                  });
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              _buildLabel(
-                                                'Raza:',
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    razaController.text
-                                                        .trim()
-                                                        .isEmpty,
-                                              ),
-                                              _buildRazaField(),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                            ),
 
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              _buildLabel(
-                                                'Edad:',
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    edadController.text
-                                                        .trim()
-                                                        .isEmpty,
-                                              ),
-                                              _buildEdadField(),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              _buildLabel(
-                                                'Color:',
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    colorController.text
-                                                        .trim()
-                                                        .isEmpty,
-                                              ),
-                                              _buildTextFieldBox(
-                                                controller: colorController,
-                                                inputFormatters: [
-                                                  FilteringTextInputFormatter.deny(
-                                                    RegExp(r'[0-9]'),
-                                                  ),
-                                                ],
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    colorController.text
-                                                        .trim()
-                                                        .isEmpty,
-                                                icon: Icons.color_lens_rounded,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                            const SizedBox(height: 18),
 
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              _buildLabel(
-                                                'Sexo:',
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    sexo == null,
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Radio(
-                                                    value: "Macho",
-                                                    groupValue: sexo,
-                                                    activeColor:
-                                                        const Color.fromARGB(
-                                                          255,
-                                                          13,
-                                                          0,
-                                                          60,
-                                                        ),
-                                                    visualDensity:
-                                                        const VisualDensity(
-                                                          horizontal: -4,
-                                                          vertical: -4,
-                                                        ),
-                                                    onChanged:
-                                                        (v) => setState(
-                                                          () => sexo = v,
-                                                        ),
-                                                  ),
-                                                  const Text(
-                                                    "Macho",
-                                                    style: TextStyle(
-                                                      fontSize: 13,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Radio(
-                                                    value: "Hembra",
-                                                    groupValue: sexo,
-                                                    activeColor:
-                                                        const Color.fromARGB(
-                                                          255,
-                                                          13,
-                                                          0,
-                                                          60,
-                                                        ),
-                                                    visualDensity:
-                                                        const VisualDensity(
-                                                          horizontal: -4,
-                                                          vertical: -4,
-                                                        ),
-                                                    onChanged:
-                                                        (v) => setState(
-                                                          () => sexo = v,
-                                                        ),
-                                                  ),
-                                                  const Text(
-                                                    "Hembra",
-                                                    style: TextStyle(
-                                                      fontSize: 13,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              _buildLabel(
-                                                'Esterilizado:',
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    esterilizado == null,
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Radio<bool>(
-                                                    value: true,
-                                                    groupValue: esterilizado,
-                                                    activeColor:
-                                                        const Color.fromARGB(
-                                                          255,
-                                                          13,
-                                                          0,
-                                                          60,
-                                                        ),
-                                                    visualDensity:
-                                                        const VisualDensity(
-                                                          horizontal: -4,
-                                                          vertical: -4,
-                                                        ),
-                                                    onChanged:
-                                                        (v) => setState(
-                                                          () =>
-                                                              esterilizado = v,
-                                                        ),
-                                                  ),
-                                                  const Text(
-                                                    "Sí",
-                                                    style: TextStyle(
-                                                      fontSize: 13,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Radio<bool>(
-                                                    value: false,
-                                                    groupValue: esterilizado,
-                                                    activeColor:
-                                                        const Color.fromARGB(
-                                                          255,
-                                                          13,
-                                                          0,
-                                                          60,
-                                                        ),
-                                                    visualDensity:
-                                                        const VisualDensity(
-                                                          horizontal: -4,
-                                                          vertical: -4,
-                                                        ),
-                                                    onChanged:
-                                                        (v) => setState(
-                                                          () =>
-                                                              esterilizado = v,
-                                                        ),
-                                                  ),
-                                                  const Text(
-                                                    "No",
-                                                    style: TextStyle(
-                                                      fontSize: 13,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: azulSuave,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              padding: const EdgeInsets.all(14),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildLabel(
+                                    'Nombre de la mascota:',
+                                    isError:
+                                        _mostrarErrores &&
+                                        nombreController.text.trim().isEmpty,
+                                  ),
 
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              _buildLabel(
-                                                'Tamaño:',
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    tamanoController.text
-                                                        .trim()
-                                                        .isEmpty,
-                                              ),
-                                              _buildTextFieldBox(
-                                                controller: tamanoController,
-                                                hintText:
-                                                    'Pequeño, mediano, grande...',
-                                                hintStyle: const TextStyle(
-                                                  fontSize: 12,
+                                  _buildTextFieldBox(
+                                    controller: nombreController,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]'),
+                                      ),
+                                    ],
+                                    isError:
+                                        _mostrarErrores &&
+                                        nombreController.text.trim().isEmpty,
+                                    icon: Icons.pets_rounded,
+                                  ),
+
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildLabel(
+                                              'Especie:',
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  especie == null,
+                                            ),
+                                            _buildDropdownBox<String>(
+                                              value: especie,
+                                              hint: 'Seleccionar',
+                                              items: especies,
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  especie == null,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  especie = value;
+                                                  razaController.clear();
+                                                });
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildLabel(
+                                              'Raza:',
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  razaController.text
+                                                      .trim()
+                                                      .isEmpty,
+                                            ),
+                                            _buildRazaField(),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildLabel(
+                                              'Edad:',
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  edadController.text
+                                                      .trim()
+                                                      .isEmpty,
+                                            ),
+                                            _buildEdadField(),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildLabel(
+                                              'Color:',
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  colorController.text
+                                                      .trim()
+                                                      .isEmpty,
+                                            ),
+                                            _buildTextFieldBox(
+                                              controller: colorController,
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter.deny(
+                                                  RegExp(r'[0-9]'),
                                                 ),
-                                                inputFormatters: [
-                                                  FilteringTextInputFormatter.deny(
-                                                    RegExp(r'[0-9]'),
-                                                  ),
-                                                ],
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    tamanoController.text
-                                                        .trim()
-                                                        .isEmpty,
-                                                icon: Icons.straighten_rounded,
-                                              ),
-                                            ],
-                                          ),
+                                              ],
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  colorController.text
+                                                      .trim()
+                                                      .isEmpty,
+                                              icon: Icons.color_lens_rounded,
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              _buildLabel(
-                                                'Peso:',
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    pesoController.text
-                                                        .trim()
-                                                        .isEmpty,
-                                              ),
-                                              _buildTextFieldBox(
-                                                controller: pesoController,
-                                                keyboardType:
-                                                    const TextInputType.numberWithOptions(
-                                                      decimal: true,
-                                                    ),
-                                                inputFormatters: [
-                                                  FilteringTextInputFormatter.allow(
-                                                    RegExp(
-                                                      r'^\d{0,3}(\.\d{0,2})?$',
-                                                    ),
-                                                  ),
-                                                ],
-                                                suffixText: 'kg',
-                                                isError:
-                                                    _mostrarErrores &&
-                                                    pesoController.text
-                                                        .trim()
-                                                        .isEmpty,
-                                                icon:
-                                                    Icons
-                                                        .monitor_weight_outlined,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
+                                  ),
 
-                                    const SizedBox(height: 24),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: ElevatedButton(
-                                            onPressed: _guardarMascota,
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  const Color.fromARGB(
-                                                    255,
-                                                    13,
-                                                    0,
-                                                    60,
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildLabel(
+                                              'Sexo:',
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  sexo == null,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Radio(
+                                                  value: "Macho",
+                                                  groupValue: sexo,
+                                                  activeColor: const Color(
+                                                    0xFF2A74D9,
                                                   ),
-                                              minimumSize:
-                                                  const Size.fromHeight(48),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
+                                                  visualDensity:
+                                                      const VisualDensity(
+                                                        horizontal: -4,
+                                                        vertical: -4,
+                                                      ),
+                                                  onChanged:
+                                                      (v) => setState(
+                                                        () => sexo = v,
+                                                      ),
+                                                ),
+                                                const Text(
+                                                  "Macho",
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            child: const Text(
-                                              'Guardar',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
+                                            Row(
+                                              children: [
+                                                Radio(
+                                                  value: "Hembra",
+                                                  groupValue: sexo,
+                                                  activeColor: const Color(
+                                                    0xFF2A74D9,
+                                                  ),
+                                                  visualDensity:
+                                                      const VisualDensity(
+                                                        horizontal: -4,
+                                                        vertical: -4,
+                                                      ),
+                                                  onChanged:
+                                                      (v) => setState(
+                                                        () => sexo = v,
+                                                      ),
+                                                ),
+                                                const Text(
+                                                  "Hembra",
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildLabel(
+                                              'Esterilizado:',
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  esterilizado == null,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Radio<bool>(
+                                                  value: true,
+                                                  groupValue: esterilizado,
+                                                  activeColor: const Color(
+                                                    0xFF2A74D9,
+                                                  ),
+                                                  visualDensity:
+                                                      const VisualDensity(
+                                                        horizontal: -4,
+                                                        vertical: -4,
+                                                      ),
+                                                  onChanged:
+                                                      (v) => setState(
+                                                        () => esterilizado = v,
+                                                      ),
+                                                ),
+                                                const Text(
+                                                  "Sí",
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                Radio<bool>(
+                                                  value: false,
+                                                  groupValue: esterilizado,
+                                                  activeColor: const Color(
+                                                    0xFF2A74D9,
+                                                  ),
+                                                  visualDensity:
+                                                      const VisualDensity(
+                                                        horizontal: -4,
+                                                        vertical: -4,
+                                                      ),
+                                                  onChanged:
+                                                      (v) => setState(
+                                                        () => esterilizado = v,
+                                                      ),
+                                                ),
+                                                const Text(
+                                                  "No",
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildLabel(
+                                              'Tamaño:',
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  tamanoController.text
+                                                      .trim()
+                                                      .isEmpty,
+                                            ),
+                                            _buildTextFieldBox(
+                                              controller: tamanoController,
+                                              hintText:
+                                                  'Pequeño, mediano, grande...',
+                                              hintStyle: const TextStyle(
+                                                fontSize: 12,
                                               ),
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter.deny(
+                                                  RegExp(r'[0-9]'),
+                                                ),
+                                              ],
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  tamanoController.text
+                                                      .trim()
+                                                      .isEmpty,
+                                              icon: Icons.straighten_rounded,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildLabel(
+                                              'Peso:',
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  pesoController.text
+                                                      .trim()
+                                                      .isEmpty,
+                                            ),
+                                            _buildTextFieldBox(
+                                              controller: pesoController,
+                                              keyboardType:
+                                                  const TextInputType.numberWithOptions(
+                                                    decimal: true,
+                                                  ),
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter.allow(
+                                                  RegExp(
+                                                    r'^\d{0,3}(\.\d{0,2})?$',
+                                                  ),
+                                                ),
+                                              ],
+                                              suffixText: 'kg',
+                                              isError:
+                                                  _mostrarErrores &&
+                                                  pesoController.text
+                                                      .trim()
+                                                      .isEmpty,
+                                              icon:
+                                                  Icons.monitor_weight_outlined,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 24),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: _guardarMascota,
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(
+                                              0xFF2A74D9,
+                                            ),
+                                            minimumSize: const Size.fromHeight(
+                                              48,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Guardar',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: ElevatedButton(
-                                            onPressed:
-                                                () => Navigator.pop(context),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.grey,
-                                              minimumSize:
-                                                  const Size.fromHeight(48),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed:
+                                              () => Navigator.pop(context),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                            minimumSize: const Size.fromHeight(
+                                              48,
                                             ),
-                                            child: const Text(
-                                              'Cancelar',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Cancelar',
+                                            style: TextStyle(
+                                              color: Color(0xFF2A74D9),
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

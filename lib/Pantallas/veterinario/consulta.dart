@@ -23,6 +23,10 @@ class _MedicationFields {
   final TextEditingController dosis = TextEditingController();
   final TextEditingController frecuencia = TextEditingController();
   final TextEditingController duracion = TextEditingController();
+
+  String tipoFrecuencia = 'Horas'; // Horas o Día
+  String unidadDosis = 'ml'; // ml, mg, tabletas
+  final TextEditingController valorFrecuencia = TextEditingController();
 }
 
 class _ConsultaMedicaState extends State<ConsultaMedica> {
@@ -100,7 +104,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
             .map(
               (m) => {
                 'nombre': m.nombre.text,
-                'dosis': m.dosis.text,
+                'dosis': '${m.dosis.text} ${m.unidadDosis}',
                 'frecuencia': m.frecuencia.text,
                 'duracion': m.duracion.text,
               },
@@ -404,6 +408,10 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     );
   }
 
+  // 🔥 SOLO TE MUESTRO LAS PARTES MODIFICADAS PARA NO HACERLO GIGANTE
+
+  // ✅ REEMPLAZA TU _buildMedicacionForm POR ESTE:
+
   Widget _buildMedicacionForm(_MedicationFields med, int index) {
     return Column(
       children: [
@@ -416,23 +424,139 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
 
         Row(
           children: [
+            /// 🔥 DOSIS CON UNIDAD EN MISMO INPUT
             Expanded(
-              child: _campo(
-                'Dosis',
-                med.dosis,
-                icon: Icons.medication_liquid,
-                error: index == 0 && _errMedDosis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Dosis', style: FormStyles.labelStyle),
+                  const SizedBox(height: 6),
+
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD6E6FF).withOpacity(0.30),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color:
+                            index == 0 && _errMedDosis
+                                ? Colors.red
+                                : const Color(0xFF2A74D9).withOpacity(0.5),
+                        width: 1.5,
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: med.dosis,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Cantidad',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: med.unidadDosis,
+                            items: const [
+                              DropdownMenuItem(value: 'ml', child: Text('ml')),
+                              DropdownMenuItem(value: 'mg', child: Text('mg')),
+                              DropdownMenuItem(
+                                value: 'tab',
+                                child: Text('tab'),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                med.unidadDosis = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
 
             const SizedBox(width: 12),
-
             Expanded(
-              child: _campo(
-                'Frecuencia',
-                med.frecuencia,
-                icon: Icons.timer,
-                error: index == 0 && _errMedFrecuencia,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Frecuencia', style: FormStyles.labelStyle),
+                  const SizedBox(height: 6),
+
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD6E6FF).withOpacity(0.30),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color:
+                            index == 0 && _errMedFrecuencia
+                                ? Colors.red
+                                : const Color(0xFF2A74D9).withOpacity(0.5),
+                        width: 1.5,
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: med.valorFrecuencia,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9]'),
+                              ),
+                            ],
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Cantidad',
+                            ),
+                            onChanged: (value) {
+                              if (value.isEmpty) return;
+
+                              if (med.tipoFrecuencia == 'Horas') {
+                                med.frecuencia.text = "C/ $value hrs";
+                              } else {
+                                med.frecuencia.text = "$value vez al día";
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: med.tipoFrecuencia,
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'Horas',
+                                child: Text('hrs'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'Día',
+                                child: Text(' vez al día'),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                med.tipoFrecuencia = value!;
+                                med.valorFrecuencia.clear();
+                                med.frecuencia.clear();
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
