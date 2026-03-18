@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'MascotaPerfil.dart';
+import 'package:login/form_styles.dart';
 
 class Mascotadueno extends StatefulWidget {
   static const routeName = '/Mascotadueno';
@@ -41,21 +42,14 @@ class _MascotaduenoState extends State<Mascotadueno> {
     _telefonoController.text = telefono;
     _correoController.text = correo;
 
-    const azulPrincipal = Color(0xFF4E78FF);
-
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
+          shape: FormStyles.dialogShape(),
           child: Container(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: Colors.white,
-            ),
+            decoration: FormStyles.dialogDecoration(),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -105,18 +99,9 @@ class _MascotaduenoState extends State<Mascotadueno> {
                         ),
                       ),
                       const SizedBox(width: 12),
+
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 22,
-                            vertical: 14,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          backgroundColor: azulPrincipal,
-                          elevation: 4,
-                        ),
+                        style: FormStyles.botonPrincipal(),
                         onPressed: () async {
                           await _guardarContacto();
                           Navigator.pop(context);
@@ -166,7 +151,6 @@ class _MascotaduenoState extends State<Mascotadueno> {
 
             return Column(
               children: [
-                // 🔵 APPBAR CORREGIDO
                 Container(
                   height: 100,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -202,7 +186,7 @@ class _MascotaduenoState extends State<Mascotadueno> {
                                     const Icon(Icons.person),
                                     const SizedBox(width: 8),
                                     Text(
-                                      nombre, // ✅ YA FUNCIONA
+                                      nombre,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -211,7 +195,6 @@ class _MascotaduenoState extends State<Mascotadueno> {
                                 ),
                               ),
                               const PopupMenuDivider(),
-
                               const PopupMenuItem<int>(
                                 value: 2,
                                 child: Row(
@@ -222,7 +205,6 @@ class _MascotaduenoState extends State<Mascotadueno> {
                                   ],
                                 ),
                               ),
-
                               const PopupMenuItem<int>(
                                 value: 1,
                                 child: Row(
@@ -246,9 +228,7 @@ class _MascotaduenoState extends State<Mascotadueno> {
                           ),
                         ),
                       ),
-
                       const SizedBox(width: 12),
-
                       const Expanded(
                         child: Center(
                           child: Text(
@@ -265,7 +245,6 @@ class _MascotaduenoState extends State<Mascotadueno> {
                   ),
                 ),
 
-                // 🔽 CONTENIDO
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
@@ -273,10 +252,7 @@ class _MascotaduenoState extends State<Mascotadueno> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _banner(nombre),
-
-
                         const SizedBox(height: 24),
-
                         const Text(
                           'Mis Mascotas',
                           style: TextStyle(
@@ -284,9 +260,7 @@ class _MascotaduenoState extends State<Mascotadueno> {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-
                         const SizedBox(height: 12),
-
                         _listaMascotas(),
                       ],
                     ),
@@ -297,6 +271,19 @@ class _MascotaduenoState extends State<Mascotadueno> {
           },
         ),
       ),
+    );
+  }
+
+  Widget _inputEstilizado({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboard = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboard,
+      decoration: FormStyles.inputDecorationLabel(label, icon),
     );
   }
 
@@ -345,122 +332,6 @@ class _MascotaduenoState extends State<Mascotadueno> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _cardContacto({
-    required String direccion,
-    required String telefono,
-    required String correo,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x22000000),
-            blurRadius: 18,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _pillInfo(Icons.home_filled, 'Dirección', direccion),
-          const SizedBox(height: 10),
-          _pillInfo(Icons.phone_rounded, 'Teléfono', telefono),
-          const SizedBox(height: 10),
-          _pillInfo(Icons.email_rounded, 'Correo', correo),
-        ],
-      ),
-    );
-  }
-
-  Widget _pillInfo(IconData icon, String label, String text) {
-    const azulChip = Color(0xFF2A74D9);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4F6FF),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: azulChip.withOpacity(.25)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: azulChip.withOpacity(.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 18, color: azulChip),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.black45,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  text,
-                  style: const TextStyle(fontSize: 14),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _inputEstilizado({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType keyboard = TextInputType.text,
-  }) {
-    const azul = Color(0xFF2A74D9);
-
-    return TextField(
-      controller: controller,
-      keyboardType: keyboard,
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: const Color(0xFFF4F6FF),
-        prefixIcon: Icon(icon, color: azul),
-        labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 18,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: azul.withOpacity(.3)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: azul.withOpacity(.2)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: azul, width: 1.5),
-        ),
       ),
     );
   }

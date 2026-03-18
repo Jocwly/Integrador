@@ -18,18 +18,30 @@ class _AgregarPersonalState extends State<AgregarPersonal> {
   bool cargando = false;
   bool _mostrarErrores = false;
 
+  bool get nombreValido =>
+      RegExp(r'^[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]+$').hasMatch(nombreCtrl.text.trim());
+
+  bool get correoValido => RegExp(
+    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+  ).hasMatch(correoCtrl.text.trim());
+
+  bool get telefonoValido =>
+      RegExp(r'^\d{10}$').hasMatch(telefonoCtrl.text.trim());
+
   Future<void> _guardarPersonal() async {
     final nombre = nombreCtrl.text.trim();
     final correo = correoCtrl.text.trim();
     final telefono = telefonoCtrl.text.trim();
 
-    if (nombre.isEmpty || correo.isEmpty) {
+    if (nombre.isEmpty ||
+        correo.isEmpty ||
+        !nombreValido ||
+        !correoValido ||
+        (telefono.isNotEmpty && !telefonoValido)) {
       setState(() => _mostrarErrores = true);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor llena los campos obligatorios'),
-        ),
+        const SnackBar(content: Text('Verifica los datos ingresados')),
       );
       return;
     }
@@ -69,10 +81,16 @@ class _AgregarPersonalState extends State<AgregarPersonal> {
 
     return Scaffold(
       backgroundColor: fondo,
-
       appBar: AppBar(
         elevation: 0,
         toolbarHeight: 70,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -82,9 +100,10 @@ class _AgregarPersonalState extends State<AgregarPersonal> {
             ),
           ),
         ),
+        centerTitle: true,
         title: const Text(
-          'Agregar personal',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          'Agregar Personal',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
 
@@ -95,111 +114,175 @@ class _AgregarPersonalState extends State<AgregarPersonal> {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 560),
-                child: Card(
-                  elevation: 10,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: azulSuave,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 🔹 NOMBRE
-                          _buildLabel(
-                            'Nombre:',
-                            isError:
-                                _mostrarErrores &&
-                                nombreCtrl.text.trim().isEmpty,
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: azulSuave,
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          _buildTextFieldBox(
-                            controller: nombreCtrl,
-                            icon: Icons.person,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]'),
-                              ),
-                            ],
-                            isError:
-                                _mostrarErrores &&
-                                nombreCtrl.text.trim().isEmpty,
+                          child: const Icon(
+                            Icons.group_add_rounded,
+                            color: azul,
                           ),
-
-                          const SizedBox(height: 16),
-
-                          // 🔹 CORREO
-                          _buildLabel(
-                            'Correo:',
-                            isError:
-                                _mostrarErrores &&
-                                correoCtrl.text.trim().isEmpty,
-                          ),
-                          _buildTextFieldBox(
-                            controller: correoCtrl,
-                            icon: Icons.email,
-                            keyboardType: TextInputType.emailAddress,
-                            isError:
-                                _mostrarErrores &&
-                                correoCtrl.text.trim().isEmpty,
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // 🔹 TELÉFONO
-                          _buildLabel('Teléfono:'),
-                          _buildTextFieldBox(
-                            controller: telefonoCtrl,
-                            icon: Icons.phone,
-                            keyboardType: TextInputType.phone,
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // 🔹 ROL
-                          _buildLabel('Rol:'),
-                          _buildDropdownBox<String>(
-                            value: rolSeleccionado,
-                            items: ['Veterinario', 'Asistente'],
-                            onChanged: (value) {
-                              setState(() {
-                                rolSeleccionado = value!;
-                              });
-                            },
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // 🔹 BOTÓN
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _guardarPersonal,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: azul,
-                                minimumSize: const Size.fromHeight(48),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: const Text(
-                                'Guardar',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "Nuevo personal",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
+                            Text(
+                              "Registra un nuevo asistente/veterinario",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    Card(
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: azulSuave,
+                            borderRadius: BorderRadius.circular(18),
                           ),
-                        ],
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Información del empleado",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              _buildLabel(
+                                'Nombre:',
+                                isError:
+                                    _mostrarErrores &&
+                                    (!nombreValido || nombreCtrl.text.isEmpty),
+                              ),
+                              _buildTextFieldBox(
+                                controller: nombreCtrl,
+                                icon: Icons.person_rounded,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                    RegExp(r'[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]'),
+                                  ),
+                                ],
+                                isError:
+                                    _mostrarErrores &&
+                                    (!nombreValido || nombreCtrl.text.isEmpty),
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              _buildLabel(
+                                'Correo:',
+                                isError:
+                                    _mostrarErrores &&
+                                    (!correoValido || correoCtrl.text.isEmpty),
+                              ),
+                              _buildTextFieldBox(
+                                controller: correoCtrl,
+                                icon: Icons.email_outlined,
+                                keyboardType: TextInputType.emailAddress,
+                                isError:
+                                    _mostrarErrores &&
+                                    (!correoValido || correoCtrl.text.isEmpty),
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              _buildLabel(
+                                'Teléfono:',
+                                isError:
+                                    _mostrarErrores &&
+                                    telefonoCtrl.text.isNotEmpty &&
+                                    !telefonoValido,
+                              ),
+                              _buildTextFieldBox(
+                                controller: telefonoCtrl,
+                                icon: Icons.phone_rounded,
+                                keyboardType: TextInputType.phone,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(10),
+                                ],
+                                isError:
+                                    _mostrarErrores &&
+                                    telefonoCtrl.text.isNotEmpty &&
+                                    !telefonoValido,
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              _buildLabel('Rol:'),
+                              _buildDropdownBox<String>(
+                                value: rolSeleccionado,
+                                items: ['Veterinario', 'Asistente'],
+                                onChanged: (value) {
+                                  setState(() {
+                                    rolSeleccionado = value!;
+                                  });
+                                },
+                              ),
+
+                              const SizedBox(height: 22),
+
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: _guardarPersonal,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: azul,
+                                    elevation: 4,
+                                    minimumSize: const Size.fromHeight(50),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Guardar',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -215,7 +298,6 @@ class _AgregarPersonalState extends State<AgregarPersonal> {
     );
   }
 
-  // 🔹 LABEL
   Widget _buildLabel(String text, {bool isError = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -230,7 +312,6 @@ class _AgregarPersonalState extends State<AgregarPersonal> {
     );
   }
 
-  // 🔹 TEXTFIELD ESTILO
   Widget _buildTextFieldBox({
     required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
@@ -266,7 +347,6 @@ class _AgregarPersonalState extends State<AgregarPersonal> {
     );
   }
 
-  // 🔹 DROPDOWN ESTILO
   Widget _buildDropdownBox<T>({
     required T? value,
     required List<T> items,

@@ -150,15 +150,32 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       backgroundColor: FormStyles.fondoGradientTop,
       appBar: AppBar(
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         backgroundColor: Colors.transparent,
         toolbarHeight: 80,
         flexibleSpace: Container(
           decoration: const BoxDecoration(gradient: FormStyles.appBarGradient),
         ),
         centerTitle: true,
-        title: const Text(
-          'Programar cita',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.pets, color: Colors.white, size: 20),
+            SizedBox(width: 6),
+            Text(
+              'Programar Cita',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
 

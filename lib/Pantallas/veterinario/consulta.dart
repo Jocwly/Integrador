@@ -136,15 +136,32 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         backgroundColor: Colors.transparent,
         toolbarHeight: 80,
         flexibleSpace: Container(
           decoration: const BoxDecoration(gradient: FormStyles.appBarGradient),
         ),
         centerTitle: true,
-        title: const Text(
-          'Nueva consulta médica',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.pets, color: Colors.white, size: 20),
+            SizedBox(width: 6),
+            Text(
+              'Nueva Consulta Médica',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
 

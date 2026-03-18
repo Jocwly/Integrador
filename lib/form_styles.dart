@@ -8,6 +8,8 @@ class FormStyles {
 
   static const Color azulFuerte = Color(0xFF2A74D9);
   static const Color azulOscuro = Color(0xFF0B1446);
+  static const Color azulPrincipal = Color(0xFF4E78FF);
+  static const Color fondo = Color(0xFFF5F7FB);
   //static const Color azulBoton = Color(0xFF2A74D9);
   static const Color fondoGradientTop = Color(0xFFD7D2FF);
   static const Color fondoGradientBottom = Color(0xFFF1EEFF);
@@ -141,6 +143,97 @@ class FormStyles {
     height: 25,
     color: Color.fromARGB(255, 182, 181, 181),
   );
+
+  static InputDecoration inputDecorationLabel(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      filled: true,
+      fillColor: const Color(0xFFF4F6FF),
+      prefixIcon: Icon(icon, color: azulFuerte),
+      labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(color: azulFuerte.withOpacity(.3)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(color: azulFuerte.withOpacity(.2)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(color: azulFuerte, width: 1.5),
+      ),
+    );
+  }
+
+  static BoxDecoration personalCardDecoration = BoxDecoration(
+    gradient: const LinearGradient(
+      colors: [Color(0xFFE7F0FF), Color(0xFFD6E6FF)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+    borderRadius: BorderRadius.circular(18),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.08),
+        blurRadius: 8,
+        offset: const Offset(0, 4),
+      ),
+    ],
+    border: Border.all(color: azulFuerte.withOpacity(0.25)),
+  );
+  static BoxDecoration chipDecoration = BoxDecoration(
+    color: Colors.white.withOpacity(0.7),
+    borderRadius: BorderRadius.circular(12),
+    border: Border.all(color: azulFuerte.withOpacity(0.2)),
+  );
+
+  static const TextStyle chipLabel = TextStyle(
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+  );
+
+  static const TextStyle chipValue = TextStyle(fontSize: 14);
+
+  // 🔷 DROPDOWN
+  static InputDecoration dropdownDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      filled: true,
+      fillColor: const Color(0xFFF4F6FF),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(color: azulPrincipal.withOpacity(.3)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(color: azulPrincipal.withOpacity(.2)),
+      ),
+    );
+  }
+
+  // 🔷 BOTÓN PRINCIPAL
+  static ButtonStyle botonPrincipal() {
+    return ElevatedButton.styleFrom(
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      backgroundColor: azulPrincipal,
+      elevation: 4,
+    );
+  }
+
+  // 🔷 DIALOG
+  static BoxDecoration dialogDecoration() {
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(24),
+      color: Colors.white,
+    );
+  }
+
+  static ShapeBorder dialogShape() {
+    return RoundedRectangleBorder(borderRadius: BorderRadius.circular(24));
+  }
 
   // ===== ESPACIADOS =====
   static const SizedBox spaceSmall = SizedBox(height: 6);

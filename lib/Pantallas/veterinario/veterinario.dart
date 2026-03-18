@@ -4,11 +4,80 @@ import 'package:login/Pantallas/veterinario/Agregar_personal.dart';
 import 'package:login/Pantallas/veterinario/Clientes.dart';
 import 'package:login/Pantallas/veterinario/citas_hoy.dart';
 import 'package:login/Pantallas/Login.dart';
+import 'package:login/Pantallas/veterinario/lista_personal.dart';
 
 class Veterinario extends StatelessWidget {
   static String routeName = '/veterinario';
 
   const Veterinario({super.key});
+  void _mostrarMenuPersonal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Personal",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _MenuItem(
+                      icon: Icons.person_add,
+                      label: "Registrar\npersonal",
+                      onTap: () {
+                        Navigator.pop(context);
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AgregarPersonal(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _MenuItem(
+                      icon: Icons.visibility,
+                      label: "Ver\npersonal",
+                      onTap: () {
+                        Navigator.pop(context);
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ListaPersonal(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 15),
+
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cerrar"),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,11 +137,7 @@ class Veterinario extends StatelessWidget {
                     (route) => false,
                   );
                 } else if (value == 2) {
-                  // 🔹 Aquí mandas a la pantalla de agregar personal
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AgregarPersonal()),
-                  );
+                  _mostrarMenuPersonal(context);
                 }
               },
               itemBuilder:
@@ -94,9 +159,9 @@ class Veterinario extends StatelessWidget {
                       value: 2,
                       child: Row(
                         children: [
-                          Icon(Icons.person_add, color: Colors.blue),
+                          Icon(Icons.group_outlined, color: Colors.blue),
                           SizedBox(width: 8),
-                          Text('Agregar personal'),
+                          Text('Personal'),
                         ],
                       ),
                     ),
@@ -435,6 +500,57 @@ class _SquareIcon extends StatelessWidget {
         ),
       ),
       child: Icon(icon, color: Colors.white, size: 30),
+    );
+  }
+}
+
+class _MenuItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _MenuItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const azulChip = Color(0xFF2A74D9);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            height: 72,
+            width: 72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: azulChip, width: 2),
+              color: Colors.white,
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x22000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(icon, size: 34, color: Colors.black87),
+          ),
+          const SizedBox(height: 6),
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
