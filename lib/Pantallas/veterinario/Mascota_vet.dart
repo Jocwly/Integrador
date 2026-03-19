@@ -68,11 +68,7 @@ class PerfilMascota extends StatelessWidget {
       body: SafeArea(
         child: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFD7D2FF), Color(0xFFF1EEFF)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+            color: Color.fromARGB(255, 229, 231, 233),
           ),
           child: Center(
             child: ConstrainedBox(
@@ -202,7 +198,7 @@ class _CardMascota extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const moradoOscuro = Color(0xFF0B1446);
+    const azulFuerte = Color(0xFF2A74D9);
 
     return Container(
       decoration: BoxDecoration(
@@ -240,7 +236,7 @@ class _CardMascota extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
             decoration: BoxDecoration(
-              color: moradoOscuro,
+              color: azulFuerte,
               borderRadius: BorderRadius.circular(22),
             ),
             child: Text(nombre, style: const TextStyle(color: Colors.white)),

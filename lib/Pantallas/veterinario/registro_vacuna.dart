@@ -21,25 +21,19 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
   final _nombreVacunaCtrl = TextEditingController();
   final _loteCtrl = TextEditingController();
   final _dosisCtrl = TextEditingController();
-  final _personalCtrl = TextEditingController();
-
   final _dateAplicCtrl = TextEditingController();
   final _dateProxCtrl = TextEditingController();
 
   DateTime? _fechaAplicacion;
   DateTime? _fechaProxima;
 
+  String? personalId;
+  String? personalNombre;
+
   bool _errNombre = false;
   bool _errLote = false;
   bool _errDosis = false;
   bool _errPersonal = false;
-
-  final List<String> _personalOpciones = const [
-    'Dr. Edson SanJuan',
-    'Dra. Abril Peña',
-    'Adriana Mendoza',
-    'Sharlyn Zenaido',
-  ];
 
   @override
   void initState() {
@@ -54,7 +48,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
       _errNombre = _nombreVacunaCtrl.text.trim().isEmpty;
       _errLote = _loteCtrl.text.trim().isEmpty;
       _errDosis = _dosisCtrl.text.trim().isEmpty;
-      _errPersonal = _personalCtrl.text.trim().isEmpty;
+      _errPersonal = personalId == null;
     });
 
     if (_errNombre || _errLote || _errDosis || _errPersonal) return;
@@ -69,7 +63,8 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
       'nombreVacuna': _nombreVacunaCtrl.text.trim(),
       'lote': _loteCtrl.text.trim(),
       'dosis': _dosisCtrl.text.trim(),
-      'personalAplicador': _personalCtrl.text.trim(),
+      'personalId': personalId,
+      'personalNombre': personalNombre,
       'fechaAplicacion': _fechaAplicacion,
       'fechaProxima': _fechaProxima,
       'fechaRegistro': DateTime.now(),
@@ -119,6 +114,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
         .doc(widget.mascotaId);
 
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 229, 231, 233),
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -128,7 +124,7 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        backgroundColor: Colors.transparent,
+
         toolbarHeight: 80,
         flexibleSpace: Container(
           decoration: const BoxDecoration(gradient: FormStyles.appBarGradient),
@@ -150,178 +146,210 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
         ),
       ),
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: FormStyles.backgroundGradient,
-          ),
-          child: StreamBuilder<DocumentSnapshot>(
-            stream: mascotaRef.snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: mascotaRef.snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-              final data = snapshot.data!.data() as Map<String, dynamic>;
-              final nombre = data['nombre'] ?? 'Mascota';
-              final fotoUrl = data['fotoUrl'];
+            final data = snapshot.data!.data() as Map<String, dynamic>;
+            final nombre = data['nombre'] ?? 'Mascota';
+            final fotoUrl = data['fotoUrl'];
 
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Container(
-                  decoration: FormStyles.cardDecoration,
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      /// ===== HEADER =====
-                      Row(
-                        children: [
-                          Container(
-                            decoration: FormStyles.avatarBorderDecoration,
-                            padding: const EdgeInsets.all(
-                              FormStyles.avatarPadding,
-                            ),
-                            child: CircleAvatar(
-                              radius: 32,
-                              backgroundImage:
-                                  fotoUrl != null
-                                      ? NetworkImage(fotoUrl)
-                                      : const AssetImage(
-                                            'assets/images/icono.png',
-                                          )
-                                          as ImageProvider,
-                            ),
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                decoration: FormStyles.cardDecoration,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          decoration: FormStyles.avatarBorderDecoration,
+                          padding: const EdgeInsets.all(
+                            FormStyles.avatarPadding,
                           ),
-                          const SizedBox(width: 14),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(nombre, style: FormStyles.mascotaNombre),
-                              const SizedBox(height: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: FormStyles.pacienteChipDecoration,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(Icons.pets, size: 14),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      "Paciente",
-                                      style: FormStyles.pacienteChipText,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                          child: CircleAvatar(
+                            radius: 32,
+                            backgroundImage:
+                                fotoUrl != null
+                                    ? NetworkImage(fotoUrl)
+                                    : const AssetImage(
+                                          'assets/images/icono.png',
+                                        )
+                                        as ImageProvider,
                           ),
-                        ],
-                      ),
-
-                      FormStyles.formDivider,
-
-                      /// CAMPOS
-                      _campo(
-                        'Nombre vacuna',
-                        _nombreVacunaCtrl,
-                        error: _errNombre,
-                        icon: Icons.vaccines,
-                      ),
-
-                      _campo(
-                        'Fecha aplicación',
-                        _dateAplicCtrl,
-                        icon: Icons.calendar_today,
-                        readOnly: true,
-                        onTap: _pickFechaAplicacion,
-                      ),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _campo(
-                              'Lote',
-                              _loteCtrl,
-                              error: _errLote,
-                              icon: Icons.qr_code,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _campo(
-                              'Dosis',
-                              _dosisCtrl,
-                              error: _errDosis,
-                              icon: Icons.medication,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      _campoWidget(
-                        "Personal aplicador",
-                        DropdownButtonFormField<String>(
-                          decoration: FormStyles.inputDecoration(
-                            hint: 'Seleccionar personal',
-                            icon: Icons.person,
-                            error: _errPersonal,
-                          ),
-                          value:
-                              _personalCtrl.text.isNotEmpty
-                                  ? _personalCtrl.text
-                                  : null,
-                          items:
-                              _personalOpciones
-                                  .map(
-                                    (p) => DropdownMenuItem(
-                                      value: p,
-                                      child: Text(p),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged:
-                              (v) =>
-                                  setState(() => _personalCtrl.text = v ?? ''),
                         ),
-                      ),
-
-                      _campo(
-                        'Próxima dosis',
-                        _dateProxCtrl,
-                        icon: Icons.event,
-                        readOnly: true,
-                        onTap: _pickFechaProxima,
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              style: FormStyles.primaryButton,
-                              onPressed: _guardar,
-                              child: const Text('Guardar'),
+                        const SizedBox(width: 14),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(nombre, style: FormStyles.mascotaNombre),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: FormStyles.pacienteChipDecoration,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.pets, size: 14),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    "Paciente",
+                                    style: FormStyles.pacienteChipText,
+                                  ),
+                                ],
+                              ),
                             ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    FormStyles.formDivider,
+
+                    /// CAMPOS
+                    _campo(
+                      'Nombre vacuna',
+                      _nombreVacunaCtrl,
+                      error: _errNombre,
+                      icon: Icons.vaccines,
+                    ),
+
+                    _campo(
+                      'Fecha aplicación',
+                      _dateAplicCtrl,
+                      icon: Icons.calendar_today,
+                      readOnly: true,
+                      onTap: _pickFechaAplicacion,
+                    ),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _campo(
+                            'Lote',
+                            _loteCtrl,
+                            error: _errLote,
+                            icon: Icons.qr_code,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton(
-                              style: FormStyles.outlineButton,
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Cancelar'),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _campo(
+                            'Dosis',
+                            _dosisCtrl,
+                            error: _errDosis,
+                            icon: Icons.medication,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    _campoWidget(
+                      "Personal aplicador",
+                      StreamBuilder<QuerySnapshot>(
+                        stream:
+                            FirebaseFirestore.instance
+                                .collection('personal')
+                                .snapshots(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          final personalDocs = snapshot.data!.docs;
+
+                          return DropdownButtonFormField<String>(
+                            decoration: FormStyles.inputDecoration(
+                              hint: 'Seleccionar personal',
+                              icon: Icons.person,
+                            ).copyWith(
+                              errorText:
+                                  _errPersonal ? "Selecciona personal" : null,
                             ),
-                          ),
-                        ],
+                            value: personalId,
+                            items:
+                                personalDocs.map((doc) {
+                                  final data =
+                                      doc.data() as Map<String, dynamic>;
+
+                                  final nombre = data['nombre'] ?? '';
+                                  final rol = data['rol'] ?? '';
+
+                                  final nombreMostrar =
+                                      rol == "Veterinario"
+                                          ? "MVZ $nombre"
+                                          : nombre;
+
+                                  return DropdownMenuItem(
+                                    value: doc.id,
+                                    child: Text(nombreMostrar),
+                                  );
+                                }).toList(),
+                            onChanged: (v) {
+                              final doc = personalDocs.firstWhere(
+                                (d) => d.id == v,
+                              );
+                              final data = doc.data() as Map<String, dynamic>;
+
+                              final nombre = data['nombre'] ?? '';
+                              final rol = data['rol'] ?? '';
+
+                              final nombreMostrar =
+                                  rol == "Veterinario" ? "MVZ $nombre" : nombre;
+
+                              setState(() {
+                                personalId = v;
+                                personalNombre = nombreMostrar;
+                              });
+                            },
+                          );
+                        },
                       ),
-                    ],
-                  ),
+                    ),
+
+                    _campo(
+                      'Próxima dosis',
+                      _dateProxCtrl,
+                      icon: Icons.event,
+                      readOnly: true,
+                      onTap: _pickFechaProxima,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            style: FormStyles.primaryButton,
+                            onPressed: _guardar,
+                            child: const Text('Guardar'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton(
+                            style: FormStyles.outlineButton,
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancelar'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

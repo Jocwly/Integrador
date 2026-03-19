@@ -25,6 +25,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   TimeOfDay? horaSeleccionada;
   String? tipoCita;
   String? personal;
+  String? personalNombre;
   String? nombreMascota;
   bool _mostrarErrores = false;
 
@@ -33,13 +34,6 @@ class _ProgramarCitaState extends State<ProgramarCita> {
     'Consulta médica',
     'Vacunación',
     'Desparasitación',
-  ];
-
-  final List<String> personalDisponible = [
-    'Dr. Edson SanJuan',
-    'Dra. Abril Peña',
-    'Adriana Mendoza',
-    'Sharlyn Zenaido',
   ];
 
   @override
@@ -119,7 +113,8 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       'tipo': tipoCita,
       'fecha': fechaCompleta,
       'motivo': motivoController.text,
-      'personal': personal,
+      'personalId': personal,
+      'personalNombre': personalNombre,
       'creado': Timestamp.now(),
       'completada': false,
       'estado': 'Programada',
@@ -147,7 +142,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
         .doc(widget.mascotaId);
 
     return Scaffold(
-      backgroundColor: FormStyles.fondoGradientTop,
+      backgroundColor: const Color.fromARGB(255, 229, 231, 233),
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -180,252 +175,286 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       ),
 
       body: SafeArea(
-        child: Container(
+        /*child: Container(
           decoration: const BoxDecoration(
             gradient: FormStyles.backgroundGradient,
-          ),
+          ),*/
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: mascotaRef.snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          child: StreamBuilder<DocumentSnapshot>(
-            stream: mascotaRef.snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
+            final data = snapshot.data!.data() as Map<String, dynamic>;
+            final nombre = data['nombre'] ?? 'Mascota';
 
-              final data = snapshot.data!.data() as Map<String, dynamic>;
-              final nombre = data['nombre'] ?? 'Mascota';
+            nombreMascota ??= nombre;
 
-              nombreMascota ??= nombre;
+            final fotoUrl = data['fotoUrl'];
 
-              final fotoUrl = data['fotoUrl'];
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
 
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-
-                child: Container(
-                  decoration: FormStyles.cardDecoration,
-                  padding: const EdgeInsets.all(20),
-
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            decoration: FormStyles.avatarBorderDecoration,
-                            padding: const EdgeInsets.all(
-                              FormStyles.avatarPadding,
-                            ),
-                            child: CircleAvatar(
-                              radius: 32,
-                              backgroundImage:
-                                  fotoUrl != null
-                                      ? NetworkImage(fotoUrl)
-                                      : const AssetImage(
-                                            'assets/images/icono.png',
-                                          )
-                                          as ImageProvider,
-                            ),
+              child: Container(
+                decoration: FormStyles.cardDecoration,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          decoration: FormStyles.avatarBorderDecoration,
+                          padding: const EdgeInsets.all(
+                            FormStyles.avatarPadding,
                           ),
+                          child: CircleAvatar(
+                            radius: 32,
+                            backgroundImage:
+                                fotoUrl != null
+                                    ? NetworkImage(fotoUrl)
+                                    : const AssetImage(
+                                          'assets/images/icono.png',
+                                        )
+                                        as ImageProvider,
+                          ),
+                        ),
 
-                          const SizedBox(width: 14),
+                        const SizedBox(width: 14),
 
-                          Column(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(nombre, style: FormStyles.mascotaNombre),
+
+                            const SizedBox(height: 4),
+
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: FormStyles.pacienteChipDecoration,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.pets, size: 14),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    "Paciente",
+                                    style: FormStyles.pacienteChipText,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    FormStyles.spaceLarge,
+
+                    Text("Tipo de cita", style: FormStyles.labelStyle),
+                    FormStyles.spaceSmall,
+
+                    DropdownButtonFormField<String>(
+                      decoration: FormStyles.inputDecoration(
+                        hint: "Seleccionar",
+                      ).copyWith(
+                        errorText:
+                            _mostrarErrores && tipoCita == null
+                                ? "Campo obligatorio"
+                                : null,
+                      ),
+                      value: tipoCita,
+                      items:
+                          tiposCita
+                              .map(
+                                (e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)),
+                              )
+                              .toList(),
+                      onChanged: (v) => setState(() => tipoCita = v),
+                    ),
+
+                    FormStyles.spaceMedium,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(nombre, style: FormStyles.mascotaNombre),
+                              Text("Fecha", style: FormStyles.labelStyle),
+                              FormStyles.spaceSmall,
 
-                              const SizedBox(height: 4),
-
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
+                              TextFormField(
+                                readOnly: true,
+                                decoration: FormStyles.inputDecoration(
+                                  hint:
+                                      fechaSeleccionada != null
+                                          ? DateFormat(
+                                            'dd/MM/yyyy',
+                                          ).format(fechaSeleccionada!)
+                                          : "Seleccionar",
+                                  icon: Icons.calendar_today,
+                                ).copyWith(
+                                  errorText:
+                                      _mostrarErrores &&
+                                              fechaSeleccionada == null
+                                          ? "Selecciona una fecha"
+                                          : null,
                                 ),
-                                decoration: FormStyles.pacienteChipDecoration,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(Icons.pets, size: 14),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      "Paciente",
-                                      style: FormStyles.pacienteChipText,
-                                    ),
-                                  ],
-                                ),
+                                onTap: () => _seleccionarFecha(context),
                               ),
                             ],
                           ),
-                        ],
-                      ),
-
-                      FormStyles.spaceLarge,
-
-                      Text("Tipo de cita", style: FormStyles.labelStyle),
-                      FormStyles.spaceSmall,
-
-                      DropdownButtonFormField<String>(
-                        decoration: FormStyles.inputDecoration(
-                          hint: "Seleccionar",
-                        ).copyWith(
-                          errorText:
-                              _mostrarErrores && tipoCita == null
-                                  ? "Campo obligatorio"
-                                  : null,
                         ),
-                        value: tipoCita,
-                        items:
-                            tiposCita
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: e,
-                                    child: Text(e),
-                                  ),
-                                )
-                                .toList(),
-                        onChanged: (v) => setState(() => tipoCita = v),
-                      ),
 
-                      FormStyles.spaceMedium,
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Fecha", style: FormStyles.labelStyle),
-                                FormStyles.spaceSmall,
+                        const SizedBox(width: 12),
 
-                                TextFormField(
-                                  readOnly: true,
-                                  decoration: FormStyles.inputDecoration(
-                                    hint:
-                                        fechaSeleccionada != null
-                                            ? DateFormat(
-                                              'dd/MM/yyyy',
-                                            ).format(fechaSeleccionada!)
-                                            : "Seleccionar",
-                                    icon: Icons.calendar_today,
-                                  ).copyWith(
-                                    errorText:
-                                        _mostrarErrores &&
-                                                fechaSeleccionada == null
-                                            ? "Selecciona una fecha"
-                                            : null,
-                                  ),
-                                  onTap: () => _seleccionarFecha(context),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Hora", style: FormStyles.labelStyle),
+                              FormStyles.spaceSmall,
+
+                              TextFormField(
+                                readOnly: true,
+                                decoration: FormStyles.inputDecoration(
+                                  hint:
+                                      horaSeleccionada != null
+                                          ? horaSeleccionada!.format(context)
+                                          : "Seleccionar",
+                                  icon: Icons.access_time,
+                                ).copyWith(
+                                  errorText:
+                                      _mostrarErrores &&
+                                              horaSeleccionada == null
+                                          ? "Selecciona una hora"
+                                          : null,
                                 ),
-                              ],
-                            ),
+                                onTap: () => _seleccionarHora(context),
+                              ),
+                            ],
                           ),
-
-                          const SizedBox(width: 12),
-
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Hora", style: FormStyles.labelStyle),
-                                FormStyles.spaceSmall,
-
-                                TextFormField(
-                                  readOnly: true,
-                                  decoration: FormStyles.inputDecoration(
-                                    hint:
-                                        horaSeleccionada != null
-                                            ? horaSeleccionada!.format(context)
-                                            : "Seleccionar",
-                                    icon: Icons.access_time,
-                                  ).copyWith(
-                                    errorText:
-                                        _mostrarErrores &&
-                                                horaSeleccionada == null
-                                            ? "Selecciona una hora"
-                                            : null,
-                                  ),
-                                  onTap: () => _seleccionarHora(context),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      FormStyles.spaceMedium,
-                      Text("Motivo", style: FormStyles.labelStyle),
-                      FormStyles.spaceSmall,
-
-                      TextField(
-                        controller: motivoController,
-                        maxLines: 3,
-                        decoration: FormStyles.inputDecoration(
-                          hint: "Motivo",
-                        ).copyWith(
-                          errorText:
-                              _mostrarErrores &&
-                                      motivoController.text.trim().isEmpty
-                                  ? "Escribe el motivo"
-                                  : null,
                         ),
+                      ],
+                    ),
+
+                    FormStyles.spaceMedium,
+                    Text("Motivo", style: FormStyles.labelStyle),
+                    FormStyles.spaceSmall,
+
+                    TextField(
+                      controller: motivoController,
+                      maxLines: 3,
+                      decoration: FormStyles.inputDecoration(
+                        hint: "Motivo",
+                      ).copyWith(
+                        errorText:
+                            _mostrarErrores &&
+                                    motivoController.text.trim().isEmpty
+                                ? "Escribe el motivo"
+                                : null,
                       ),
+                    ),
 
-                      Text("Personal asignado", style: FormStyles.labelStyle),
-                      FormStyles.spaceSmall,
+                    Text("Personal asignado", style: FormStyles.labelStyle),
+                    FormStyles.spaceSmall,
 
-                      DropdownButtonFormField<String>(
-                        decoration: FormStyles.inputDecoration(
-                          hint: "Seleccionar",
-                          icon: Icons.person,
-                        ).copyWith(
-                          errorText:
-                              _mostrarErrores && personal == null
-                                  ? "Selecciona personal"
-                                  : null,
+                    StreamBuilder<QuerySnapshot>(
+                      stream:
+                          FirebaseFirestore.instance
+                              .collection('personal')
+                              .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const CircularProgressIndicator();
+                        }
+
+                        final personalDocs = snapshot.data!.docs;
+
+                        return DropdownButtonFormField<String>(
+                          decoration: FormStyles.inputDecoration(
+                            hint: "Seleccionar",
+                            icon: Icons.person,
+                          ).copyWith(
+                            errorText:
+                                _mostrarErrores && personal == null
+                                    ? "Selecciona personal"
+                                    : null,
+                          ),
+                          value: personal,
+                          items:
+                              personalDocs.map((doc) {
+                                final data = doc.data() as Map<String, dynamic>;
+
+                                final nombre = data['nombre'] ?? '';
+                                final rol = data['rol'] ?? '';
+
+                                final nombreMostrar =
+                                    rol == "Veterinario"
+                                        ? "MVZ $nombre"
+                                        : nombre;
+
+                                return DropdownMenuItem(
+                                  value: doc.id, // 🔥 CAMBIO IMPORTANTE
+                                  child: Text(nombreMostrar),
+                                );
+                              }).toList(),
+                          onChanged: (v) {
+                            final doc = personalDocs.firstWhere(
+                              (d) => d.id == v,
+                            );
+                            final data = doc.data() as Map<String, dynamic>;
+
+                            final nombre = data['nombre'] ?? '';
+                            final rol = data['rol'] ?? '';
+
+                            final nombreMostrar =
+                                rol == "Veterinario" ? "MVZ $nombre" : nombre;
+
+                            setState(() {
+                              personal = v; // 🔥 guarda ID
+                              personalNombre =
+                                  nombreMostrar; // 🔥 guarda nombre bonito
+                            });
+                          },
+                        );
+                      },
+                    ),
+                    FormStyles.spaceLarge,
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            style: FormStyles.primaryButton,
+                            onPressed: guardarCita,
+                            child: const Text("Programar cita"),
+                          ),
                         ),
-                        value: personal,
-                        items:
-                            personalDisponible
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: e,
-                                    child: Text(e),
-                                  ),
-                                )
-                                .toList(),
-                        onChanged: (v) => setState(() => personal = v),
-                      ),
 
-                      FormStyles.spaceLarge,
+                        const SizedBox(width: 12),
 
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              style: FormStyles.primaryButton,
-                              onPressed: guardarCita,
-                              child: const Text("Programar cita"),
-                            ),
+                        Expanded(
+                          child: OutlinedButton(
+                            style: FormStyles.outlineButton,
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Cancelar"),
                           ),
-
-                          const SizedBox(width: 12),
-
-                          Expanded(
-                            child: OutlinedButton(
-                              style: FormStyles.outlineButton,
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("Cancelar"),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
+        //),
       ),
     );
   }

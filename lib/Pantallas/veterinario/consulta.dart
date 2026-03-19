@@ -134,6 +134,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
         .doc(widget.mascotaId);
 
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 229, 231, 233),
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -166,193 +167,185 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
       ),
 
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: FormStyles.backgroundGradient,
-          ),
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: mascotaRef.snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          child: StreamBuilder<DocumentSnapshot>(
-            stream: mascotaRef.snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
+            final data = snapshot.data!.data() as Map<String, dynamic>;
+            final nombre = data['nombre'] ?? 'Mascota';
+            final fotoUrl = data['fotoUrl'];
 
-              final data = snapshot.data!.data() as Map<String, dynamic>;
-              final nombre = data['nombre'] ?? 'Mascota';
-              final fotoUrl = data['fotoUrl'];
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
 
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+              child: Container(
+                decoration: FormStyles.cardDecoration,
+                padding: const EdgeInsets.all(20),
 
-                child: Container(
-                  decoration: FormStyles.cardDecoration,
-                  padding: const EdgeInsets.all(20),
-
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            decoration: FormStyles.avatarBorderDecoration,
-                            padding: const EdgeInsets.all(
-                              FormStyles.avatarPadding,
-                            ),
-                            child: CircleAvatar(
-                              radius: 32,
-                              backgroundImage:
-                                  fotoUrl != null
-                                      ? NetworkImage(fotoUrl)
-                                      : const AssetImage(
-                                            'assets/images/icono.png',
-                                          )
-                                          as ImageProvider,
-                            ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          decoration: FormStyles.avatarBorderDecoration,
+                          padding: const EdgeInsets.all(
+                            FormStyles.avatarPadding,
                           ),
-                          const SizedBox(width: 14),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(nombre, style: FormStyles.mascotaNombre),
+                          child: CircleAvatar(
+                            radius: 32,
+                            backgroundImage:
+                                fotoUrl != null
+                                    ? NetworkImage(fotoUrl)
+                                    : const AssetImage(
+                                          'assets/images/icono.png',
+                                        )
+                                        as ImageProvider,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(nombre, style: FormStyles.mascotaNombre),
 
-                              const SizedBox(height: 4),
+                            const SizedBox(height: 4),
 
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: FormStyles.pacienteChipDecoration,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(Icons.pets, size: 14),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      "Paciente",
-                                      style: FormStyles.pacienteChipText,
-                                    ),
-                                  ],
-                                ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: FormStyles.pacienteChipDecoration,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.pets, size: 14),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    "Paciente",
+                                    style: FormStyles.pacienteChipText,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    FormStyles.formDivider,
+
+                    /// CAMPOS
+                    _campo(
+                      'Fecha',
+                      _dateCtrl,
+                      icon: Icons.calendar_today,
+                      readOnly: true,
+                      onTap: _pickDate,
+                    ),
+
+                    _campo(
+                      'Motivo de la consulta',
+                      _reasonCtrl,
+                      error: _errMotivo,
+                    ),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _campo(
+                            'Peso',
+                            _weightCtrl,
+                            icon: Icons.monitor_weight,
+                            suffixText: 'kg',
+                            error: _errPeso,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9.]'),
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
 
-                      FormStyles.formDivider,
+                        const SizedBox(width: 12),
 
-                      /// CAMPOS
-                      _campo(
-                        'Fecha',
-                        _dateCtrl,
-                        icon: Icons.calendar_today,
-                        readOnly: true,
-                        onTap: _pickDate,
-                      ),
-
-                      _campo(
-                        'Motivo de la consulta',
-                        _reasonCtrl,
-                        error: _errMotivo,
-                      ),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _campo(
-                              'Peso',
-                              _weightCtrl,
-                              icon: Icons.monitor_weight,
-                              suffixText: 'kg',
-                              error: _errPeso,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'[0-9.]'),
-                                ),
-                              ],
+                        Expanded(
+                          child: _campo(
+                            'Temperatura',
+                            _tempCtrl,
+                            icon: Icons.thermostat,
+                            suffixText: '°C',
+                            error: _errTemp,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
                             ),
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          Expanded(
-                            child: _campo(
-                              'Temperatura',
-                              _tempCtrl,
-                              icon: Icons.thermostat,
-                              suffixText: '°C',
-                              error: _errTemp,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'[0-9.]'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      _campo(
-                        'Diagnóstico',
-                        _diagnosisCtrl,
-                        maxLines: 3,
-                        error: _errDiag,
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Medicación prescrita',
-                          style: FormStyles.labelStyle.copyWith(
-                            fontWeight: FontWeight.w800,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9.]'),
+                              ),
+                            ],
                           ),
                         ),
+                      ],
+                    ),
+
+                    _campo(
+                      'Diagnóstico',
+                      _diagnosisCtrl,
+                      maxLines: 3,
+                      error: _errDiag,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Medicación prescrita',
+                        style: FormStyles.labelStyle.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
+                    ),
 
-                      const SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
-                      _buildMedicacionesSection(),
+                    _buildMedicacionesSection(),
 
-                      const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              style: FormStyles.primaryButton,
-                              onPressed: _onGuardar,
-                              child: const Text('Guardar'),
-                            ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            style: FormStyles.primaryButton,
+                            onPressed: _onGuardar,
+                            child: const Text('Guardar'),
                           ),
+                        ),
 
-                          const SizedBox(width: 12),
+                        const SizedBox(width: 12),
 
-                          Expanded(
-                            child: OutlinedButton(
-                              style: FormStyles.outlineButton,
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Cancelar'),
-                            ),
+                        Expanded(
+                          child: OutlinedButton(
+                            style: FormStyles.outlineButton,
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancelar'),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

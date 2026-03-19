@@ -11,8 +11,8 @@ class FormStyles {
   static const Color azulPrincipal = Color(0xFF4E78FF);
   static const Color fondo = Color(0xFFF5F7FB);
   //static const Color azulBoton = Color(0xFF2A74D9);
-  static const Color fondoGradientTop = Color(0xFFD7D2FF);
-  static const Color fondoGradientBottom = Color(0xFFF1EEFF);
+  static const Color fondoGradientTop = Color.fromARGB(255, 229, 231, 233);
+  static const Color fondoGradientBottom = Color.fromARGB(255, 229, 231, 233);
 
   // ===== GRADIENTES =====
   static const LinearGradient backgroundGradient = LinearGradient(

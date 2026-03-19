@@ -110,6 +110,7 @@ class _LoginState extends State<Login> {
                 // 🧊 Tarjeta blanca centrada y redondeada
                 child: Card(
                   elevation: 10,
+
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
                   ),

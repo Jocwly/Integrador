@@ -147,7 +147,7 @@ class _CitasMascotaState extends State<CitasMascota> {
                       /// FOTO
                       Container(
                         decoration: BoxDecoration(
-                          border: Border.all(color: azulFuerted, width: 3),
+                          border: Border.all(color: moradoOscuro, width: 3),
                           shape: BoxShape.circle,
                         ),
                         padding: const EdgeInsets.all(4),
@@ -166,7 +166,7 @@ class _CitasMascotaState extends State<CitasMascota> {
                       /// NOMBRE
                       Container(
                         decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 12, 8, 43),
+                          color: moradoOscuro,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.symmetric(
@@ -505,6 +505,54 @@ class _CitasMascotaState extends State<CitasMascota> {
                   ),
                   child: const Text(
                     'Editar',
+                    style: TextStyle(color: Colors.white, fontSize: 13),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () => _cancelarCita(context, citasRef, citaId),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Text(
+                    'Cancelar',
+                    style: TextStyle(color: Colors.white, fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+
+          /// BOTONES SOLO SI ES VENCIDA Y NO ES SOLO LECTURA
+          if (!widget.soloLectura && esVencida)
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed:
+                      () => _editarFechaHora(
+                        context: context,
+                        citasRef: citasRef,
+                        citaId: citaId,
+                        fechaActual: fecha,
+                      ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: azulFuerte,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Text(
+                    'Reprogramar',
                     style: TextStyle(color: Colors.white, fontSize: 13),
                   ),
                 ),

@@ -128,7 +128,7 @@ class _MascotaduenoState extends State<Mascotadueno> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: const Color.fromARGB(255, 229, 231, 233),
 
       body: SafeArea(
         child: StreamBuilder<DocumentSnapshot>(
