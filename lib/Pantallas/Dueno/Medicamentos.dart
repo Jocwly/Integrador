@@ -94,35 +94,40 @@ class _MedicamentosMascotaState extends State<MedicamentosMascota> {
                   }
 
                   List medicamentos = [];
-
                   for (var doc in snapshot.data!.docs) {
                     final data = doc.data();
 
-                    if (data['medicaciones'] != null) {
-                      List meds;
-
-                      if (data['medicaciones'] is List) {
-                        meds = data['medicaciones'];
-                      } else if (data['medicaciones'] is Map) {
-                        meds = (data['medicaciones'] as Map).values.toList();
-                      } else {
-                        meds = [];
-                      }
+                    if (data['medicaciones'] != null &&
+                        data['medicaciones'] is List) {
+                      List meds = data['medicaciones'];
 
                       for (int i = 0; i < meds.length; i++) {
                         var med = meds[i];
 
-                        if (data['fechaStr'] != null &&
-                            _matchFecha(data['fechaStr'])) {
-                          medicamentos.add({
-                            "nombre": med['nombre'] ?? "Sin nombre",
-                            "dosis": med['dosis'] ?? "Sin dosis",
-                            "frecuencia": med['frecuencia'] ?? "Sin frecuencia",
-                            "fecha": data['fechaStr'] ?? "",
-                            "administrado": med['administrado'] ?? false,
-                            "consultaId": doc.id,
-                            "index": i,
-                          });
+                        if (med['tomas'] != null) {
+                          for (int j = 0; j < med['tomas'].length; j++) {
+                            var toma = med['tomas'][j];
+
+                            DateTime fechaToma =
+                                (toma['fecha'] as Timestamp).toDate();
+
+                            if (DateUtils.isSameDay(
+                              fechaToma,
+                              fechaSeleccionada,
+                            )) {
+                              medicamentos.add({
+                                "nombre": med['nombre'],
+                                "dosis": med['dosis'],
+                                "fecha": DateFormat(
+                                  'dd/MM/yyyy HH:mm',
+                                ).format(fechaToma),
+                                "administrado": toma['administrado'] ?? false,
+                                "consultaId": doc.id,
+                                "medIndex": i,
+                                "tomaIndex": j,
+                              });
+                            }
+                          }
                         }
                       }
                     }
@@ -278,7 +283,7 @@ class _MedicamentosMascotaState extends State<MedicamentosMascota> {
                   const SizedBox(width: 10),
 
                   Text(
-                    med["frecuencia"],
+                    "frecuencia: Cada ${med['frecuenciaHoras']}h",
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ],
@@ -364,11 +369,17 @@ class _MedicamentosMascotaState extends State<MedicamentosMascota> {
 
                           final doc = await docRef.get();
 
-                          List meds = doc['medicaciones'];
+                          var medsData = doc['medicaciones'];
 
-                          meds[med["index"]]['administrado'] = true;
-                          meds[med["index"]]['horaAdministrado'] =
-                              Timestamp.now();
+                          if (medsData is! List) return;
+
+                          List meds = medsData;
+
+                          int medIndex = med["medIndex"];
+                          int tomaIndex = med["tomaIndex"];
+
+                          meds[medIndex]['tomas'][tomaIndex]['administrado'] =
+                              true;
 
                           await docRef.update({'medicaciones': meds});
                         },

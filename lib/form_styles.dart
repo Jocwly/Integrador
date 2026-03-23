@@ -239,4 +239,6 @@ class FormStyles {
   static const SizedBox spaceSmall = SizedBox(height: 6);
   static const SizedBox spaceMedium = SizedBox(height: 16);
   static const SizedBox spaceLarge = SizedBox(height: 24);
+
+  static var inputBoxDecoration;
 }

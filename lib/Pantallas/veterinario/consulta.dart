@@ -21,12 +21,14 @@ class ConsultaMedica extends StatefulWidget {
 class _MedicationFields {
   final TextEditingController nombre = TextEditingController();
   final TextEditingController dosis = TextEditingController();
-  final TextEditingController frecuencia = TextEditingController();
-  final TextEditingController duracion = TextEditingController();
 
-  String tipoFrecuencia = 'Horas'; // Horas o Día
-  String unidadDosis = 'ml'; // ml, mg, tabletas
-  final TextEditingController valorFrecuencia = TextEditingController();
+  final TextEditingController valorFrecuencia = TextEditingController(
+    text: "1",
+  );
+  final TextEditingController duracion = TextEditingController(text: "1");
+
+  DateTime fechaInicio = DateTime.now();
+  TimeOfDay horaInicio = TimeOfDay(hour: 9, minute: 0);
 }
 
 class _ConsultaMedicaState extends State<ConsultaMedica> {
@@ -79,7 +81,7 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
 
       _errMedNombre = firstMed.nombre.text.trim().isEmpty;
       _errMedDosis = firstMed.dosis.text.trim().isEmpty;
-      _errMedFrecuencia = firstMed.frecuencia.text.trim().isEmpty;
+      _errMedFrecuencia = firstMed.valorFrecuencia.text.trim().isEmpty;
       _errMedDuracion = firstMed.duracion.text.trim().isEmpty;
     });
 
@@ -100,16 +102,43 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
         .doc(widget.mascotaId);
 
     final meds =
-        _medicaciones
-            .map(
-              (m) => {
-                'nombre': m.nombre.text,
-                'dosis': '${m.dosis.text} ${m.unidadDosis}',
-                'frecuencia': m.frecuencia.text,
-                'duracion': m.duracion.text,
-              },
-            )
-            .toList();
+        _medicaciones.map((m) {
+          int frecuenciaHoras = int.tryParse(m.valorFrecuencia.text) ?? 0;
+
+          int duracionDias = int.tryParse(m.duracion.text) ?? 0;
+
+          DateTime inicio = DateTime(
+            m.fechaInicio.year,
+            m.fechaInicio.month,
+            m.fechaInicio.day,
+            m.horaInicio.hour,
+            m.horaInicio.minute,
+          );
+
+          int totalHoras = duracionDias * 24;
+          int totalTomas = (totalHoras / frecuenciaHoras).floor();
+
+          List<Map<String, dynamic>> tomas = [];
+
+          for (int i = 0; i < totalTomas; i++) {
+            DateTime fechaToma = inicio.add(
+              Duration(hours: i * frecuenciaHoras),
+            );
+
+            tomas.add({
+              'fecha': Timestamp.fromDate(fechaToma),
+              'administrado': false,
+            });
+          }
+
+          return {
+            'nombre': m.nombre.text,
+            'dosis': m.dosis.text,
+            'frecuenciaHoras': frecuenciaHoras,
+            'duracionDias': duracionDias,
+            'tomas': tomas,
+          };
+        }).toList();
 
     await mascotaRef.collection('consultas').add({
       'fechaStr': _dateCtrl.text,
@@ -418,166 +447,164 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
     );
   }
 
-  // 🔥 SOLO TE MUESTRO LAS PARTES MODIFICADAS PARA NO HACERLO GIGANTE
-
-  // ✅ REEMPLAZA TU _buildMedicacionForm POR ESTE:
-
   Widget _buildMedicacionForm(_MedicationFields med, int index) {
+    int frecuenciaHoras = int.tryParse(med.valorFrecuencia.text) ?? 0;
+    int duracionDias = int.tryParse(med.duracion.text) ?? 0;
+
+    int totalDosis =
+        (frecuenciaHoras > 0 && duracionDias > 0)
+            ? ((duracionDias * 24) / frecuenciaHoras).floor()
+            : 0;
+
+    Future<void> pickHora() async {
+      final picked = await showTimePicker(
+        context: context,
+        initialTime: med.horaInicio,
+      );
+
+      if (picked != null) {
+        setState(() => med.horaInicio = picked);
+      }
+    }
+
+    Future<void> pickFecha() async {
+      final picked = await showDatePicker(
+        context: context,
+        initialDate: med.fechaInicio,
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100),
+      );
+
+      if (picked != null) {
+        setState(() => med.fechaInicio = picked);
+      }
+    }
+
+    Widget numberSpinner(TextEditingController ctrl, String label) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: FormStyles.labelStyle),
+          const SizedBox(height: 6),
+          Container(
+            decoration: FormStyles.inputBoxDecoration,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: ctrl,
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    decoration: const InputDecoration(border: InputBorder.none),
+                  ),
+                ),
+                Column(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.keyboard_arrow_up),
+                      onPressed: () {
+                        int val = int.tryParse(ctrl.text) ?? 0;
+                        setState(() => ctrl.text = (val + 1).toString());
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.keyboard_arrow_down),
+                      onPressed: () {
+                        int val = int.tryParse(ctrl.text) ?? 0;
+                        if (val > 1) {
+                          setState(() => ctrl.text = (val - 1).toString());
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       children: [
         _campo(
-          'Nombre medicamento',
+          'Medicamento',
           med.nombre,
           icon: Icons.medication,
           error: index == 0 && _errMedNombre,
         ),
 
+        _campo(
+          'Dosis',
+          med.dosis,
+          icon: Icons.science,
+          error: index == 0 && _errMedDosis,
+        ),
+
         Row(
           children: [
-            /// 🔥 DOSIS CON UNIDAD EN MISMO INPUT
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Dosis', style: FormStyles.labelStyle),
-                  const SizedBox(height: 6),
+              child: numberSpinner(med.valorFrecuencia, 'Frecuencia (horas)'),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: numberSpinner(med.duracion, 'Duración (días)')),
+          ],
+        ),
 
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD6E6FF).withOpacity(0.30),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color:
-                            index == 0 && _errMedDosis
-                                ? Colors.red
-                                : const Color(0xFF2A74D9).withOpacity(0.5),
-                        width: 1.5,
-                      ),
+        const SizedBox(height: 12),
+
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: pickFecha,
+                child: AbsorbPointer(
+                  child: _campo(
+                    'Fecha de inicio',
+                    TextEditingController(
+                      text: DateFormat('dd/MM/yyyy').format(med.fechaInicio),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: med.dosis,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Cantidad',
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: med.unidadDosis,
-                            items: const [
-                              DropdownMenuItem(value: 'ml', child: Text('ml')),
-                              DropdownMenuItem(value: 'mg', child: Text('mg')),
-                              DropdownMenuItem(
-                                value: 'tab',
-                                child: Text('tab'),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                med.unidadDosis = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                    icon: Icons.calendar_today,
                   ),
-                ],
+                ),
               ),
             ),
 
             const SizedBox(width: 12),
+
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Frecuencia', style: FormStyles.labelStyle),
-                  const SizedBox(height: 6),
-
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD6E6FF).withOpacity(0.30),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color:
-                            index == 0 && _errMedFrecuencia
-                                ? Colors.red
-                                : const Color(0xFF2A74D9).withOpacity(0.5),
-                        width: 1.5,
-                      ),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: med.valorFrecuencia,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'[0-9]'),
-                              ),
-                            ],
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Cantidad',
-                            ),
-                            onChanged: (value) {
-                              if (value.isEmpty) return;
-
-                              if (med.tipoFrecuencia == 'Horas') {
-                                med.frecuencia.text = "C/ $value hrs";
-                              } else {
-                                med.frecuencia.text = "$value vez al día";
-                              }
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: med.tipoFrecuencia,
-                            items: const [
-                              DropdownMenuItem(
-                                value: 'Horas',
-                                child: Text('hrs'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'Día',
-                                child: Text(' vez al día'),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                med.tipoFrecuencia = value!;
-                                med.valorFrecuencia.clear();
-                                med.frecuencia.clear();
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+              child: GestureDetector(
+                onTap: pickHora,
+                child: AbsorbPointer(
+                  child: _campo(
+                    'Hora primera dosis',
+                    TextEditingController(text: med.horaInicio.format(context)),
+                    icon: Icons.access_time,
                   ),
-                ],
+                ),
               ),
             ),
           ],
         ),
 
-        _campo(
-          'Duración',
-          med.duracion,
-          icon: Icons.calendar_today,
-          error: index == 0 && _errMedDuracion,
-        ),
+        const SizedBox(height: 10),
+
+        if (totalDosis > 0)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD6E6FF),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              "Se generarán $totalDosis dosis cada $frecuenciaHoras horas durante $duracionDias días",
+              style: const TextStyle(
+                color: Color(0xFF2A74D9),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
 
         FormStyles.formDivider,
       ],
