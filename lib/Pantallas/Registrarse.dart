@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login/Pantallas/Login.dart';
 import 'package:flutter/services.dart';
@@ -42,9 +43,10 @@ class _RegistroState extends State<Registro> {
   }
 
   String _hashPassword(String password) {
-    final bytes = utf8.encode(password);
+    final salt = "petcare_${Random().nextInt(99999)}";
+    final bytes = utf8.encode(password + salt);
     final digest = sha256.convert(bytes);
-    return digest.toString();
+    return "$digest:$salt";
   }
 
   String? _validateNombre(String value) {
@@ -68,7 +70,7 @@ class _RegistroState extends State<Registro> {
     borderSide: BorderSide(color: Colors.red, width: w),
   );
 
-  // ---------- Validadores ----------
+  //Validadores
 
   String? _validateTelefono(String value) {
     final v = value.trim();
@@ -104,7 +106,7 @@ class _RegistroState extends State<Registro> {
     return null;
   }
 
-  // ---------- SnackBars con estilo ----------
+  // SnackBars con estilo 
   void _showStyledSnackBar(String message, {bool success = true}) {
     final Color bg =
         success ? const Color(0xFF4CAF50) : const Color(0xFFE53935);
@@ -141,7 +143,7 @@ class _RegistroState extends State<Registro> {
     final passwordHash = _hashPassword(passwordPlano);
 
     try {
-      // 🔎 1️⃣ Verificar si ya existe el correo
+      //Verificar si ya existe el correo
       final query =
           await FirebaseFirestore.instance
               .collection('clientes')
@@ -160,13 +162,18 @@ class _RegistroState extends State<Registro> {
         return;
       }
 
-      // ✅ 2️⃣ Si no existe, registrar
+      String sanitize(String input) {
+        return input.replaceAll(RegExp(r'<[^>]*>'), '');
+      }
+
+      // Si no existe, registrar
       await FirebaseFirestore.instance.collection('clientes').add({
-        'nombre': nombre,
+        'nombre': sanitize(nombre),
         'telefono': telefono,
         'correo': correo,
-        'direccion': direccion,
+        'direccion': sanitize(direccion),
         'password': passwordHash,
+        'rol': 'cliente', // siempre que se registre sea cliente
         'mascotas': 0,
         'createdAt': FieldValue.serverTimestamp(),
       });

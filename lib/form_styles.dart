@@ -114,7 +114,7 @@ class FormStyles {
     fontWeight: FontWeight.w600,
   );
 
-  // ===== TARJETA CONTENEDORA =====
+  //TARJETA CONTENEDORA
   static BoxDecoration cardDecoration = BoxDecoration(
     color: Colors.white,
     borderRadius: BorderRadius.circular(28),
@@ -123,7 +123,7 @@ class FormStyles {
     ],
   );
 
-  // ===== BOTÓN PRINCIPAL =====
+  //BOTÓN PRINCIPAL
   static ButtonStyle primaryButton = ElevatedButton.styleFrom(
     backgroundColor: azulFuerte,
     foregroundColor: Colors.white,
@@ -131,7 +131,7 @@ class FormStyles {
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
   );
 
-  // ===== BOTÓN OUTLINE =====
+  //BOTÓN OUTLINE 
   static ButtonStyle outlineButton = OutlinedButton.styleFrom(
     minimumSize: const Size.fromHeight(52),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -196,7 +196,7 @@ class FormStyles {
 
   static const TextStyle chipValue = TextStyle(fontSize: 14);
 
-  // 🔷 DROPDOWN
+  //DROPDOWN
   static InputDecoration dropdownDecoration(String label) {
     return InputDecoration(
       labelText: label,
@@ -213,7 +213,7 @@ class FormStyles {
     );
   }
 
-  // 🔷 BOTÓN PRINCIPAL
+  // BOTÓN PRINCIPAL
   static ButtonStyle botonPrincipal() {
     return ElevatedButton.styleFrom(
       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
@@ -223,7 +223,7 @@ class FormStyles {
     );
   }
 
-  // 🔷 DIALOG
+  //DIALOG
   static BoxDecoration dialogDecoration() {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(24),
@@ -235,7 +235,7 @@ class FormStyles {
     return RoundedRectangleBorder(borderRadius: BorderRadius.circular(24));
   }
 
-  // ===== ESPACIADOS =====
+  // ESPACIADOS
   static const SizedBox spaceSmall = SizedBox(height: 6);
   static const SizedBox spaceMedium = SizedBox(height: 16);
   static const SizedBox spaceLarge = SizedBox(height: 24);

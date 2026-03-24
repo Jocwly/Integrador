@@ -97,8 +97,7 @@ class _MedicamentosMascotaState extends State<MedicamentosMascota> {
                   for (var doc in snapshot.data!.docs) {
                     final data = doc.data();
 
-                    if (data['medicaciones'] != null &&
-                        data['medicaciones'] is List) {
+                    if (data['medicaciones'] != null) {
                       List meds = data['medicaciones'];
 
                       for (int i = 0; i < meds.length; i++) {

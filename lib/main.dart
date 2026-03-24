@@ -12,7 +12,7 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // 👇 inicializamos las notificaciones locales
+  //inicializamos las notificaciones locales
   await NotificationService().init();
 
   runApp(const MyApp());
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      locale: const Locale('es', 'MX'), // Español México
+      locale: const Locale('es', 'MX'), //idioma a español para los relojs
 
       supportedLocales: const [Locale('es', 'MX'), Locale('es', 'ES')],
 

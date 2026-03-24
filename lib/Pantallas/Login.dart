@@ -22,9 +22,6 @@ class _LoginState extends State<Login> {
   bool _obscure = true;
   bool _isLoading = false;
 
-  static const String _vetEmail = 'veterinario@gmail.com';
-  static const String _vetPass = 'vet123456';
-
   String _hashPassword(String password) {
     final bytes = utf8.encode(password);
     final digest = sha256.convert(bytes);
@@ -41,48 +38,79 @@ class _LoginState extends State<Login> {
   Future<void> _handleLogin() async {
     final email = _emailCtrl.text.trim();
     final passPlano = _passCtrl.text.trim();
-    final pass = _hashPassword(passPlano);
 
     setState(() => _isLoading = true);
 
     try {
-      if (email == _vetEmail && passPlano == _vetPass) {
-        if (!mounted) return;
-        Navigator.pushReplacementNamed(context, Veterinario.routeName);
-        return;
-      }
-      final pass = _hashPassword(passPlano);
       final query =
           await FirebaseFirestore.instance
               .collection('clientes')
               .where('correo', isEqualTo: email)
-              .where('password', isEqualTo: pass)
               .limit(1)
               .get();
 
+      if (query.docs.isEmpty) {
+        throw 'Usuario no encontrado';
+      }
+
+      final userDoc = query.docs.first;
+      final data = userDoc.data();
+
+      //  password
+      final stored = data['password'];
+      final parts = stored.split(':');
+
+      if (parts.length != 2) throw 'Error de seguridad';
+
+      final hash = parts[0];
+      final salt = parts[1];
+
+      final newHash = sha256.convert(utf8.encode(passPlano + salt)).toString();
+
+      if (newHash != hash) {
+        throw 'Contraseña incorrecta';
+      }
+
+      // log
+      await FirebaseFirestore.instance.collection('logs').add({
+        'evento': 'login',
+        'correo': email,
+        'fecha': FieldValue.serverTimestamp(),
+        'exito': true,
+      });
+
+      //roles
+      final rol = data['rol'];
+
       if (!mounted) return;
 
-      if (query.docs.isNotEmpty) {
-        final clienteId = query.docs.first.id;
-
+      if (rol == 'veterinario') {
+        Navigator.pushReplacementNamed(context, Veterinario.routeName);
+      } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => Mascotadueno(clienteId: clienteId)),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Correo o contraseña incorrectos')),
+          MaterialPageRoute(
+            builder: (_) => Mascotadueno(clienteId: userDoc.id),
+          ),
         );
       }
     } catch (e) {
+      // Logs
+      await FirebaseFirestore.instance.collection('logs').add({
+        'evento': 'login',
+        'correo': email,
+        'fecha': FieldValue.serverTimestamp(),
+        'exito': false,
+        'error': e.toString(),
+      });
+
       if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error al iniciar sesión: $e')));
+      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -93,7 +121,7 @@ class _LoginState extends State<Login> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-        // 🎨 Fondo degradado azul
+        //Fondo degradado azul
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -107,7 +135,7 @@ class _LoginState extends State<Login> {
               padding: const EdgeInsets.all(16),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 380),
-                // 🧊 Tarjeta blanca centrada y redondeada
+                // Tarjeta blanca centrada y redondeada
                 child: Card(
                   elevation: 10,
 
@@ -152,7 +180,7 @@ class _LoginState extends State<Login> {
                           ),
                           const SizedBox(height: 28),
 
-                          // 📧 Correo
+                          // Correo
                           _FilledField(
                             controller: _emailCtrl,
                             label: 'Correo Electrónico',
@@ -175,7 +203,7 @@ class _LoginState extends State<Login> {
                           ),
                           const SizedBox(height: 16),
 
-                          // 🔒 Contraseña
+                          // Contraseña
                           _FilledField(
                             controller: _passCtrl,
                             label: 'Contraseña',
@@ -197,8 +225,8 @@ class _LoginState extends State<Login> {
                               if (text.isEmpty) {
                                 return 'Completa este campo';
                               }
-                              if (text.length < 6) {
-                                return 'Mínimo 6 caracteres';
+                              if (text.length < 8) {
+                                return 'Mínimo 8 caracteres';
                               }
                               return null;
                             },
@@ -206,7 +234,7 @@ class _LoginState extends State<Login> {
 
                           const SizedBox(height: 26),
 
-                          // 🔵 Botón Iniciar sesión
+                          // Botón Iniciar sesión
                           SizedBox(
                             width: double.infinity,
                             height: 48,
