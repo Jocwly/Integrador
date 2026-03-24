@@ -42,6 +42,7 @@ class _LoginState extends State<Login> {
     setState(() => _isLoading = true);
 
     try {
+      // PROTECCIÓN SQLi
       final query =
           await FirebaseFirestore.instance
               .collection('clientes')
@@ -56,7 +57,7 @@ class _LoginState extends State<Login> {
       final userDoc = query.docs.first;
       final data = userDoc.data();
 
-      //  password
+      //VALIDACIÓN BACKEND (password)
       final stored = data['password'];
       final parts = stored.split(':');
 
@@ -71,7 +72,7 @@ class _LoginState extends State<Login> {
         throw 'Contraseña incorrecta';
       }
 
-      // log
+      // logs (login exitoso)
       await FirebaseFirestore.instance.collection('logs').add({
         'evento': 'login',
         'correo': email,
@@ -79,7 +80,7 @@ class _LoginState extends State<Login> {
         'exito': true,
       });
 
-      //roles
+      //Roles (control de acceso)
       final rol = data['rol'];
 
       if (!mounted) return;
@@ -95,7 +96,7 @@ class _LoginState extends State<Login> {
         );
       }
     } catch (e) {
-      // Logs
+      // Logs (login fallido)
       await FirebaseFirestore.instance.collection('logs').add({
         'evento': 'login',
         'correo': email,
