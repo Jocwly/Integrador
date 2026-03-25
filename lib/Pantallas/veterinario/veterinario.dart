@@ -274,7 +274,7 @@ class Veterinario extends StatelessWidget {
                             _SquareIcon(icon: Icons.person),
                             SizedBox(height: 6),
                             Text(
-                              '¡Bienvenido, Dr.!',
+                              '¡Bienvenido!',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 26,

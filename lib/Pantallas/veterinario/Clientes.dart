@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login/Pantallas/veterinario/citas_hoy.dart';
-import 'package:login/Pantallas/veterinario/perfil_cliente.dart'; // Cliente
-import 'package:login/Pantallas/veterinario/veterinario.dart'; // pantalla de inicio
+import 'package:login/Pantallas/veterinario/perfil_cliente.dart'; 
+import 'package:login/Pantallas/veterinario/veterinario.dart'; 
 
 class Clientes extends StatelessWidget {
   const Clientes({super.key});
@@ -85,7 +85,7 @@ class Clientes extends StatelessWidget {
                         .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return Center(child: Text("❌ ERROR: ${snapshot.error}"));
+                    return Center(child: Text(" ERROR: ${snapshot.error}"));
                   }
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -105,8 +105,11 @@ class Clientes extends StatelessWidget {
                       final data = doc.data() as Map<String, dynamic>;
                       final nombre = data['nombre'] ?? 'Sin nombre';
                       final correo = data['correo'] ?? 'Sin correo';
-                      final mascotas = (data['mascotas'] ?? 0) as int;
 
+                    
+                      if (correo == "aplicacionmovilpetcare@gmail.com") {
+                        return const SizedBox();
+                      }
                       return Dismissible(
                         key: Key(doc.id),
                         direction: DismissDirection.endToStart,
@@ -207,12 +210,29 @@ class Clientes extends StatelessWidget {
                                         style: const TextStyle(fontSize: 14),
                                       ),
                                       const SizedBox(height: 2),
-                                      Text(
-                                        '$mascotas mascota(s)',
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.black54,
-                                        ),
+                                      StreamBuilder<QuerySnapshot>(
+                                        stream:
+                                            FirebaseFirestore.instance
+                                                .collection('clientes')
+                                                .doc(doc.id)
+                                                .collection('mascotas')
+                                                .snapshots(),
+                                        builder: (context, snapMascotas) {
+                                          int mascotas = 0;
+
+                                          if (snapMascotas.hasData) {
+                                            mascotas =
+                                                snapMascotas.data!.docs.length;
+                                          }
+
+                                          return Text(
+                                            '$mascotas mascota(s)',
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.black54,
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ],
                                   ),
@@ -227,12 +247,29 @@ class Clientes extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   alignment: Alignment.center,
-                                  child: Text(
-                                    mascotas.toString(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  child: StreamBuilder<QuerySnapshot>(
+                                    stream:
+                                        FirebaseFirestore.instance
+                                            .collection('clientes')
+                                            .doc(doc.id)
+                                            .collection('mascotas')
+                                            .snapshots(),
+                                    builder: (context, snapMascotas) {
+                                      int mascotas = 0;
+
+                                      if (snapMascotas.hasData) {
+                                        mascotas =
+                                            snapMascotas.data!.docs.length;
+                                      }
+
+                                      return Text(
+                                        mascotas.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],

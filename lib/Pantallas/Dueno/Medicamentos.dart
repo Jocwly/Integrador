@@ -117,9 +117,13 @@ class _MedicamentosMascotaState extends State<MedicamentosMascota> {
                               medicamentos.add({
                                 "nombre": med['nombre'],
                                 "dosis": med['dosis'],
+                                "frecuenciaHoras":
+                                    med['frecuenciaHoras'], // 👈 AGREGA ESTO
                                 "fecha": DateFormat(
                                   'dd/MM/yyyy HH:mm',
                                 ).format(fechaToma),
+                                "fechaReal":
+                                    fechaToma, // 👈 importante para validación después
                                 "administrado": toma['administrado'] ?? false,
                                 "consultaId": doc.id,
                                 "medIndex": i,
@@ -232,7 +236,12 @@ class _MedicamentosMascotaState extends State<MedicamentosMascota> {
   }
 
   /// CARD MEDICAMENTO
+  ///
   Widget _medCard(Map med) {
+    DateTime ahora = DateTime.now();
+    DateTime fechaToma = med["fechaReal"];
+
+    bool puedeMarcar = ahora.isAfter(fechaToma);
     bool administrado = med["administrado"];
 
     return AnimatedContainer(
@@ -357,31 +366,34 @@ class _MedicamentosMascotaState extends State<MedicamentosMascota> {
                           backgroundColor: const Color(0xFF2A74D9),
                         ),
 
-                        onPressed: () async {
-                          final docRef = FirebaseFirestore.instance
-                              .collection('clientes')
-                              .doc(widget.clienteId)
-                              .collection('mascotas')
-                              .doc(widget.mascotaId)
-                              .collection('consultas')
-                              .doc(med["consultaId"]);
+                        onPressed:
+                            puedeMarcar
+                                ? () async {
+                                  final docRef = FirebaseFirestore.instance
+                                      .collection('clientes')
+                                      .doc(widget.clienteId)
+                                      .collection('mascotas')
+                                      .doc(widget.mascotaId)
+                                      .collection('consultas')
+                                      .doc(med["consultaId"]);
 
-                          final doc = await docRef.get();
+                                  final doc = await docRef.get();
 
-                          var medsData = doc['medicaciones'];
+                                  var medsData = doc['medicaciones'];
 
-                          if (medsData is! List) return;
+                                  if (medsData is! List) return;
 
-                          List meds = medsData;
+                                  List meds = medsData;
 
-                          int medIndex = med["medIndex"];
-                          int tomaIndex = med["tomaIndex"];
+                                  int medIndex = med["medIndex"];
+                                  int tomaIndex = med["tomaIndex"];
 
-                          meds[medIndex]['tomas'][tomaIndex]['administrado'] =
-                              true;
+                                  meds[medIndex]['tomas'][tomaIndex]['administrado'] =
+                                      true;
 
-                          await docRef.update({'medicaciones': meds});
-                        },
+                                  await docRef.update({'medicaciones': meds});
+                                }
+                                : null, // 👈 DESHABILITA
 
                         label: const Text(
                           "Marcar como administrado",

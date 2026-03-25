@@ -486,7 +486,9 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
         children: [
           Text(label, style: FormStyles.labelStyle),
           const SizedBox(height: 6),
+
           Container(
+            height: 48, // 🔥 controla la altura total
             decoration: FormStyles.inputBoxDecoration,
             child: Row(
               children: [
@@ -495,28 +497,37 @@ class _ConsultaMedicaState extends State<ConsultaMedica> {
                     controller: ctrl,
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
-                    decoration: const InputDecoration(border: InputBorder.none),
+                    style: const TextStyle(fontSize: 14), // 🔽 más pequeño
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 8),
+                    ),
                   ),
                 ),
-                Column(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.keyboard_arrow_up),
-                      onPressed: () {
-                        int val = int.tryParse(ctrl.text) ?? 0;
-                        setState(() => ctrl.text = (val + 1).toString());
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.keyboard_arrow_down),
-                      onPressed: () {
-                        int val = int.tryParse(ctrl.text) ?? 0;
-                        if (val > 1) {
-                          setState(() => ctrl.text = (val - 1).toString());
-                        }
-                      },
-                    ),
-                  ],
+
+                SizedBox(
+                  width: 32,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          int val = int.tryParse(ctrl.text) ?? 0;
+                          setState(() => ctrl.text = (val + 1).toString());
+                        },
+                        child: const Icon(Icons.keyboard_arrow_up, size: 18),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          int val = int.tryParse(ctrl.text) ?? 0;
+                          if (val > 1) {
+                            setState(() => ctrl.text = (val - 1).toString());
+                          }
+                        },
+                        child: const Icon(Icons.keyboard_arrow_down, size: 18),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

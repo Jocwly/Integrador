@@ -5,11 +5,12 @@ import 'package:login/form_styles.dart';
 
 class Alimentacion extends StatefulWidget {
   final String mascotaId;
+  final String clienteId; // 👈 NECESARIO
 
   const Alimentacion({
     super.key,
     required this.mascotaId,
-    required String clienteId,
+    required this.clienteId,
   });
 
   @override
@@ -195,6 +196,8 @@ class _AlimentacionState extends State<Alimentacion>
                                   ).format(DateTime.now());
 
                                   await _db
+                                      .collection('clientes')
+                                      .doc(widget.clienteId)
                                       .collection('mascotas')
                                       .doc(widget.mascotaId)
                                       .collection('alimentacion')
@@ -418,6 +421,8 @@ class _AlimentacionState extends State<Alimentacion>
                 child: StreamBuilder<QuerySnapshot>(
                   stream:
                       _db
+                          .collection('clientes')
+                          .doc(widget.clienteId)
                           .collection('mascotas')
                           .doc(widget.mascotaId)
                           .collection('alimentacion')
