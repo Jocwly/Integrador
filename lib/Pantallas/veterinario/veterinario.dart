@@ -303,7 +303,7 @@ class Veterinario extends StatelessWidget {
                           child: AspectRatio(
                             aspectRatio: 4 / 3,
                             child: Image.asset(
-                              'assets/images/animales.png',
+                              'assets/images/animales.jpg',
                               fit: BoxFit.cover,
                             ),
                           ),

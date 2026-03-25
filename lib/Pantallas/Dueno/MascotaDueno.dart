@@ -325,7 +325,7 @@ class _MascotaduenoState extends State<Mascotadueno> {
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Image.asset(
-              'assets/images/animales.png',
+              'assets/images/animales.jpg',
               width: 70,
               height: 70,
               fit: BoxFit.cover,
