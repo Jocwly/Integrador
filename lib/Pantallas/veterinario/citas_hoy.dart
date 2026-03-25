@@ -18,10 +18,10 @@ class CitasHoy extends StatelessWidget {
     final inicioHoy = DateTime(now.year, now.month, now.day);
     final finHoy = inicioHoy.add(const Duration(days: 1));
 
-    final Query citasHoyQuery = FirebaseFirestore.instance
-        .collectionGroup('citas')
-        .where('fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(inicioHoy))
-        .where('fecha', isLessThan: Timestamp.fromDate(finHoy));
+    //final Query citasHoyQuery = FirebaseFirestore.instance
+      //  .collectionGroup('citas')
+        //.where('fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(inicioHoy))
+       // .where('fecha', isLessThan: Timestamp.fromDate(finHoy));
     // sin orderBy -> no necesitas índice compuesto
 
     return Scaffold(
@@ -71,8 +71,16 @@ class CitasHoy extends StatelessWidget {
                       stream:
                           FirebaseFirestore.instance
                               .collectionGroup('citas')
-                              .where('fecha', isGreaterThanOrEqualTo: inicioHoy)
-                              .where('fecha', isLessThan: finHoy)
+                              .where(
+                                'fecha',
+                                isGreaterThanOrEqualTo: Timestamp.fromDate(
+                                  inicioHoy,
+                                ),
+                              )
+                              .where(
+                                'fecha',
+                                isLessThan: Timestamp.fromDate(finHoy),
+                              )
                               .snapshots(),
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {

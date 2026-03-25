@@ -148,7 +148,7 @@ class Veterinario extends StatelessWidget {
                         children: [
                           Icon(Icons.person, color: Colors.black),
                           SizedBox(width: 8),
-                          Text('Dr. José'),
+                          Text('Administrador'),
                         ],
                       ),
                     ),

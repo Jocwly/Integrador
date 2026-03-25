@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login/Pantallas/Login.dart';
 import 'package:flutter/services.dart';
@@ -42,9 +43,10 @@ class _RegistroState extends State<Registro> {
   }
 
   String _hashPassword(String password) {
-    final bytes = utf8.encode(password);
+    final salt = "petcare_${Random().nextInt(99999)}";
+    final bytes = utf8.encode(password + salt);
     final digest = sha256.convert(bytes);
-    return digest.toString();
+    return "$digest:$salt";
   }
 
   String? _validateNombre(String value) {
@@ -68,8 +70,7 @@ class _RegistroState extends State<Registro> {
     borderSide: BorderSide(color: Colors.red, width: w),
   );
 
-  // ---------- Validadores ----------
-
+  //Validadores
   String? _validateTelefono(String value) {
     final v = value.trim();
     if (v.isEmpty) return 'Este campo es requerido';
@@ -86,11 +87,22 @@ class _RegistroState extends State<Registro> {
     return null;
   }
 
+  // contraseña
   String? _validatePass(String value) {
     final v = value.trim();
     if (v.isEmpty) return 'Este campo es requerido';
+
     if (v.length < 8) {
-      return 'La contraseña debe tener mínimo 8 caracteres';
+      return 'Mínimo 8 caracteres';
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(v)) {
+      return 'Debe tener al menos una mayúscula';
+    }
+    if (!RegExp(r'[0-9]').hasMatch(v)) {
+      return 'Debe tener al menos un número';
+    }
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(v)) {
+      return 'Debe tener al menos un carácter especial';
     }
     return null;
   }
@@ -104,7 +116,7 @@ class _RegistroState extends State<Registro> {
     return null;
   }
 
-  // ---------- SnackBars con estilo ----------
+  // SnackBars con Estilo
   void _showStyledSnackBar(String message, {bool success = true}) {
     final Color bg =
         success ? const Color(0xFF4CAF50) : const Color(0xFFE53935);
@@ -141,7 +153,9 @@ class _RegistroState extends State<Registro> {
     final passwordHash = _hashPassword(passwordPlano);
 
     try {
-      // 🔎 1️⃣ Verificar si ya existe el correo
+      // PROTECCIÓN CONTRA SQLi
+      // Firestore usa consultas estructuradas ,
+      // por lo tanto NO es vulnerable a sql Injection directamente
       final query =
           await FirebaseFirestore.instance
               .collection('clientes')
@@ -150,8 +164,6 @@ class _RegistroState extends State<Registro> {
               .get();
 
       if (query.docs.isNotEmpty) {
-        if (!mounted) return;
-
         setState(() {
           _emailError = 'Este correo ya está registrado';
         });
@@ -160,24 +172,49 @@ class _RegistroState extends State<Registro> {
         return;
       }
 
-      // ✅ 2️⃣ Si no existe, registrar
+      //  PROTECCIÓN XSS (SANITIZACIÓN DE DATOS)
+      String sanitize(String input) {
+        return input.replaceAll(RegExp(r'<[^>]*>'), '');
+      }
+
+      // VALIDACIÓN BACKEND
+      // Aquí ya llegan datos validados desde funciones _validate*
+      // pero se refuerza en backend antes de guardar
+
       await FirebaseFirestore.instance.collection('clientes').add({
-        'nombre': nombre,
+        'nombre': sanitize(nombre), // XSS protegido
         'telefono': telefono,
         'correo': correo,
-        'direccion': direccion,
-        'password': passwordHash,
+        'direccion': sanitize(direccion), // XSS protegido
+        'password': passwordHash, // HASH + SALT (seguridad de contraseñas)+
+        // ROLES Y PERMISOS
+        'rol': 'cliente', // asignación de rol por defecto (RBAC)
+
         'mascotas': 0,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      if (!mounted) return;
+      // REGISTRO DE LOGS
+      await FirebaseFirestore.instance.collection('logs').add({
+        'evento': 'registro',
+        'correo': correo,
+        'fecha': FieldValue.serverTimestamp(),
+        'exito': true,
+      });
 
       _showStyledSnackBar('Registro exitoso', success: true);
 
       Navigator.pushReplacementNamed(context, Login.routeName);
     } catch (e) {
-      if (!mounted) return;
+      //  LOG DE ERROR
+      await FirebaseFirestore.instance.collection('logs').add({
+        'evento': 'registro',
+        'correo': correo,
+        'fecha': FieldValue.serverTimestamp(),
+        'exito': false,
+        'error': e.toString(),
+      });
+
       _showStyledSnackBar(
         'Error al registrar. Inténtalo de nuevo.',
         success: false,

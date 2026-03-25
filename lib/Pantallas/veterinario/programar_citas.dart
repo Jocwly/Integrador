@@ -67,70 +67,64 @@ class _ProgramarCitaState extends State<ProgramarCita> {
   }
 
   Future<void> guardarCita() async {
-    setState(() {
-      _mostrarErrores = true;
-    });
+    try {
+      setState(() {
+        _mostrarErrores = true;
+      });
 
-    if (fechaSeleccionada == null ||
-        horaSeleccionada == null ||
-        tipoCita == null ||
-        personal == null ||
-        motivoController.text.trim().isEmpty) {
-      return;
+      if (fechaSeleccionada == null ||
+          horaSeleccionada == null ||
+          tipoCita == null ||
+          personal == null ||
+          motivoController.text.trim().isEmpty) {
+        return;
+      }
+
+      final fechaCompleta = DateTime(
+        fechaSeleccionada!.year,
+        fechaSeleccionada!.month,
+        fechaSeleccionada!.day,
+        horaSeleccionada!.hour,
+        horaSeleccionada!.minute,
+      );
+
+      final mascotaRef =
+          FirebaseFirestore.instance
+              .collection('clientes')
+              .doc(widget.clienteId)
+              .collection('mascotas')
+              .doc(widget.mascotaId)
+              .collection('citas')
+              .doc();
+
+      await mascotaRef.set({
+        'tipo': tipoCita,
+        'fecha': fechaCompleta,
+        'motivo': motivoController.text,
+        'personalId': personal,
+        'personalNombre': personalNombre,
+        'creado': Timestamp.now(),
+        'completada': false,
+        'estado': 'Programada',
+        'clienteId': widget.clienteId,
+        'mascotaId': widget.mascotaId,
+      });
+
+      print("✅ CITA GUARDADA");
+
+      // 🔥 SOLUCIÓN AQUÍ
+      if (!mounted) return;
+
+      Navigator.pop(context);
+    } catch (e) {
+      print("❌ ERROR AL GUARDAR CITA: $e");
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
-
-    final fechaCompleta = DateTime(
-      fechaSeleccionada!.year,
-      fechaSeleccionada!.month,
-      fechaSeleccionada!.day,
-      horaSeleccionada!.hour,
-      horaSeleccionada!.minute,
-    );
-
-    if (fechaCompleta.isBefore(DateTime.now())) return;
-
-    final mascotaRef =
-        FirebaseFirestore.instance
-            .collection('clientes')
-            .doc(widget.clienteId)
-            .collection('mascotas')
-            .doc(widget.mascotaId)
-            .collection('citas')
-            .doc();
-
-    final clienteSnap =
-        await FirebaseFirestore.instance
-            .collection('clientes')
-            .doc(widget.clienteId)
-            .get();
-
-    final nombreDuenio =
-        (clienteSnap.data()?['nombre'] ?? 'Propietario') as String;
-
-    final nombrePaciente = nombreMascota ?? 'Mascota';
-
-    await mascotaRef.set({
-      'tipo': tipoCita,
-      'fecha': fechaCompleta,
-      'motivo': motivoController.text,
-      'personalId': personal,
-      'personalNombre': personalNombre,
-      'creado': Timestamp.now(),
-      'completada': false,
-      'estado': 'Programada',
-      'clienteId': widget.clienteId,
-      'mascotaId': widget.mascotaId,
-      'nombreDuenio': nombreDuenio,
-      'nombreMascota': nombrePaciente,
-    });
-
-    await NotificationService().scheduleCitaNotifications(
-      fechaCita: fechaCompleta,
-      nombreMascota: nombrePaciente,
-      tipoCita: tipoCita!,
-    );
-
-    Navigator.pop(context);
   }
 
   @override
