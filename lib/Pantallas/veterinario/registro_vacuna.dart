@@ -213,7 +213,6 @@ class _RegistrarVacunaState extends State<RegistrarVacuna> {
 
                     FormStyles.formDivider,
 
-                    /// CAMPOS
                     _campo(
                       'Nombre vacuna',
                       _nombreVacunaCtrl,

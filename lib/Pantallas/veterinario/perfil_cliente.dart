@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:login/Pantallas/veterinario/Mascota_vet.dart'; // PerfilMascota
-import 'package:login/Pantallas/veterinario/registrar_mascota.dart'; // RegistrarMascota
+import 'package:login/Pantallas/veterinario/Mascota_vet.dart';
+import 'package:login/Pantallas/veterinario/registrar_mascota.dart';
 
 class Cliente extends StatelessWidget {
   final String clienteId;
@@ -18,7 +18,7 @@ class Cliente extends StatelessWidget {
     final double horizontalPadding = size.width < 360 ? 12 : 16;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFD7D2FF),
+      backgroundColor: Color.fromARGB(255, 229, 231, 233),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -58,50 +58,41 @@ class Cliente extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFD7D2FF), Color(0xFFF1EEFF)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 430),
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  8,
-                  horizontalPadding,
-                  24,
-                ),
-                child: StreamBuilder<DocumentSnapshot>(
-                  stream: clienteRef.snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return const Center(
-                        child: Text('Error al cargar datos del cliente'),
-                      );
-                    }
-                    if (!snapshot.hasData || !snapshot.data!.exists) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    final data = snapshot.data!.data() as Map<String, dynamic>;
-                    final nombre = data['nombre'] ?? 'Cliente';
-                    final direccion = data['direccion'] ?? 'Sin dirección';
-                    final telefono = data['telefono'] ?? 'Sin teléfono';
-
-                    return _CardContenido(
-                      theme: theme,
-                      nombre: nombre,
-                      direccion: direccion,
-                      telefono: telefono,
-                      clienteId: clienteId,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 430),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                8,
+                horizontalPadding,
+                24,
+              ),
+              child: StreamBuilder<DocumentSnapshot>(
+                stream: clienteRef.snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text('Error al cargar datos del cliente'),
                     );
-                  },
-                ),
+                  }
+                  if (!snapshot.hasData || !snapshot.data!.exists) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final data = snapshot.data!.data() as Map<String, dynamic>;
+                  final nombre = data['nombre'] ?? 'Cliente';
+                  final direccion = data['direccion'] ?? 'Sin dirección';
+                  final telefono = data['telefono'] ?? 'Sin teléfono';
+
+                  return _CardContenido(
+                    theme: theme,
+                    nombre: nombre,
+                    direccion: direccion,
+                    telefono: telefono,
+                    clienteId: clienteId,
+                  );
+                },
               ),
             ),
           ),
@@ -155,7 +146,6 @@ class _CardContenido extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Encabezado cliente
           Row(
             children: [
               Container(
@@ -317,14 +307,10 @@ class _CardContenido extends StatelessWidget {
                         final doc = docs[index];
                         final data = doc.data() as Map<String, dynamic>;
                         final nombreMascota = data['nombre'] ?? 'Mascota';
-
-                        // 🔹 LEER fotoUrl (la que guardas en RegistrarMascota)
                         final String? fotoUrl =
                             (data['fotoUrl'] ?? data['foto']) is String
                                 ? (data['fotoUrl'] ?? data['foto']) as String
                                 : null;
-
-                        // 🔹 Para que veas en consola si realmente llega la URL
                         debugPrint(
                           'Mascota ${doc.id} -> nombre: $nombreMascota, fotoUrl: $fotoUrl',
                         );

@@ -111,8 +111,6 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       });
 
       print("✅ CITA GUARDADA");
-
-      // 🔥 SOLUCIÓN AQUÍ
       if (!mounted) return;
 
       Navigator.pop(context);
@@ -169,10 +167,6 @@ class _ProgramarCitaState extends State<ProgramarCita> {
       ),
 
       body: SafeArea(
-        /*child: Container(
-          decoration: const BoxDecoration(
-            gradient: FormStyles.backgroundGradient,
-          ),*/
         child: StreamBuilder<DocumentSnapshot>(
           stream: mascotaRef.snapshots(),
           builder: (context, snapshot) {
@@ -394,7 +388,7 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                                         : nombre;
 
                                 return DropdownMenuItem(
-                                  value: doc.id, // 🔥 CAMBIO IMPORTANTE
+                                  value: doc.id,
                                   child: Text(nombreMostrar),
                                 );
                               }).toList(),
@@ -411,9 +405,8 @@ class _ProgramarCitaState extends State<ProgramarCita> {
                                 rol == "Veterinario" ? "MVZ $nombre" : nombre;
 
                             setState(() {
-                              personal = v; // 🔥 guarda ID
-                              personalNombre =
-                                  nombreMostrar; // 🔥 guarda nombre bonito
+                              personal = v;
+                              personalNombre = nombreMostrar;
                             });
                           },
                         );

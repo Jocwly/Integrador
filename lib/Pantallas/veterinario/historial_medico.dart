@@ -428,7 +428,7 @@ class _HistorialMedicoState extends State<HistorialMedico> {
         final double maxHeight = MediaQuery.of(context).size.height * 0.85;
 
         return Dialog(
-          backgroundColor: Colors.white, // fondo blanco 100%
+          backgroundColor: Colors.white,
           insetPadding: const EdgeInsets.symmetric(
             horizontal: 18,
             vertical: 20,

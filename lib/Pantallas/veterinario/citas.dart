@@ -26,7 +26,6 @@ class _CitasMascotaState extends State<CitasMascota> {
     final azulSuave = const Color(0xFFD6E1F7);
     final azulFuerte = const Color(0xFF0B1446);
     final moradoOscuro = const Color(0xFF1C0936);
-    final azulFuerted = const Color(0xFF2A74D9);
 
     final mascotaRef = FirebaseFirestore.instance
         .collection('clientes')
@@ -37,10 +36,8 @@ class _CitasMascotaState extends State<CitasMascota> {
     final citasRef = mascotaRef.collection('citas');
 
     return Scaffold(
-      backgroundColor: const Color(0xFFD7D2FF),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.transparent,
         toolbarHeight: 80,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -143,8 +140,6 @@ class _CitasMascotaState extends State<CitasMascota> {
                   return Column(
                     children: [
                       const SizedBox(height: 16),
-
-                      /// FOTO
                       Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: moradoOscuro, width: 3),
@@ -163,7 +158,6 @@ class _CitasMascotaState extends State<CitasMascota> {
 
                       const SizedBox(height: 8),
 
-                      /// NOMBRE
                       Container(
                         decoration: BoxDecoration(
                           color: moradoOscuro,
@@ -185,7 +179,6 @@ class _CitasMascotaState extends State<CitasMascota> {
 
                       const SizedBox(height: 16),
 
-                      /// RESUMEN
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
@@ -222,7 +215,6 @@ class _CitasMascotaState extends State<CitasMascota> {
 
                       const SizedBox(height: 14),
 
-                      /// TABS
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Container(
@@ -243,7 +235,6 @@ class _CitasMascotaState extends State<CitasMascota> {
 
                       const SizedBox(height: 16),
 
-                      /// LISTA
                       Expanded(
                         child:
                             listaActual.isEmpty
@@ -408,7 +399,6 @@ class _CitasMascotaState extends State<CitasMascota> {
                     : completada
                     ? 'Completada'
                     : 'Programada',
-                //colorFondo: Colors.white,
                 colorTexto:
                     esVencida
                         ? Colors.red
@@ -417,15 +407,13 @@ class _CitasMascotaState extends State<CitasMascota> {
                         : Colors.black87,
               ),
               const Spacer(),
-
-              /// SWITCH SOLO SI NO ES VENCIDA
               if (!esVencida)
                 Switch(
                   value: completada,
                   activeColor: Colors.green,
                   onChanged:
                       widget.soloLectura
-                          ? null // 👈 deshabilitado
+                          ? null
                           : (value) async {
                             await citasRef.doc(citaId).update({
                               'completada': value,
@@ -481,7 +469,6 @@ class _CitasMascotaState extends State<CitasMascota> {
 
           const SizedBox(height: 10),
 
-          /// BOTONES SOLO SI NO ESTÁ COMPLETADA Y NO ES VENCIDA
           if (!widget.soloLectura && !completada && !esVencida)
             Row(
               children: [
@@ -529,7 +516,6 @@ class _CitasMascotaState extends State<CitasMascota> {
               ],
             ),
 
-          /// BOTONES SOLO SI ES VENCIDA Y NO ES SOLO LECTURA
           if (!widget.soloLectura && esVencida)
             Row(
               children: [
@@ -641,7 +627,6 @@ class _CitasMascotaState extends State<CitasMascota> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  /// FECHA
                   ListTile(
                     leading: const Icon(Icons.calendar_today_rounded),
                     title: Text(DateFormat('dd/MM/yyyy').format(fechaTemp)),
@@ -652,7 +637,7 @@ class _CitasMascotaState extends State<CitasMascota> {
                             fechaTemp.isBefore(DateTime.now())
                                 ? DateTime.now()
                                 : fechaTemp,
-                        firstDate: DateTime.now(), // 🚫 NO PASADAS
+                        firstDate: DateTime.now(),
                         lastDate: DateTime(2100),
                       );
 
@@ -669,8 +654,6 @@ class _CitasMascotaState extends State<CitasMascota> {
                       }
                     },
                   ),
-
-                  /// HORA
                   ListTile(
                     leading: const Icon(Icons.access_time_rounded),
                     title: Text(horaTemp.format(context)),
@@ -705,8 +688,6 @@ class _CitasMascotaState extends State<CitasMascota> {
                     );
 
                     final ahora = DateTime.now();
-
-                    /// 🚫 VALIDAR FECHA/HORA PASADA
                     if (nuevaFecha.isBefore(ahora)) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -718,8 +699,6 @@ class _CitasMascotaState extends State<CitasMascota> {
                       );
                       return;
                     }
-
-                    /// 🚫 VALIDAR CHOQUE DE HORARIOS
                     final citasMismoDia =
                         await citasRef
                             .where(
@@ -771,8 +750,6 @@ class _CitasMascotaState extends State<CitasMascota> {
                       );
                       return;
                     }
-
-                    /// ✅ ACTUALIZAR
                     await citasRef.doc(citaId).update({'fecha': nuevaFecha});
 
                     if (dialogContext.mounted) {

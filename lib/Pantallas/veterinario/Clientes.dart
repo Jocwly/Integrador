@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:login/Pantallas/veterinario/citas_hoy.dart';
-import 'package:login/Pantallas/veterinario/perfil_cliente.dart'; 
-import 'package:login/Pantallas/veterinario/veterinario.dart'; 
+import 'package:login/Pantallas/veterinario/perfil_cliente.dart';
+import 'package:login/Pantallas/veterinario/veterinario.dart';
 
 class Clientes extends StatelessWidget {
   const Clientes({super.key});
@@ -106,7 +106,6 @@ class Clientes extends StatelessWidget {
                       final nombre = data['nombre'] ?? 'Sin nombre';
                       final correo = data['correo'] ?? 'Sin correo';
 
-                    
                       if (correo == "aplicacionmovilpetcare@gmail.com") {
                         return const SizedBox();
                       }
@@ -187,8 +186,6 @@ class Clientes extends StatelessWidget {
                                 ),
                               ],
                             ),
-
-                            // ===== ROW PRINCIPAL CON CONTADOR =====
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
@@ -237,8 +234,6 @@ class Clientes extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-
-                                // === CONTADOR AZUL DE MASCOTAS ===
                                 Container(
                                   width: 30,
                                   height: 30,

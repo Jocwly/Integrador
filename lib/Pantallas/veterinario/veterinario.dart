@@ -81,7 +81,6 @@ class Veterinario extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Colores base
     const fondo = Color(0xFFF5F7FB);
     const azulClaro = Color(0xFF8FA8FF);
     const azulOscuro = Color(0xFF2A74D9);
@@ -153,8 +152,6 @@ class Veterinario extends StatelessWidget {
                       ),
                     ),
                     const PopupMenuDivider(),
-
-                    // 🔹 NUEVA OPCIÓN
                     const PopupMenuItem<int>(
                       value: 2,
                       child: Row(
@@ -297,9 +294,7 @@ class Veterinario extends StatelessWidget {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(22),
                         child: SizedBox(
-                          width:
-                              size.width *
-                              0.40, // ancho fijo para parecerse al mockup
+                          width: size.width * 0.40,
                           child: AspectRatio(
                             aspectRatio: 4 / 3,
                             child: Image.asset(
@@ -317,7 +312,6 @@ class Veterinario extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // --------- PANEL DE ESTADÍSTICAS ---------
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -427,7 +421,6 @@ class Veterinario extends StatelessWidget {
         ),
       ),
 
-      // =================== MENÚ INFERIOR ===================
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -480,7 +473,6 @@ class Veterinario extends StatelessWidget {
   }
 }
 
-// ============= ICONO CUADRADO AZUL DEL HEADER =============
 class _SquareIcon extends StatelessWidget {
   final IconData icon;
 
@@ -555,7 +547,6 @@ class _MenuItem extends StatelessWidget {
   }
 }
 
-// ============= CARD CON EL DEGRADADO IGUAL AL MOCKUP =============
 class _InfoCard extends StatelessWidget {
   final String titulo;
   final String valor;

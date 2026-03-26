@@ -117,13 +117,11 @@ class _MedicamentosMascotaState extends State<MedicamentosMascota> {
                               medicamentos.add({
                                 "nombre": med['nombre'],
                                 "dosis": med['dosis'],
-                                "frecuenciaHoras":
-                                    med['frecuenciaHoras'], // 👈 AGREGA ESTO
+                                "frecuenciaHoras": med['frecuenciaHoras'],
                                 "fecha": DateFormat(
                                   'dd/MM/yyyy HH:mm',
                                 ).format(fechaToma),
-                                "fechaReal":
-                                    fechaToma, // 👈 importante para validación después
+                                "fechaReal": fechaToma,
                                 "administrado": toma['administrado'] ?? false,
                                 "consultaId": doc.id,
                                 "medIndex": i,
@@ -160,7 +158,6 @@ class _MedicamentosMascotaState extends State<MedicamentosMascota> {
     );
   }
 
-  /// SELECTOR DE FECHA
   Widget _selectorFecha() {
     return Container(
       margin: const EdgeInsets.all(16),
@@ -235,8 +232,6 @@ class _MedicamentosMascotaState extends State<MedicamentosMascota> {
     );
   }
 
-  /// CARD MEDICAMENTO
-  ///
   Widget _medCard(Map med) {
     DateTime ahora = DateTime.now();
     DateTime fechaToma = med["fechaReal"];

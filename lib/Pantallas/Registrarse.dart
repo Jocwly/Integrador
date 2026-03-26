@@ -24,7 +24,6 @@ class _RegistroState extends State<Registro> {
 
   bool _obscure = true;
 
-  // Errores
   String? _nameError;
   String? _phoneError;
   String? _emailError;
@@ -69,8 +68,6 @@ class _RegistroState extends State<Registro> {
     borderRadius: BorderRadius.circular(12),
     borderSide: BorderSide(color: Colors.red, width: w),
   );
-
-  //Validadores
   String? _validateTelefono(String value) {
     final v = value.trim();
     if (v.isEmpty) return 'Este campo es requerido';
@@ -87,7 +84,6 @@ class _RegistroState extends State<Registro> {
     return null;
   }
 
-  // contraseña
   String? _validatePass(String value) {
     final v = value.trim();
     if (v.isEmpty) return 'Este campo es requerido';
@@ -116,7 +112,6 @@ class _RegistroState extends State<Registro> {
     return null;
   }
 
-  // SnackBars con Estilo
   void _showStyledSnackBar(String message, {bool success = true}) {
     final Color bg =
         success ? const Color(0xFF4CAF50) : const Color(0xFFE53935);
@@ -154,8 +149,6 @@ class _RegistroState extends State<Registro> {
 
     try {
       // PROTECCIÓN CONTRA SQLi
-      // Firestore usa consultas estructuradas ,
-      // por lo tanto NO es vulnerable a sql Injection directamente
       final query =
           await FirebaseFirestore.instance
               .collection('clientes')
@@ -178,16 +171,13 @@ class _RegistroState extends State<Registro> {
       }
 
       // VALIDACIÓN BACKEND
-      // Aquí ya llegan datos validados desde funciones _validate*
-      // pero se refuerza en backend antes de guardar
 
       await FirebaseFirestore.instance.collection('clientes').add({
-        'nombre': sanitize(nombre), // XSS protegido
+        'nombre': sanitize(nombre),
         'telefono': telefono,
         'correo': correo,
-        'direccion': sanitize(direccion), // XSS protegido
-        'password': passwordHash, // HASH + SALT (seguridad de contraseñas)+
-        // ROLES Y PERMISOS
+        'direccion': sanitize(direccion),
+        'password': passwordHash,
         'rol': 'cliente', // asignación de rol por defecto (RBAC)
 
         'mascotas': 0,

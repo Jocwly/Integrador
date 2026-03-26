@@ -14,7 +14,6 @@ class _ListaPersonalState extends State<ListaPersonal> {
     'personal',
   );
 
-  // 🔴 ELIMINAR
   void _eliminarPersonal(String id) async {
     final confirmar = await showDialog(
       context: context,
@@ -44,7 +43,6 @@ class _ListaPersonalState extends State<ListaPersonal> {
     }
   }
 
-  // 🔵 EDITAR (VENTANA)
   void _mostrarDialogoEditar(DocumentSnapshot data) {
     final nombreCtrl = TextEditingController(text: data['nombre']);
     final correoCtrl = TextEditingController(text: data['correo']);
@@ -217,7 +215,6 @@ class _ListaPersonalState extends State<ListaPersonal> {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            // 🔷 ENCABEZADO
             Row(
               children: [
                 Container(
@@ -249,8 +246,6 @@ class _ListaPersonalState extends State<ListaPersonal> {
             ),
 
             const SizedBox(height: 16),
-
-            // 🔥 LISTA
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream:

@@ -146,7 +146,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
 
       final mascotaRef = clienteRef.collection('mascotas').doc();
 
-      // 🔹 Foto puede ser null o venir de inicial
       String? fotoUrl = _fotoUrlRemota;
       if (_imagenSeleccionada != null) {
         final url = await _subirImagenACloudinary(_imagenSeleccionada!);
@@ -173,7 +172,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
         'especie': especie,
         'sexo': sexo,
         'esterilizado': esterilizado,
-        // 👇 Puede ser null si no se subió foto
         'fotoUrl': fotoUrl,
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -196,7 +194,7 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
               children: const [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor: Color(0xFFD6E1F7),
+                  backgroundColor: Color.fromARGB(255, 247, 214, 242),
                   child: Icon(
                     Icons.pets_rounded,
                     color: Color(0xFF2A74D9),
@@ -256,9 +254,8 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
             : null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: Color.fromARGB(255, 229, 231, 233),
 
-      // 🔥 APPBAR BIEN PUESTO
       appBar: AppBar(
         elevation: 0,
         toolbarHeight: 70,
@@ -294,8 +291,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
           ],
         ),
       ),
-
-      // 🔽 BODY
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -321,7 +316,6 @@ class _RegistrarMascotaState extends State<RegistrarMascota> {
                         ),
                         child: Column(
                           children: [
-                            // FOTO
                             Container(
                               decoration: BoxDecoration(
                                 border: Border.all(

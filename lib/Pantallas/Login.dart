@@ -80,7 +80,7 @@ class _LoginState extends State<Login> {
         'exito': true,
       });
 
-      //Roles (control de acceso)
+      //Roles
       final rol = data['rol'];
 
       if (!mounted) return;
@@ -122,7 +122,6 @@ class _LoginState extends State<Login> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-        //Fondo degradado azul
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -153,7 +152,6 @@ class _LoginState extends State<Login> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Logo (tu imagen)
                           CircleAvatar(
                             radius: 50,
                             backgroundColor: Colors.transparent,
@@ -180,8 +178,6 @@ class _LoginState extends State<Login> {
                             ),
                           ),
                           const SizedBox(height: 28),
-
-                          // Correo
                           _FilledField(
                             controller: _emailCtrl,
                             label: 'Correo Electrónico',
@@ -204,7 +200,6 @@ class _LoginState extends State<Login> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Contraseña
                           _FilledField(
                             controller: _passCtrl,
                             label: 'Contraseña',
@@ -235,7 +230,6 @@ class _LoginState extends State<Login> {
 
                           const SizedBox(height: 26),
 
-                          // Botón Iniciar sesión
                           SizedBox(
                             width: double.infinity,
                             height: 48,
@@ -251,7 +245,6 @@ class _LoginState extends State<Login> {
                                   _isLoading
                                       ? null
                                       : () {
-                                        // Valida que los campos estén llenos
                                         if (!_formKey.currentState!
                                             .validate()) {
                                           return;

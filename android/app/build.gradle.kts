@@ -29,7 +29,7 @@ android {
         applicationId = "com.example.login"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         //flutter.minSdkVersion
         targetSdk = 33
         versionCode = flutter.versionCode
