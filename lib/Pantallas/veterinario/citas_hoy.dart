@@ -9,7 +9,9 @@ const azulClaro = Color(0xFF8FA8FF);
 const azulOscuro = Color(0xFF2965C7);
 
 class CitasHoy extends StatelessWidget {
-  const CitasHoy({super.key});
+  final String veterinarioId;
+
+  const CitasHoy({super.key, required this.veterinarioId});
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +21,9 @@ class CitasHoy extends StatelessWidget {
     final finHoy = inicioHoy.add(const Duration(days: 1));
 
     //final Query citasHoyQuery = FirebaseFirestore.instance
-      //  .collectionGroup('citas')
-        //.where('fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(inicioHoy))
-       // .where('fecha', isLessThan: Timestamp.fromDate(finHoy));
+    //  .collectionGroup('citas')
+    //.where('fecha', isGreaterThanOrEqualTo: Timestamp.fromDate(inicioHoy))
+    // .where('fecha', isLessThan: Timestamp.fromDate(finHoy));
     // sin orderBy -> no necesitas índice compuesto
 
     return Scaffold(
@@ -168,12 +170,16 @@ class CitasHoy extends StatelessWidget {
             if (index == 0) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const Veterinario()),
+                MaterialPageRoute(
+                  builder: (_) => Veterinario(veterinarioId: veterinarioId),
+                ),
               );
             } else if (index == 1) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const Clientes()),
+                MaterialPageRoute(
+                  builder: (_) => Clientes(veterinarioId: veterinarioId),
+                ),
               );
             }
           },

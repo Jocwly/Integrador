@@ -13,7 +13,7 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   //inicializamos las notificaciones locales
-  await NotificationService().init();
+  await NotificationService.init();
 
   runApp(const MyApp());
 }
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
       routes: {
         Login.routeName: (_) => const Login(),
         Registro.routeName: (_) => const Registro(),
-        Veterinario.routeName: (_) => const Veterinario(),
+        //Veterinario.routeName: (_) => const Veterinario(),
       },
     );
   }

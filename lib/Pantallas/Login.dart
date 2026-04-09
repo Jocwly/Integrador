@@ -86,7 +86,15 @@ class _LoginState extends State<Login> {
       if (!mounted) return;
 
       if (rol == 'veterinario') {
-        Navigator.pushReplacementNamed(context, Veterinario.routeName);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder:
+                (_) => Veterinario(
+                  veterinarioId: userDoc.id, // 🔥 AQUÍ VA EL ID
+                ),
+          ),
+        );
       } else {
         Navigator.pushReplacement(
           context,

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'MascotaPerfil.dart';
 import 'package:login/form_styles.dart';
+import 'package:login/servicios/notification_service.dart';
 
 class Mascotadueno extends StatefulWidget {
   static const routeName = '/Mascotadueno';
@@ -14,6 +15,12 @@ class Mascotadueno extends StatefulWidget {
 }
 
 class _MascotaduenoState extends State<Mascotadueno> {
+  @override
+  void initState() {
+    super.initState();
+    _escucharCitas();
+  }
+
   final TextEditingController _direccionController = TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
   final TextEditingController _correoController = TextEditingController();
@@ -35,6 +42,51 @@ class _MascotaduenoState extends State<Mascotadueno> {
       'telefono': _telefonoController.text.trim(),
       'correo': _correoController.text.trim(),
     });
+  }
+
+  void _escucharCitas() {
+    FirebaseFirestore.instance
+        .collection('clientes')
+        .doc(widget.clienteId)
+        .collection('mascotas')
+        .snapshots()
+        .listen((mascotasSnapshot) {
+          for (var mascota in mascotasSnapshot.docs) {
+            final mascotaId = mascota.id;
+
+            FirebaseFirestore.instance
+                .collection('clientes')
+                .doc(widget.clienteId)
+                .collection('mascotas')
+                .doc(mascotaId)
+                .collection('citas')
+                .snapshots()
+                .listen((citasSnapshot) {
+                  for (var cambio in citasSnapshot.docChanges) {
+                    if (cambio.type == DocumentChangeType.added) {
+                      final data = cambio.doc.data() as Map<String, dynamic>?;
+
+                      if (data == null || data['fecha'] == null) return;
+
+                      // 🔔 Notificación inmediata
+                      NotificationService.mostrarNotificacion(
+                        "🐾 Nueva cita",
+                        "Tienes una cita de ${data?['tipo']}",
+                      );
+
+                      // ⏰ Recordatorio 1 hora antes
+                      DateTime fecha = (data?['fecha'] as Timestamp).toDate();
+
+                      NotificationService.programarNotificacion(
+                        "⏰ Recordatorio",
+                        "Tienes una cita en 1 hora",
+                        fecha.subtract(const Duration(hours: 1)),
+                      );
+                    }
+                  }
+                });
+          }
+        });
   }
 
   void _mostrarDialogoEditar(String direccion, String telefono, String correo) {

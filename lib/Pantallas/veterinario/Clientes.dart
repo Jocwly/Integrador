@@ -5,7 +5,9 @@ import 'package:login/Pantallas/veterinario/perfil_cliente.dart';
 import 'package:login/Pantallas/veterinario/veterinario.dart';
 
 class Clientes extends StatelessWidget {
-  const Clientes({super.key});
+  final String veterinarioId;
+
+  const Clientes({super.key, required this.veterinarioId});
 
   @override
   Widget build(BuildContext context) {
@@ -304,12 +306,16 @@ class Clientes extends StatelessWidget {
             if (index == 0) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const Veterinario()),
+                MaterialPageRoute(
+                  builder: (_) => Veterinario(veterinarioId: veterinarioId),
+                ),
               );
             } else if (index == 2) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const CitasHoy()),
+                MaterialPageRoute(
+                  builder: (_) => CitasHoy(veterinarioId: veterinarioId),
+                ),
               );
             }
           },

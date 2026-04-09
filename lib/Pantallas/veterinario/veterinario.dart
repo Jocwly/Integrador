@@ -5,11 +5,55 @@ import 'package:login/Pantallas/veterinario/Clientes.dart';
 import 'package:login/Pantallas/veterinario/citas_hoy.dart';
 import 'package:login/Pantallas/Login.dart';
 import 'package:login/Pantallas/veterinario/lista_personal.dart';
+import 'package:login/servicios/notification_service.dart';
 
-class Veterinario extends StatelessWidget {
+class Veterinario extends StatefulWidget {
   static String routeName = '/veterinario';
 
-  const Veterinario({super.key});
+  final String veterinarioId;
+
+  const Veterinario({super.key, required this.veterinarioId});
+
+  @override
+  State<Veterinario> createState() => _VeterinarioState();
+}
+
+class _VeterinarioState extends State<Veterinario> {
+  @override
+  void initState() {
+    super.initState();
+    _escucharCitasVeterinario();
+  }
+
+  void _escucharCitasVeterinario() {
+    FirebaseFirestore.instance
+        .collectionGroup('citas')
+        .where('personalId', isEqualTo: widget.veterinarioId)
+        .snapshots()
+        .listen((snapshot) {
+          for (var cambio in snapshot.docChanges) {
+            if (cambio.type == DocumentChangeType.added) {
+              final data = cambio.doc.data() as Map<String, dynamic>;
+
+              // 🔔 Notificación inmediata
+              NotificationService.mostrarNotificacion(
+                "🐾 Nueva cita asignada",
+                "Tienes una cita de ${data['tipo']}",
+              );
+
+              // ⏰ Recordatorio 1 hora antes
+              DateTime fecha = (data['fecha'] as Timestamp).toDate();
+
+              NotificationService.programarNotificacion(
+                "⏰ Recordatorio",
+                "Tienes una cita en 1 hora",
+                fecha.subtract(const Duration(hours: 1)),
+              );
+            }
+          }
+        });
+  }
+
   void _mostrarMenuPersonal(BuildContext context) {
     showDialog(
       context: context,
@@ -441,15 +485,20 @@ class Veterinario extends StatelessWidget {
           currentIndex: 0,
           onTap: (index) {
             if (index == 0) return;
+
             if (index == 1) {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const Clientes()),
+                MaterialPageRoute(
+                  builder: (_) => Clientes(veterinarioId: widget.veterinarioId),
+                ),
               );
             } else if (index == 2) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const CitasHoy()),
+                MaterialPageRoute(
+                  builder: (_) => CitasHoy(veterinarioId: widget.veterinarioId),
+                ),
               );
             }
           },
